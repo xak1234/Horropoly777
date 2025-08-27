@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dice Roll Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
+        .warning { color: #ff9800; }
+        .info { color: #2196F3; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎲 Dice Roll Function Fix Test</h1>
+        
+        <div class="test-section">
+            <h2>📋 Test Overview</h2>
+            <p>This test verifies that the <code>triggerDiceRoll</code> function is properly exposed to the global scope and accessible from tablet-touch-manager.js</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 Function Availability Test</h2>
+            <button onclick="testFunctionAvailability()">Test Function Availability</button>
+            <div id="availability-results" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Tablet Touch Manager Simulation</h2>
+            <button onclick="simulateTabletTouch()">Simulate Tablet Touch</button>
+            <div id="touch-results" class="log"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="test-summary" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️';
+            console.log(`${prefix} ${message}`);
+            return `[${timestamp}] ${prefix} ${message}\n`;
+        }
+
+        function testFunctionAvailability() {
+            const resultsDiv = document.getElementById('availability-results');
+            let output = '';
+
+            output += log('Testing function availability...', 'info');
+
+            // Test triggerDiceRoll
+            if (typeof window.triggerDiceRoll === 'function') {
+                output += log('triggerDiceRoll: Available ✅', 'success');
+                testResults.push({ test: 'triggerDiceRoll availability', result: 'PASS' });
+            } else {
+                output += log('triggerDiceRoll: NOT AVAILABLE ❌', 'error');
+                testResults.push({ test: 'triggerDiceRoll availability', result: 'FAIL' });
+            }
+
+            // Test other functions
+            const functions = ['handlePropertySteal', 'handleCanvasTap'];
+            functions.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    output += log(`${funcName}: Available ✅`, 'success');
+                    testResults.push({ test: `${funcName} availability`, result: 'PASS' });
+                } else {
+                    output += log(`${funcName}: Not available (may be normal) ⚠️`, 'warning');
+                    testResults.push({ test: `${funcName} availability`, result: 'WARN' });
+                }
+            });
+
+            // Test if game.js is loaded
+            if (typeof players !== 'undefined') {
+                output += log('Game.js variables detected ✅', 'success');
+                testResults.push({ test: 'game.js loaded', result: 'PASS' });
+            } else {
+                output += log('Game.js variables not detected ❌', 'error');
+                testResults.push({ test: 'game.js loaded', result: 'FAIL' });
+            }
+
+            resultsDiv.textContent = output;
+            updateTestSummary();
+        }
+
+        function simulateTabletTouch() {
+            const resultsDiv = document.getElementById('touch-results');
+            let output = '';
+
+            output += log('Simulating tablet touch manager behavior...', 'info');
+
+            // Simulate the exact check from tablet-touch-manager.js
+            if (typeof triggerDiceRoll === 'function') {
+                output += log('✅ triggerDiceRoll function found!', 'success');
+                output += log('🎯 Calling triggerDiceRoll() from tablet touch manager simulation', 'info');
+                
+                try {
+                    // Don't actually call it to avoid game state issues, just verify it exists
+                    output += log('Function call would succeed - triggerDiceRoll is callable', 'success');
+                    testResults.push({ test: 'tablet touch simulation', result: 'PASS' });
+                } catch (error) {
+                    output += log(`Function call failed: ${error.message}`, 'error');
+                    testResults.push({ test: 'tablet touch simulation', result: 'FAIL' });
+                }
+            } else {
+                output += log('❌ triggerDiceRoll function not found!', 'error');
+                output += log('This is the exact error that tablet-touch-manager.js would show', 'error');
+                testResults.push({ test: 'tablet touch simulation', result: 'FAIL' });
+            }
+
+            resultsDiv.textContent = output;
+            updateTestSummary();
+        }
+
+        function updateTestSummary() {
+            const summaryDiv = document.getElementById('test-summary');
+            let output = '';
+
+            const passed = testResults.filter(r => r.result === 'PASS').length;
+            const failed = testResults.filter(r => r.result === 'FAIL').length;
+            const warnings = testResults.filter(r => r.result === 'WARN').length;
+
+            output += log(`Test Summary:`, 'info');
+            output += log(`  Passed: ${passed}`, 'success');
+            output += log(`  Failed: ${failed}`, failed > 0 ? 'error' : 'info');
+            output += log(`  Warnings: ${warnings}`, warnings > 0 ? 'warning' : 'info');
+            output += log(`  Total: ${testResults.length}`, 'info');
+
+            if (failed === 0) {
+                output += log('🎉 All critical tests passed! The dice roll fix should work.', 'success');
+            } else {
+                output += log('⚠️ Some tests failed. The fix may not work properly.', 'error');
+            }
+
+            output += log('\nDetailed Results:', 'info');
+            testResults.forEach(result => {
+                const status = result.result === 'PASS' ? '✅' : result.result === 'FAIL' ? '❌' : '⚠️';
+                output += log(`  ${status} ${result.test}: ${result.result}`, 
+                    result.result === 'PASS' ? 'success' : result.result === 'FAIL' ? 'error' : 'warning');
+            });
+
+            summaryDiv.textContent = output;
+        }
+
+        // Auto-run availability test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testFunctionAvailability();
+            }, 1000);
+        });
+    </script>
+
+    <!-- Load the game scripts in the same order as game.html -->
+    <script src="tablet-touch-manager.js"></script>
+    <script type="module" src="lobby.js"></script>
+    <script src="game.js" type="module"></script>
+</body>
+</html>

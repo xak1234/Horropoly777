@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Dungeons</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url('available.png') center/cover no-repeat fixed #000;
+      color: #fff;
+      margin: 0;
+      padding: 15px 20px;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    
+    .lobby-panel {
+      background: rgba(0,0,0,0.3);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 15px 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #fff;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 8px;
+      }
+      
+      .lobby-panel {
+        padding: 10px 12px;
+        max-height: 75vh;
+        border-radius: 6px;
+      }
+      
+      h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+      
+      .room-card {
+        padding: 8px;
+        margin-top: 4px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .room-name {
+        font-size: 1rem;
+      }
+      
+      .dungeon-master, .victim-count {
+        font-size: 0.8rem;
+        margin-top: 1px;
+      }
+      
+      .room-actions {
+        align-self: stretch;
+        justify-content: center;
+      }
+      
+      .join-button, .cancel-button {
+        padding: 6px 12px;
+        font-size: 12px;
+        flex: 1;
+        max-width: 120px;
+      }
+    }
+
+    .room-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .room-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 10px;
+      margin-top: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      transition: all 0.3s ease;
+    }
+
+    .room-card:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .room-header {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .room-name {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .dungeon-master {
+      font-size: 0.85rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 2px;
+    }
+
+    .victim-count {
+      font-size: 0.85rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 2px;
+    }
+
+    .waiting-status {
+      font-size: 0.8rem;
+      color: #ffff00;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 4px;
+      animation: flashWaiting 1.5s ease-in-out infinite;
+    }
+
+    @keyframes flashWaiting {
+      0%, 50% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0.3;
+      }
+    }
+
+    .room-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .join-button {
+      cursor: pointer;
+      background: rgba(0,100,0,0.8);
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 8px 16px;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    
+    .join-button:hover {
+      background: rgba(0,128,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+    }
+    
+    .join-button:disabled {
+      background: rgba(68,68,68,0.6);
+      border-color: rgba(255,255,255,0.2);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .cancel-button {
+      cursor: pointer;
+      background: rgba(139,0,0,0.8);
+      border: 2px solid rgba(255,255,255,0.3);
+      padding: 8px 14px;
+      border-radius: 5px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 13px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    
+    .cancel-button:hover {
+      background: rgba(180,0,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Mobile input modal */
+    .mobile-input-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .mobile-input-content {
+      background: rgba(20,20,20,0.95);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 300px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .mobile-input-content h3 {
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .mobile-input-content input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    .mobile-input-content button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .mobile-input-content .confirm-btn {
+      background: rgba(0,128,0,0.8);
+      color: #fff;
+    }
+
+    .mobile-input-content .cancel-btn {
+      background: rgba(128,0,0,0.8);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<div class="lobby-panel">
+  <h2>Available Dungeons</h2>
+
+  <div class="room-list" id="roomList">
+    <!-- Firebase rooms will be injected here -->
+  </div>
+</div>
+
+<!-- Mobile-friendly input modal -->
+<div class="mobile-input-modal" id="mobileInputModal">
+  <div class="mobile-input-content">
+    <h3 id="inputModalTitle">Enter your name:</h3>
+    <input type="text" id="playerNameInput" placeholder="Your name..." maxlength="20">
+    <div>
+      <button class="confirm-btn" onclick="confirmPlayerName()">Join</button>
+      <button class="cancel-btn" onclick="cancelPlayerName()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Mobile-compatible Firebase initialization without ES6 modules
+(function() {
+  'use strict';
+  
+  // Global variables
+  var db = null;
+  var roomListEl = document.getElementById("roomList");
+  var currentRoomToJoin = null;
+  var currentUserId = localStorage.getItem('currentUserId') || 'mobile-user-' + Date.now();
+  
+  // Mobile-friendly input modal functions
+  window.showMobileInput = function(title, callback) {
+    var modal = document.getElementById('mobileInputModal');
+    var titleEl = document.getElementById('inputModalTitle');
+    var input = document.getElementById('playerNameInput');
+    
+    titleEl.textContent = title;
+    input.value = '';
+    modal.style.display = 'flex';
+    
+    // Focus input after a short delay for mobile compatibility
+    setTimeout(function() {
+      input.focus();
+    }, 100);
+    
+    window.mobileInputCallback = callback;
+  };
+  
+  window.confirmPlayerName = function() {
+    var input = document.getElementById('playerNameInput');
+    var name = input.value.trim();
+    
+    if (name) {
+      var modal = document.getElementById('mobileInputModal');
+      modal.style.display = 'none';
+      
+      if (window.mobileInputCallback) {
+        window.mobileInputCallback(name);
+      }
+    } else {
+      alert('Please enter a name');
+    }
+  };
+  
+  window.cancelPlayerName = function() {
+    var modal = document.getElementById('mobileInputModal');
+    modal.style.display = 'none';
+    window.mobileInputCallback = null;
+    currentRoomToJoin = null;
+  };
+
+  // Allow enter key to confirm input
+  document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      confirmPlayerName();
+    }
+  });
+
+  function renderRoom(roomData) {
+    var roomName = roomData.roomName || '';
+    var players = roomData.players || 0;
+    var maxPlayers = roomData.maxPlayers || 4;
+    var hostName = roomData.hostName || 'Unknown Master';
+    var hostUserId = roomData.hostUserId || '';
+    var status = roomData.status || '';
+    var gameStarted = roomData.gameStarted || false;
+    
+    var isFull = players >= maxPlayers;
+    var dungeonMaster = hostName;
+    var victimCount = players + '/' + maxPlayers + ' Victims';
+    
+    // Check if room should be removed
+    var shouldBeRemoved = gameStarted || status === 'finished' || status === 'discarded' || status === 'in_progress';
+    if (shouldBeRemoved) {
+      return null;
+    }
+    
+    var isWaitingForPlayers = !isFull && status === 'waiting_for_players';
+    var isMyRoom = hostUserId && currentUserId && hostUserId === currentUserId;
+
+    return '<div class="room-card" data-name="' + roomName.toLowerCase() + '">' +
+           '<div class="room-header">' +
+           '<span class="room-name">' + roomName + '</span>' +
+           '<span class="dungeon-master">Dungeon Master: ' + dungeonMaster + '</span>' +
+           '<span class="victim-count">Number of Victims: ' + victimCount + '</span>' +
+           (isWaitingForPlayers ? '<span class="waiting-status">Waiting</span>' : '') +
+           '</div>' +
+           '<div class="room-actions">' +
+           '<button class="join-button" ' + (isFull ? 'disabled' : '') + ' onclick="joinRoom(\'' + roomName + '\')">' +
+           (isFull ? 'Full' : 'Join') +
+           '</button>' +
+           (isMyRoom ? '<button class="cancel-button" onclick="cancelRoom(\'' + roomName + '\')">Cancel</button>' : '') +
+           '</div>' +
+           '</div>';
+  }
+
+  function updateRoomList(rooms) {
+    roomListEl.innerHTML = "";
+    rooms.forEach(function(roomData) {
+      var roomHtml = renderRoom(roomData);
+      if (roomHtml) {
+        roomListEl.innerHTML += roomHtml;
+      }
+    });
+  }
+
+  // Mobile-compatible join room function
+  window.joinRoom = function(roomName) {
+    currentRoomToJoin = roomName;
+    
+    // Use mobile-friendly input modal instead of prompt()
+    showMobileInput('Enter your name to join ' + roomName + ':', function(playerName) {
+      if (playerName && playerName.trim()) {
+        // Redirect to game
+        var gameUrl = 'game.html?room=' + encodeURIComponent(roomName) + '&player=' + encodeURIComponent(playerName.trim());
+        window.location.href = gameUrl;
+      }
+    });
+  };
+
+  // Mobile-compatible cancel room function
+  window.cancelRoom = function(roomName) {
+    var confirmDelete = confirm('Are you sure you want to cancel the dungeon "' + roomName + '"?');
+    if (confirmDelete) {
+      // In a real implementation, this would connect to Firebase
+      // For now, just remove from display
+      var roomCards = document.querySelectorAll('.room-card');
+      roomCards.forEach(function(card) {
+        var cardRoomName = card.querySelector('.room-name').textContent;
+        if (cardRoomName === roomName) {
+          card.remove();
+        }
+      });
+      alert('Dungeon "' + roomName + '" cancelled.');
+    }
+  };
+
+  // Set current user ID
+  localStorage.setItem('currentUserId', currentUserId);
+
+  // Mock data for testing (replace with Firebase connection when available)
+  var mockRooms = [
+    { roomName: 'Zombies123', players: 1, maxPlayers: 2, hostName: 'DarkLord', hostUserId: 'demo-user-123', status: 'waiting_for_players' },
+    { roomName: 'BotWarfare', players: 2, maxPlayers: 2, hostName: 'CyberMaster', hostUserId: 'other-user-456', status: 'waiting_for_players' },
+    { roomName: 'HauntedLobby', players: 3, maxPlayers: 4, hostName: 'GhostKeeper', hostUserId: 'other-user-789', status: 'waiting_for_players' },
+    { roomName: 'CryptRunners', players: 0, maxPlayers: 2, hostName: 'CryptLord', hostUserId: currentUserId, status: 'waiting_for_players' },
+    { roomName: 'BloodArena', players: 2, maxPlayers: 3, hostName: 'BloodMage', hostUserId: 'other-user-101', status: 'waiting_for_players' }
+  ];
+
+  // Load Firebase dynamically for mobile compatibility
+  function loadFirebase() {
+    var script1 = document.createElement('script');
+    script1.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+    script1.onload = function() {
+      var script2 = document.createElement('script');
+      script2.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js';
+      script2.onload = function() {
+        initFirebase();
+      };
+      script2.onerror = function() {
+        console.warn('Firebase Firestore failed to load, using mock data');
+        updateRoomList(mockRooms);
+      };
+      document.head.appendChild(script2);
+    };
+    script1.onerror = function() {
+      console.warn('Firebase App failed to load, using mock data');
+      updateRoomList(mockRooms);
+    };
+    document.head.appendChild(script1);
+  }
+
+  function initFirebase() {
+    try {
+      var firebaseConfig = {
+        apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+        authDomain: "horropoly.firebaseapp.com",
+        projectId: "horropoly",
+        storageBucket: "horropoly.firebasestorage.app",
+        messagingSenderId: "582020770053",
+        appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      
+      // Listen to room updates
+      db.collection("rooms").onSnapshot(function(snapshot) {
+        var rooms = [];
+        snapshot.forEach(function(doc) {
+          var data = doc.data();
+          if (data.status === 'waiting_for_players' && 
+              data.players && 
+              data.players.length > 0 && 
+              data.roomName) {
+            rooms.push(data);
+          }
+        });
+        updateRoomList(rooms);
+      }, function(error) {
+        console.warn('Firebase connection error:', error);
+        updateRoomList(mockRooms);
+      });
+      
+    } catch (error) {
+      console.warn('Firebase initialization failed:', error);
+      updateRoomList(mockRooms);
+    }
+  }
+
+  // Start loading Firebase or fall back to mock data
+  loadFirebase();
+
+})();
+</script>
+</body>
+</html>

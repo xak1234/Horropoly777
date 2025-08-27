@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Refresh - Minimized Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #222; color: #fff; text-align: center; }
+        .refresh-section { margin: 20px 0; padding: 20px; background: #333; border-radius: 8px; }
+        button { padding: 15px 25px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background: #45a049; }
+        .warning { background: #ff9800; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .info { background: #2196F3; color: white; padding: 10px; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Force Refresh - Minimized Multiplayer Fix</h1>
+    
+    <div class="refresh-section">
+        <h2>🚨 Browser Cache Issue Detected</h2>
+        <div class="warning">
+            <strong>Problem:</strong> Your browser is still using the old cached version of game.js, so the minimized mode fix isn't active yet.
+        </div>
+        
+        <div class="info">
+            <strong>Solution:</strong> Force refresh the browser to load the latest code with the fix.
+        </div>
+        
+        <h3>Try these methods (in order):</h3>
+        
+        <button onclick="hardRefresh()">1. Hard Refresh (Ctrl+F5)</button>
+        <button onclick="clearCacheAndReload()">2. Clear Cache & Reload</button>
+        <button onclick="showManualSteps()">3. Manual Cache Clear</button>
+        
+        <div id="instructions" style="margin-top: 20px; text-align: left; background: #111; padding: 15px; border-radius: 4px; display: none;">
+            <h4>Manual Cache Clear Steps:</h4>
+            <ol>
+                <li><strong>Chrome/Edge:</strong> Press F12 → Network tab → Check "Disable cache" → Reload page</li>
+                <li><strong>Firefox:</strong> Press F12 → Network tab → Settings gear → Check "Disable cache" → Reload page</li>
+                <li><strong>Alternative:</strong> Press Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)</li>
+                <li><strong>Nuclear option:</strong> Close browser completely → Reopen → Load game</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="refresh-section">
+        <h2>🔍 How to Verify the Fix is Working</h2>
+        <p>After refreshing, look for these debug messages in the console when in minimized mode:</p>
+        
+        <div style="background: #111; padding: 10px; border-radius: 4px; font-family: monospace; text-align: left;">
+[enableDiceSection] MINIMIZED CHECK: infoPanel exists=true, isMinimized=true<br>
+[enableDiceSection] MINIMIZED CHECK: infoPanel classes=info-panel minimized<br>
+🎮 MULTIPLAYER MINIMIZED DEBUG: Enabling dice for [YourName] in minimized mode (current turn: [OtherName])<br>
+📱 Re-attaching minimized dice handlers
+        </div>
+        
+        <p><strong>If you see these messages, the fix is working!</strong></p>
+    </div>
+
+    <div class="refresh-section">
+        <h2>🎮 Test Steps After Refresh</h2>
+        <ol style="text-align: left;">
+            <li>Load the game</li>
+            <li>Start or join a multiplayer game</li>
+            <li><strong>Minimize the info panel</strong> (click the minimize button)</li>
+            <li>Wait for the other player's turn (or have it be the other player's turn)</li>
+            <li>Try clicking the dice - they should now work!</li>
+        </ol>
+        
+        <div class="warning">
+            <strong>Important:</strong> The fix only applies when the info panel is minimized AND it's not your turn in a multiplayer game.
+        </div>
+    </div>
+
+    <script>
+        function hardRefresh() {
+            // Force hard refresh
+            window.location.reload(true);
+        }
+
+        function clearCacheAndReload() {
+            // Try to clear cache programmatically (limited support)
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                }).then(() => {
+                    window.location.reload(true);
+                });
+            } else {
+                // Fallback to hard refresh
+                window.location.reload(true);
+            }
+        }
+
+        function showManualSteps() {
+            const instructions = document.getElementById('instructions');
+            instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Auto-detect if we're in the game context
+        window.addEventListener('load', function() {
+            if (typeof enableDiceSection === 'function') {
+                document.body.innerHTML += '<div style="background: #4CAF50; padding: 10px; margin: 20px 0; border-radius: 4px;"><strong>✅ SUCCESS:</strong> Game functions detected - the fix should be active!</div>';
+            } else {
+                document.body.innerHTML += '<div style="background: #f44336; padding: 10px; margin: 20px 0; border-radius: 4px;"><strong>⚠️ INFO:</strong> Game not loaded yet - use this page to refresh your game tab.</div>';
+            }
+        });
+    </script>
+</body>
+</html>

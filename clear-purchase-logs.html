@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Firebase Purchase Logs - Horropoly</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .warning {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ff0000;
+        }
+        
+        .warning h3 {
+            margin: 0 0 10px 0;
+            color: #ffffff;
+        }
+        
+        .warning p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .collections-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .collections-list h3 {
+            margin: 0 0 15px 0;
+            color: #4ecdc4;
+        }
+        
+        .collection-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #4ecdc4;
+        }
+        
+        .clear-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .clear-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        .clear-button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #ff6b6b;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success {
+            color: #4ecdc4;
+        }
+        
+        .error {
+            color: #ff6b6b;
+        }
+        
+        .info {
+            color: #f7f1e3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Clear Firebase Purchase Logs</h1>
+        
+        <div class="warning">
+            <h3>⚠️ WARNING</h3>
+            <p>This action will permanently delete ALL payment-related data from Firebase, including:</p>
+            <ul>
+                <li>All payment records</li>
+                <li>Device fingerprinting data</li>
+                <li>Payment session logs</li>
+                <li>Failed payment attempts</li>
+            </ul>
+            <p><strong>This action cannot be undone!</strong></p>
+        </div>
+        
+        <div class="collections-list">
+            <h3>📋 Collections to be cleared:</h3>
+            <div class="collection-item">payments</div>
+            <div class="collection-item">paymentDevices</div>
+            <div class="collection-item">paymentSessions</div>
+            <div class="collection-item">failedPayments</div>
+        </div>
+        
+        <button id="clearButton" class="clear-button" onclick="startCleanup()">
+            🗑️ Clear All Purchase Logs
+        </button>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Clearing Firebase purchase logs...</p>
+        </div>
+        
+        <div id="status" class="status">
+            Ready to clear Firebase purchase logs.
+            Click the button above to start the cleanup process.
+        </div>
+    </div>
+
+    <script type="module" src="clear-firebase-purchase-logs.js"></script>
+    
+    <script>
+        let isClearing = false;
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const formattedMessage = `[${timestamp}] ${message}\n`;
+            
+            if (type === 'error') {
+                statusDiv.innerHTML += `<span class="error">${formattedMessage}</span>`;
+            } else if (type === 'success') {
+                statusDiv.innerHTML += `<span class="success">${formattedMessage}</span>`;
+            } else {
+                statusDiv.innerHTML += `<span class="info">${formattedMessage}</span>`;
+            }
+            
+            statusDiv.scrollTop = statusDiv.scrollHeight;
+        }
+        
+        function showLoading(show) {
+            const loadingDiv = document.getElementById('loading');
+            const clearButton = document.getElementById('clearButton');
+            
+            if (show) {
+                loadingDiv.style.display = 'block';
+                clearButton.disabled = true;
+                clearButton.textContent = '🔄 Clearing...';
+            } else {
+                loadingDiv.style.display = 'none';
+                clearButton.disabled = false;
+                clearButton.textContent = '🗑️ Clear All Purchase Logs';
+            }
+        }
+        
+        async function startCleanup() {
+            if (isClearing) return;
+            
+            isClearing = true;
+            showLoading(true);
+            updateStatus('Starting Firebase purchase logs cleanup...', 'info');
+            
+            try {
+                // Override console.log to capture messages
+                const originalLog = console.log;
+                const originalError = console.error;
+                
+                console.log = function(...args) {
+                    const message = args.join(' ');
+                    updateStatus(message, message.includes('❌') ? 'error' : 
+                                       message.includes('✅') ? 'success' : 'info');
+                    originalLog.apply(console, args);
+                };
+                
+                console.error = function(...args) {
+                    const message = args.join(' ');
+                    updateStatus(message, 'error');
+                    originalError.apply(console, args);
+                };
+                
+                // Call the cleanup function
+                await window.clearFirebasePurchaseLogs();
+                
+                // Restore console functions
+                console.log = originalLog;
+                console.error = originalError;
+                
+                updateStatus('🎉 Cleanup process completed!', 'success');
+                
+            } catch (error) {
+                updateStatus(`❌ Error during cleanup: ${error.message}`, 'error');
+                console.error('Cleanup error:', error);
+            } finally {
+                isClearing = false;
+                showLoading(false);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('🔧 Firebase purchase logs cleanup tool loaded', 'info');
+            updateStatus('💡 Click the button above to start the cleanup process', 'info');
+        });
+    </script>
+</body>
+</html> 

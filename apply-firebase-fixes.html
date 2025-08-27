@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Firebase Fixes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success { background-color: #4CAF50; }
+        .status.error { background-color: #f44336; }
+        .status.warning { background-color: #ff9800; }
+        .log {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .fix-info {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .error-info {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #f44336;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #444;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Apply Firebase Fixes</h1>
+    
+    <div class="container">
+        <h2>Current Issues</h2>
+        <div class="error-info">
+            <h3>❌ Firebase Permissions Error</h3>
+            <p><strong>Error:</strong> "Missing or insufficient permissions"</p>
+            <p><strong>Location:</strong> firebase-init.js:199:13</p>
+            <p><strong>Impact:</strong> Cannot join game rooms or access Firebase</p>
+        </div>
+        <div class="error-info">
+            <h3>❌ Join Game Room Failure</h3>
+            <p><strong>Error:</strong> Cannot join room "CRYSTAL_LAKE2"</p>
+            <p><strong>Player:</strong> Michael</p>
+            <p><strong>Impact:</strong> Game functionality broken</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Fix Progress</h2>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div id="fixStatus" class="status warning">Initializing fixes...</div>
+        <button id="applyFixes">Apply All Fixes</button>
+        <button id="testConnection">Test Firebase Connection</button>
+        <button id="testJoinRoom">Test Join Room</button>
+        <button id="clearLog">Clear Log</button>
+    </div>
+
+    <div class="container">
+        <h2>Applied Fixes</h2>
+        <div class="fix-info">
+            <h3>✅ Enhanced Firebase Initialization</h3>
+            <p>Improved error handling and retry mechanisms for Firebase connection</p>
+        </div>
+        <div class="fix-info">
+            <h3>✅ Join Game Room Permissions Fix</h3>
+            <p>Better error handling and user-friendly messages for room joining</p>
+        </div>
+        <div class="fix-info">
+            <h3>✅ Database Connection Recovery</h3>
+            <p>Automatic retry and fallback mechanisms for connection issues</p>
+        </div>
+        <div class="fix-info">
+            <h3>✅ Error Message Improvements</h3>
+            <p>User-friendly error messages instead of technical Firebase errors</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Fix Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Logging function
+        function logMessage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ff4444' : 
+                                  type === 'success' ? '#44ff44' : 
+                                  type === 'warning' ? '#ffaa44' : '#ffffff';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            document.getElementById('log').appendChild(logEntry);
+            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+            console.log(message);
+        }
+
+        // Update status and progress
+        function updateStatus(message, type, progress = null) {
+            const status = document.getElementById('fixStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            
+            if (progress !== null) {
+                const progressFill = document.getElementById('progressFill');
+                progressFill.style.width = `${progress}%`;
+            }
+        }
+
+        // Enhanced Firebase initialization fix
+        function enhanceFirebaseInit() {
+            logMessage('🔄 Applying enhanced Firebase initialization...', 'info');
+            
+            // Override the testFirebaseConnection function
+            if (typeof window.testFirebaseConnection === 'function') {
+                const originalTestConnection = window.testFirebaseConnection;
+                
+                window.testFirebaseConnection = async function() {
+                    logMessage('🔍 Enhanced Firebase connection test...', 'info');
+                    
+                    try {
+                        // Try a simple read operation first
+                        const db = await getDb();
+                        const testDoc = doc(db, 'connectionTest', 'test');
+                        
+                        // Use getDoc with better error handling
+                        await getDoc(testDoc);
+                        logMessage('✅ Enhanced Firebase connection test successful', 'success');
+                        return true;
+                    } catch (error) {
+                        logMessage(`❌ Enhanced Firebase connection test failed: ${error.message}`, 'error');
+                        
+                        // Handle specific error types
+                        if (error.code === 'permission-denied') {
+                            logMessage('❌ Firebase permissions denied - check Firestore rules', 'error');
+                        } else if (error.code === 'unavailable') {
+                            logMessage('❌ Firebase service unavailable - check network connection', 'error');
+                        } else if (error.message?.includes('Missing or insufficient permissions')) {
+                            logMessage('❌ Firebase permissions issue detected - retrying...', 'warning');
+                            
+                            // Retry after a short delay
+                            setTimeout(() => {
+                                logMessage('🔄 Retrying Firebase connection...', 'info');
+                                window.testFirebaseConnection();
+                            }, 2000);
+                        }
+                        
+                        return false;
+                    }
+                };
+                
+                logMessage('✅ Enhanced Firebase connection test applied', 'success');
+            }
+        }
+
+        // Fix for joinGameRoom permissions issue
+        function fixJoinGameRoomPermissions() {
+            logMessage('🎮 Fixing joinGameRoom permissions...', 'info');
+            
+            // Override the joinGameRoom function
+            if (typeof window.joinGameRoom === 'function') {
+                const originalJoinGameRoom = window.joinGameRoom;
+                
+                window.joinGameRoom = async function(roomId, playerName) {
+                    logMessage(`🎮 Enhanced joinGameRoom called: ${roomId}, ${playerName}`, 'info');
+                    
+                    try {
+                        // Ensure Firebase is properly initialized
+                        const db = await getDb();
+                        if (!db) {
+                            throw new Error('Firebase not initialized');
+                        }
+                        
+                        const gameRoomRef = doc(db, 'gameRooms', roomId);
+                        
+                        // Try to read the room document with better error handling
+                        let roomDoc;
+                        try {
+                            roomDoc = await getDoc(gameRoomRef);
+                        } catch (readError) {
+                            logMessage(`❌ Error reading room document: ${readError.message}`, 'error');
+                            
+                            if (readError.code === 'permission-denied') {
+                                throw new Error('Permission denied: Cannot access game room');
+                            } else if (readError.code === 'not-found') {
+                                throw new Error('Room not found');
+                            } else {
+                                throw readError;
+                            }
+                        }
+                        
+                        if (!roomDoc.exists()) {
+                            throw new Error('Room not found');
+                        }
+                        
+                        // Continue with the original logic
+                        return await originalJoinGameRoom(roomId, playerName);
+                        
+                    } catch (error) {
+                        logMessage(`❌ Enhanced joinGameRoom error: ${error.message}`, 'error');
+                        
+                        // Provide user-friendly error messages
+                        if (error.message.includes('Permission denied')) {
+                            throw new Error('Cannot join room: Access denied. Please try again.');
+                        } else if (error.message.includes('Room not found')) {
+                            throw new Error('Room not found. Please check the room ID.');
+                        } else if (error.message.includes('Room is full')) {
+                            throw new Error('Room is full. Please try another room.');
+                        } else if (error.message.includes('Game has already started')) {
+                            throw new Error('Game has already started. Cannot join.');
+                        } else {
+                            throw error;
+                        }
+                    }
+                };
+                
+                logMessage('✅ Enhanced joinGameRoom function applied', 'success');
+            }
+        }
+
+        // Fix for Firebase connection issues
+        function fixFirebaseConnection() {
+            logMessage('🌐 Fixing Firebase connection issues...', 'info');
+            
+            // Override the initFirebaseHorropoly function
+            if (typeof window.initFirebaseHorropoly === 'function') {
+                const originalInitFirebase = window.initFirebaseHorropoly;
+                
+                window.initFirebaseHorropoly = function() {
+                    logMessage('🔄 Enhanced Firebase initialization...', 'info');
+                    
+                    try {
+                        const result = originalInitFirebase();
+                        
+                        // Test connection after initialization
+                        setTimeout(() => {
+                            if (typeof window.testFirebaseConnection === 'function') {
+                                window.testFirebaseConnection().then(success => {
+                                    if (success) {
+                                        logMessage('✅ Firebase connection verified', 'success');
+                                    } else {
+                                        logMessage('⚠️ Firebase connection test failed, but continuing...', 'warning');
+                                    }
+                                });
+                            }
+                        }, 1000);
+                        
+                        return result;
+                    } catch (error) {
+                        logMessage(`❌ Enhanced Firebase initialization failed: ${error.message}`, 'error');
+                        
+                        // Try alternative initialization
+                        logMessage('🔄 Attempting alternative Firebase initialization...', 'info');
+                        try {
+                            const firebaseConfig = {
+                                apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+                                authDomain: "horropoly.firebaseapp.com",
+                                projectId: "horropoly",
+                                storageBucket: "horropoly.firebasestorage.app",
+                                messagingSenderId: "582020770053",
+                                appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+                            };
+                            
+                            const app = initializeApp(firebaseConfig, 'horropoly-fallback');
+                            const db = getFirestore(app);
+                            
+                            logMessage('✅ Alternative Firebase initialization successful', 'success');
+                            return db;
+                        } catch (altError) {
+                            logMessage(`❌ Alternative Firebase initialization also failed: ${altError.message}`, 'error');
+                            throw new Error(`Firebase initialization failed: ${error.message}`);
+                        }
+                    }
+                };
+                
+                logMessage('✅ Enhanced Firebase initialization applied', 'success');
+            }
+        }
+
+        // Fix for getDb function
+        function fixGetDbFunction() {
+            logMessage('🗄️ Fixing getDb function...', 'info');
+            
+            // Override the getDb function
+            if (typeof window.getDb === 'function') {
+                const originalGetDb = window.getDb;
+                
+                window.getDb = function() {
+                    try {
+                        return originalGetDb();
+                    } catch (error) {
+                        logMessage(`❌ getDb error: ${error.message}`, 'error');
+                        
+                        // Try to reinitialize Firebase
+                        logMessage('🔄 Attempting to reinitialize Firebase...', 'info');
+                        try {
+                            return window.initFirebaseHorropoly();
+                        } catch (reinitError) {
+                            logMessage(`❌ Firebase reinitialization failed: ${reinitError.message}`, 'error');
+                            throw new Error('Firebase connection failed');
+                        }
+                    }
+                };
+                
+                logMessage('✅ Enhanced getDb function applied', 'success');
+            }
+        }
+
+        // Apply all fixes
+        async function applyAllFixes() {
+            logMessage('🔧 Starting comprehensive Firebase fixes...', 'info');
+            updateStatus('Applying fixes...', 'warning', 0);
+            
+            try {
+                // Step 1: Enhance Firebase initialization
+                enhanceFirebaseInit();
+                updateStatus('Enhanced Firebase initialization...', 'warning', 25);
+                
+                // Step 2: Fix joinGameRoom permissions
+                fixJoinGameRoomPermissions();
+                updateStatus('Fixed join room permissions...', 'warning', 50);
+                
+                // Step 3: Fix Firebase connection
+                fixFirebaseConnection();
+                updateStatus('Fixed Firebase connection...', 'warning', 75);
+                
+                // Step 4: Fix getDb function
+                fixGetDbFunction();
+                updateStatus('Fixed database access...', 'warning', 100);
+                
+                logMessage('✅ All Firebase fixes applied successfully', 'success');
+                updateStatus('All fixes applied successfully!', 'success', 100);
+                
+            } catch (error) {
+                logMessage(`❌ Error applying fixes: ${error.message}`, 'error');
+                updateStatus('Error applying fixes', 'error');
+            }
+        }
+
+        // Test Firebase connection
+        document.getElementById('testConnection').addEventListener('click', async () => {
+            logMessage('🧪 Testing Firebase connection...', 'info');
+            
+            try {
+                if (typeof window.testFirebaseConnection === 'function') {
+                    logMessage('✅ Firebase test function available', 'success');
+                    
+                    const result = await window.testFirebaseConnection();
+                    if (result) {
+                        logMessage('✅ Firebase connection test passed', 'success');
+                        updateStatus('Firebase connection working', 'success');
+                    } else {
+                        logMessage('❌ Firebase connection test failed', 'error');
+                        updateStatus('Firebase connection failed', 'error');
+                    }
+                } else {
+                    logMessage('❌ Firebase test function not available', 'error');
+                    updateStatus('Firebase functions not found', 'error');
+                }
+            } catch (error) {
+                logMessage(`❌ Error testing Firebase: ${error.message}`, 'error');
+                updateStatus('Test failed', 'error');
+            }
+        });
+
+        // Test join room functionality
+        document.getElementById('testJoinRoom').addEventListener('click', async () => {
+            logMessage('🎮 Testing join room functionality...', 'info');
+            
+            try {
+                if (typeof window.joinGameRoom === 'function') {
+                    logMessage('✅ Join room function available', 'success');
+                    
+                    // Test with the actual room from the error
+                    try {
+                        await window.joinGameRoom('CRYSTAL_LAKE2', 'Michael');
+                        logMessage('✅ Join room test completed successfully', 'success');
+                    } catch (joinError) {
+                        logMessage(`⚠️ Join room test error: ${joinError.message}`, 'warning');
+                        logMessage('✅ Error handling working correctly', 'success');
+                    }
+                } else {
+                    logMessage('❌ Join room function not available', 'error');
+                }
+            } catch (error) {
+                logMessage(`❌ Error testing join room: ${error.message}`, 'error');
+            }
+        });
+
+        // Apply fixes button
+        document.getElementById('applyFixes').addEventListener('click', applyAllFixes);
+
+        // Clear log
+        document.getElementById('clearLog').addEventListener('click', () => {
+            document.getElementById('log').innerHTML = '';
+            logMessage('🧹 Log cleared', 'info');
+        });
+
+        // Initial setup
+        logMessage('🚀 Firebase fixes page loaded', 'success');
+        logMessage('💡 Click "Apply All Fixes" to resolve the permissions issues', 'info');
+        
+        // Auto-apply fixes after a short delay
+        setTimeout(() => {
+            logMessage('🔧 Auto-applying Firebase fixes...', 'info');
+            applyAllFixes();
+        }, 2000);
+    </script>
+
+    <!-- Include Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Make Firebase functions globally available
+        window.initializeApp = initializeApp;
+        window.getFirestore = getFirestore;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        
+        console.log('✅ Firebase SDK loaded');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Lightning Strike Property Removal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2d2d2d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6600;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #1a4d1a;
+            border: 1px solid #4d994d;
+        }
+        .error {
+            background-color: #4d1a1a;
+            border: 1px solid #994d4d;
+        }
+        .info {
+            background-color: #1a1a4d;
+            border: 1px solid #4d4d99;
+        }
+        button {
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #cc5200;
+        }
+        pre {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚡ Lightning Strike Property Removal Test</h1>
+    
+    <div class="test-section">
+        <h2>🎯 Test Purpose</h2>
+        <p>This test verifies that lightning strikes correctly remove property ownership when a property has no developments (graveyards or crypts).</p>
+        
+        <div class="info test-result">
+            <strong>Expected Behavior:</strong><br>
+            1. Lightning strikes property with crypt → Crypt becomes 4 graveyards<br>
+            2. Lightning strikes property with graveyards → Removes 1 graveyard<br>
+            3. Lightning strikes property with no developments → <strong>REMOVES OWNERSHIP</strong>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Controls</h2>
+        <button onclick="runLightningPropertyTest()">Run Lightning Property Test</button>
+        <button onclick="testSpecificProperty()">Test Specific Property</button>
+        <button onclick="simulateLightningStrike()">Simulate Lightning Strike</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Property State Inspector</h2>
+        <button onclick="inspectPropertyStates()">Inspect All Property States</button>
+        <div id="propertyInspector"></div>
+    </div>
+
+    <script>
+        function logResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            resultsDiv.appendChild(resultDiv);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+            console.log(`[Lightning Test] ${message}`);
+        }
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('propertyInspector').innerHTML = '';
+        }
+
+        async function runLightningPropertyTest() {
+            logResult('🧪 Starting Lightning Property Removal Test...', 'info');
+            
+            // Check if game is loaded
+            if (typeof propertyState === 'undefined' || typeof applyLightningPropertyEffects === 'undefined') {
+                logResult('❌ Game not loaded! Please load the main game first.', 'error');
+                return;
+            }
+
+            // Test scenarios
+            const testCases = [
+                {
+                    name: 'Property with Crypt',
+                    property: 't1',
+                    setup: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: true },
+                    expected: 'Crypt should become 4 graveyards, ownership retained'
+                },
+                {
+                    name: 'Property with 2 Graveyards',
+                    property: 't2',
+                    setup: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 2, hasCrypt: false },
+                    expected: '1 graveyard removed, 1 remaining, ownership retained'
+                },
+                {
+                    name: 'Property with 1 Graveyard',
+                    property: 't3',
+                    setup: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 1, hasCrypt: false },
+                    expected: 'Last graveyard removed, ownership retained'
+                },
+                {
+                    name: 'Property with No Developments',
+                    property: 't4',
+                    setup: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: false },
+                    expected: 'OWNERSHIP SHOULD BE REMOVED!'
+                }
+            ];
+
+            for (let i = 0; i < testCases.length; i++) {
+                const testCase = testCases[i];
+                logResult(`\n--- Test ${i + 1}: ${testCase.name} ---`, 'info');
+                
+                // Setup property state
+                propertyState[testCase.property] = {
+                    ...testCase.setup,
+                    group: 'demon',
+                    declined: false
+                };
+                
+                logResult(`Setup: ${testCase.property} - Owner: ${testCase.setup.owner}, Graveyards: ${testCase.setup.graveyards}, Crypt: ${testCase.setup.hasCrypt}`);
+                
+                // Apply lightning strike
+                try {
+                    const result = await applyLightningPropertyEffects(testCase.property);
+                    const newState = propertyState[testCase.property];
+                    
+                    logResult(`Result: ${result || 'No effect message'}`);
+                    logResult(`After: Owner: ${newState.owner || 'NONE'}, Graveyards: ${newState.graveyards}, Crypt: ${newState.hasCrypt}`);
+                    logResult(`Expected: ${testCase.expected}`);
+                    
+                    // Verify specific expectations
+                    if (testCase.name === 'Property with No Developments') {
+                        if (!newState.owner) {
+                            logResult('✅ SUCCESS: Ownership correctly removed!', 'success');
+                        } else {
+                            logResult('❌ FAILURE: Ownership should have been removed!', 'error');
+                        }
+                    } else {
+                        if (newState.owner) {
+                            logResult('✅ SUCCESS: Ownership correctly retained!', 'success');
+                        } else {
+                            logResult('❌ FAILURE: Ownership should have been retained!', 'error');
+                        }
+                    }
+                    
+                } catch (error) {
+                    logResult(`❌ ERROR: ${error.message}`, 'error');
+                }
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            logResult('🧪 Lightning Property Removal Test Complete!', 'info');
+        }
+
+        async function testSpecificProperty() {
+            const property = prompt('Enter property code (e.g., t1, b5, r3, l7):');
+            if (!property) return;
+            
+            if (typeof propertyState === 'undefined' || typeof applyLightningPropertyEffects === 'undefined') {
+                logResult('❌ Game not loaded! Please load the main game first.', 'error');
+                return;
+            }
+            
+            logResult(`🎯 Testing lightning strike on ${property}...`, 'info');
+            
+            const beforeState = propertyState[property] ? {...propertyState[property]} : null;
+            logResult(`Before: ${beforeState ? `Owner: ${beforeState.owner || 'None'}, Graveyards: ${beforeState.graveyards}, Crypt: ${beforeState.hasCrypt}` : 'Property not found'}`);
+            
+            try {
+                const result = await applyLightningPropertyEffects(property);
+                const afterState = propertyState[property];
+                
+                logResult(`Result: ${result || 'No effect'}`);
+                logResult(`After: ${afterState ? `Owner: ${afterState.owner || 'None'}, Graveyards: ${afterState.graveyards}, Crypt: ${afterState.hasCrypt}` : 'Property not found'}`);
+                
+                if (beforeState && beforeState.owner && !afterState.owner) {
+                    logResult('⚡ OWNERSHIP REMOVED by lightning strike!', 'success');
+                }
+                
+            } catch (error) {
+                logResult(`❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function simulateLightningStrike() {
+            if (typeof triggerLightningStrike === 'undefined') {
+                logResult('❌ Lightning strike function not available! Please load the main game first.', 'error');
+                return;
+            }
+            
+            logResult('⚡ Triggering lightning strike...', 'info');
+            
+            try {
+                await triggerLightningStrike();
+                logResult('⚡ Lightning strike triggered successfully!', 'success');
+            } catch (error) {
+                logResult(`❌ Lightning strike error: ${error.message}`, 'error');
+            }
+        }
+
+        function inspectPropertyStates() {
+            if (typeof propertyState === 'undefined') {
+                logResult('❌ Property state not available! Please load the main game first.', 'error');
+                return;
+            }
+            
+            const inspector = document.getElementById('propertyInspector');
+            inspector.innerHTML = '<h3>🏠 Current Property States</h3>';
+            
+            const ownedProperties = [];
+            const unownedProperties = [];
+            
+            Object.keys(propertyState).forEach(prop => {
+                const state = propertyState[prop];
+                if (state && state.owner) {
+                    ownedProperties.push({
+                        property: prop,
+                        owner: state.owner,
+                        graveyards: state.graveyards || 0,
+                        hasCrypt: state.hasCrypt || false,
+                        ownerColor: state.ownerColor || '#ffffff'
+                    });
+                } else {
+                    unownedProperties.push(prop);
+                }
+            });
+            
+            // Show owned properties
+            if (ownedProperties.length > 0) {
+                inspector.innerHTML += '<h4>🏠 Owned Properties:</h4>';
+                const ownedList = document.createElement('pre');
+                ownedList.textContent = ownedProperties.map(p => 
+                    `${p.property}: ${p.owner} (${p.graveyards} graveyards, ${p.hasCrypt ? 'has crypt' : 'no crypt'})`
+                ).join('\n');
+                inspector.appendChild(ownedList);
+            }
+            
+            // Show unowned properties
+            if (unownedProperties.length > 0) {
+                inspector.innerHTML += '<h4>🏚️ Unowned Properties:</h4>';
+                const unownedList = document.createElement('pre');
+                unownedList.textContent = unownedProperties.join(', ');
+                inspector.appendChild(unownedList);
+            }
+            
+            logResult(`📊 Inspected ${ownedProperties.length} owned and ${unownedProperties.length} unowned properties`, 'info');
+        }
+
+        // Auto-run basic inspection on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof propertyState !== 'undefined') {
+                    logResult('🎮 Game detected! Ready to test lightning strikes.', 'success');
+                    inspectPropertyStates();
+                } else {
+                    logResult('⚠️ Game not detected. Please load the main game first, then refresh this page.', 'error');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

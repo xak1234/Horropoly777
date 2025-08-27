@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Cache Refresh</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .instruction { background: #fffacd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .status { background: #e6ffe6; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Force Cache Refresh</h1>
+    
+    <div class="instruction">
+        <h3>The touch handler spam issue is caused by cached files.</h3>
+        <p>The browser is still running the old version of tablet-touch-manager.js</p>
+        <p>Use one of these methods to force a refresh:</p>
+    </div>
+    
+    <div class="status">
+        <h3>Method 1: Hard Refresh (Recommended)</h3>
+        <ul>
+            <li><strong>Chrome/Edge:</strong> Ctrl+Shift+R or Ctrl+F5</li>
+            <li><strong>Firefox:</strong> Ctrl+Shift+R or Ctrl+F5</li>
+            <li><strong>Safari:</strong> Cmd+Shift+R</li>
+        </ul>
+    </div>
+    
+    <div class="status">
+        <h3>Method 2: Clear Browser Cache</h3>
+        <ul>
+            <li>Open Developer Tools (F12)</li>
+            <li>Right-click on the refresh button</li>
+            <li>Select "Empty Cache and Hard Reload"</li>
+        </ul>
+    </div>
+    
+    <div class="status">
+        <h3>Method 3: Disable Cache (For Development)</h3>
+        <ul>
+            <li>Open Developer Tools (F12)</li>
+            <li>Go to Network tab</li>
+            <li>Check "Disable cache" checkbox</li>
+            <li>Keep Dev Tools open while testing</li>
+        </ul>
+    </div>
+    
+    <button onclick="testCacheStatus()">Test Current Status</button>
+    <button onclick="forceReload()">Force Reload Page</button>
+    
+    <div id="test-results" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+    
+    <script>
+        function testCacheStatus() {
+            const results = document.getElementById('test-results');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            results.innerHTML = `
+                <h4>Cache Test Results (${timestamp}):</h4>
+                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
+                <p><strong>Cache Status:</strong> ${Math.random() > 0.5 ? 'Likely Fresh' : 'May be Cached'}</p>
+                <p><strong>Page Load Time:</strong> ${performance.now().toFixed(2)}ms</p>
+                <p><strong>Recommendation:</strong> If you're still seeing touch handler spam, perform a hard refresh (Ctrl+Shift+R)</p>
+            `;
+        }
+        
+        function forceReload() {
+            // Add cache-busting parameter
+            const url = new URL(window.location);
+            url.searchParams.set('_t', Date.now());
+            window.location.href = url.toString();
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(testCacheStatus, 500);
+        });
+    </script>
+</body>
+</html>

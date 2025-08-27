@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closing...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
+        .message {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #00ff00;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="message">
+        <div class="spinner"></div>
+        <h2>Processing Payment...</h2>
+        <p>Please wait while we verify your payment...</p>
+    </div>
+
+    <script>
+        console.log('Close window page loaded');
+        console.log('Current URL:', window.location.href);
+        
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        const cancelled = urlParams.get('cancelled');
+        
+        console.log('Session ID:', sessionId);
+        console.log('Cancelled:', cancelled);
+        
+        // Signal to parent window immediately
+        if (window.opener) {
+            if (cancelled === 'true') {
+                console.log('Sending cancellation message to parent');
+                window.opener.postMessage({
+                    type: 'payment_cancelled'
+                }, '*');
+            } else if (sessionId) {
+                console.log('Sending success message to parent');
+                // Store session ID for parent window
+                localStorage.setItem('stripe_session_id', sessionId);
+                window.opener.postMessage({
+                    type: 'payment_success',
+                    sessionId: sessionId
+                }, '*');
+            } else {
+                console.log('No session ID or cancellation flag found');
+            }
+        } else {
+            console.log('No parent window found');
+        }
+        
+        // Close window immediately
+        console.log('Closing window...');
+        window.close();
+    </script>
+</body>
+</html> 

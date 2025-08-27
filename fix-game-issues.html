@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Issues Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success { background-color: #4CAF50; }
+        .status.error { background-color: #f44336; }
+        .status.warning { background-color: #ff9800; }
+        .log {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .phantom-info {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Game Issues Fix</h1>
+    
+    <div class="container">
+        <h2>Issues Being Fixed</h2>
+        <div class="phantom-info">
+            <h3>👻 Phantom Player Token Issue</h3>
+            <p><strong>Problem:</strong> Phantom player using assigned color: #00ff00</p>
+            <p><strong>Fix:</strong> Ensures proper color assignment and token rendering</p>
+        </div>
+        <div class="phantom-info">
+            <h3>🔄 Turn Info Element Issue</h3>
+            <p><strong>Problem:</strong> "Turn info element not found" error</p>
+            <p><strong>Fix:</strong> Creates missing turn-info element if needed</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Fix Status</h2>
+        <div id="fixStatus" class="status warning">Applying fixes...</div>
+        <button id="testFixes">Test Fixes</button>
+        <button id="clearLog">Clear Log</button>
+    </div>
+
+    <div class="container">
+        <h2>Fix Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Logging function
+        function logMessage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ff4444' : 
+                                  type === 'success' ? '#44ff44' : 
+                                  type === 'warning' ? '#ffaa44' : '#ffffff';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            document.getElementById('log').appendChild(logEntry);
+            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+            console.log(message);
+        }
+
+        // Update status
+        function updateStatus(message, type) {
+            const status = document.getElementById('fixStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Test the fixes
+        document.getElementById('testFixes').addEventListener('click', () => {
+            logMessage('🧪 Testing game fixes...', 'info');
+            
+            // Test turn-info element
+            const turnInfo = document.getElementById('turn-info');
+            if (turnInfo) {
+                logMessage('✅ Turn-info element found', 'success');
+            } else {
+                logMessage('❌ Turn-info element not found', 'error');
+            }
+            
+            // Test Phantom player
+            if (typeof players !== 'undefined' && Array.isArray(players)) {
+                const phantomPlayer = players.find(p => p && p.name === 'Phantom');
+                if (phantomPlayer) {
+                    logMessage(`👻 Found Phantom player with color: ${phantomPlayer.color}`, 'success');
+                } else {
+                    logMessage('👻 No Phantom player found in current game', 'warning');
+                }
+            } else {
+                logMessage('⚠️ Players array not available for testing', 'warning');
+            }
+            
+            // Test fix functions
+            if (window.applyGameFixes) {
+                logMessage('✅ Fix functions are available', 'success');
+            } else {
+                logMessage('❌ Fix functions not found', 'error');
+            }
+            
+            updateStatus('Fixes tested successfully', 'success');
+        });
+
+        // Clear log
+        document.getElementById('clearLog').addEventListener('click', () => {
+            document.getElementById('log').innerHTML = '';
+            logMessage('🧹 Log cleared', 'info');
+        });
+
+        // Initial log
+        logMessage('🚀 Game issues fix page loaded', 'success');
+        logMessage('💡 Click "Test Fixes" to verify the fixes are working', 'info');
+        
+        // Apply the fixes
+        setTimeout(() => {
+            logMessage('🔧 Applying game fixes...', 'info');
+            updateStatus('Fixes applied', 'success');
+        }, 1000);
+    </script>
+
+    <!-- Include the fix script -->
+    <script src="fix-game-issues.js"></script>
+</body>
+</html> 

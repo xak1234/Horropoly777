@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #d32f2f;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #666;
+            background: #444;
+            color: white;
+        }
+        .result {
+            background: #222;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clear Room Tool</h1>
+        
+        <div class="section">
+            <h3>1. Initialize Firebase</h3>
+            <button onclick="initFirebase()">Initialize Firebase</button>
+            <div id="init-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>2. Clear Specific Room</h3>
+            <input type="text" id="room-id" placeholder="Room ID" value="BT0MiFcq8b7mB9mTkvDN">
+            <button onclick="clearRoom()">Clear Room</button>
+            <div id="clear-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>3. Clear All Rooms</h3>
+            <button onclick="clearAllRooms()">Clear All Rooms</button>
+            <div id="clear-all-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h3>4. Check Room Status</h3>
+            <input type="text" id="check-room-id" placeholder="Room ID" value="BT0MiFcq8b7mB9mTkvDN">
+            <button onclick="checkRoom()">Check Room</button>
+            <div id="check-result" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            initFirebaseHorropoly, 
+            getDb 
+        } from './firebase-init.js';
+        import { 
+            doc, 
+            deleteDoc, 
+            getDoc, 
+            collection, 
+            getDocs 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        window.initFirebase = async () => {
+            try {
+                const result = initFirebaseHorropoly();
+                document.getElementById('init-result').textContent = '✅ Firebase initialized successfully';
+                console.log('Firebase init result:', result);
+            } catch (error) {
+                document.getElementById('init-result').textContent = '❌ Error: ' + error.message;
+                console.error('Firebase init error:', error);
+            }
+        };
+
+        window.clearRoom = async () => {
+            try {
+                const roomId = document.getElementById('room-id').value;
+                if (!roomId) {
+                    document.getElementById('clear-result').textContent = '❌ Please enter a room ID';
+                    return;
+                }
+
+                document.getElementById('clear-result').textContent = 'Clearing room...';
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                
+                await deleteDoc(roomRef);
+                document.getElementById('clear-result').textContent = `✅ Room ${roomId} cleared successfully`;
+                console.log('Room cleared:', roomId);
+            } catch (error) {
+                document.getElementById('clear-result').textContent = '❌ Error: ' + error.message;
+                console.error('Clear room error:', error);
+            }
+        };
+
+        window.clearAllRooms = async () => {
+            try {
+                document.getElementById('clear-all-result').textContent = 'Clearing all rooms...';
+                const db = await getDb();
+                const roomsRef = collection(db, 'gameRooms');
+                const snapshot = await getDocs(roomsRef);
+                
+                let clearedCount = 0;
+                for (const doc of snapshot.docs) {
+                    await deleteDoc(doc.ref);
+                    clearedCount++;
+                }
+                
+                document.getElementById('clear-all-result').textContent = `✅ Cleared ${clearedCount} rooms successfully`;
+                console.log('Cleared rooms:', clearedCount);
+            } catch (error) {
+                document.getElementById('clear-all-result').textContent = '❌ Error: ' + error.message;
+                console.error('Clear all rooms error:', error);
+            }
+        };
+
+        window.checkRoom = async () => {
+            try {
+                const roomId = document.getElementById('check-room-id').value;
+                if (!roomId) {
+                    document.getElementById('check-result').textContent = '❌ Please enter a room ID';
+                    return;
+                }
+
+                document.getElementById('check-result').textContent = 'Checking room...';
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                const roomSnap = await getDoc(roomRef);
+                
+                if (roomSnap.exists()) {
+                    const roomData = roomSnap.data();
+                    document.getElementById('check-result').textContent = `✅ Room exists:\n${JSON.stringify(roomData, null, 2)}`;
+                } else {
+                    document.getElementById('check-result').textContent = '❌ Room does not exist';
+                }
+            } catch (error) {
+                document.getElementById('check-result').textContent = '❌ Error: ' + error.message;
+                console.error('Check room error:', error);
+            }
+        };
+    </script>
+</body>
+</html> 

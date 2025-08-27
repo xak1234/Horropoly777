@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Multiplayer Purchase Decision Buttons</title>
+    <style>
+        body { 
+            font-family: monospace; 
+            background: #1a1a1a; 
+            color: #00ff00; 
+            padding: 20px;
+        }
+        .fix-section { 
+            background: #2a2a2a; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border: 1px solid #444;
+        }
+        .fix-title { 
+            color: #ffaa00; 
+            font-weight: bold; 
+            margin-bottom: 10px;
+        }
+        button {
+            background: #00008b;
+            color: white;
+            border: 1px solid #0066ff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: monospace;
+            margin: 5px;
+        }
+        button:hover { background: #0000cc; }
+        .error { color: #ff4444; }
+        .success { color: #44ff44; }
+        .warning { color: #ffaa00; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Multiplayer Purchase Decision Buttons</h1>
+    
+    <div class="fix-section">
+        <div class="fix-title">Issue Analysis</div>
+        <p>The purchase decision buttons are not working in multiplayer mode when the info panel is minimized. The system correctly detects the purchase decision state but the buttons may not be properly visible or clickable.</p>
+    </div>
+
+    <div class="fix-section">
+        <div class="fix-title">Diagnostic Tools</div>
+        <button onclick="checkPurchaseButtonState()">Check Purchase Button State</button>
+        <button onclick="forceShowPurchaseButtons()">Force Show Purchase Buttons</button>
+        <button onclick="debugMinimizedState()">Debug Minimized State</button>
+        <button onclick="testButtonClicks()">Test Button Click Handlers</button>
+    </div>
+
+    <div class="fix-section">
+        <div class="fix-title">Emergency Fixes</div>
+        <button onclick="forceUnminimizePanel()">Force Unminimize Panel</button>
+        <button onclick="recreatePurchaseButtons()">Recreate Purchase Buttons</button>
+        <button onclick="enableDiceAfterDecision()">Enable Dice (Skip Purchase)</button>
+    </div>
+
+    <div id="output" class="fix-section">
+        <div class="fix-title">Output</div>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            logDiv.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function checkPurchaseButtonState() {
+            log('🔍 Checking purchase button state...');
+            
+            try {
+                // Check if we're in the parent window (game)
+                const gameWindow = window.parent !== window ? window.parent : window;
+                
+                if (!gameWindow.players || !gameWindow.currentPlayerIndex !== undefined) {
+                    log('❌ Game state not accessible from this window', 'error');
+                    return;
+                }
+
+                const currentPlayer = gameWindow.players[gameWindow.currentPlayerIndex];
+                log(`✅ Current player: ${currentPlayer?.name || 'Unknown'}`);
+                
+                // Check info panel state
+                const infoPanel = gameWindow.document.getElementById('info-panel');
+                const minimizedContent = gameWindow.document.getElementById('minimized-content');
+                const propertyInfoContent = gameWindow.document.getElementById('property-info-content');
+                
+                log(`📱 Info panel minimized: ${infoPanel?.classList.contains('minimized') || false}`);
+                log(`📱 Minimized content exists: ${!!minimizedContent}`);
+                log(`📱 Property info content exists: ${!!propertyInfoContent}`);
+                
+                // Check for purchase buttons
+                const purchaseButtons = gameWindow.document.querySelectorAll('button[onclick*="handlePropertyPurchase"], button[onclick*="handleMinimizedPropertyPurchase"]');
+                const declineButtons = gameWindow.document.querySelectorAll('button[onclick*="handleDeclinePurchase"], button[onclick*="handleMinimizedDeclinePurchase"]');
+                
+                log(`🔘 Purchase buttons found: ${purchaseButtons.length}`);
+                log(`🔘 Decline buttons found: ${declineButtons.length}`);
+                
+                // Check button visibility and properties
+                purchaseButtons.forEach((btn, i) => {
+                    const rect = btn.getBoundingClientRect();
+                    log(`  Purchase button ${i+1}: visible=${rect.width > 0 && rect.height > 0}, clickable=${btn.style.pointerEvents !== 'none'}`);
+                });
+                
+                declineButtons.forEach((btn, i) => {
+                    const rect = btn.getBoundingClientRect();
+                    log(`  Decline button ${i+1}: visible=${rect.width > 0 && rect.height > 0}, clickable=${btn.style.pointerEvents !== 'none'}`);
+                });
+                
+                // Check if dice are disabled
+                const diceSection = gameWindow.document.getElementById('dice-section');
+                if (diceSection) {
+                    log(`🎲 Dice disabled: ${diceSection.style.pointerEvents === 'none'}`);
+                    log(`🎲 Dice classes: ${Array.from(diceSection.classList).join(', ')}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking state: ${error.message}`, 'error');
+            }
+        }
+
+        function forceShowPurchaseButtons() {
+            log('🔧 Force showing purchase buttons...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                
+                if (!gameWindow.players || gameWindow.currentPlayerIndex === undefined) {
+                    log('❌ Game state not accessible', 'error');
+                    return;
+                }
+
+                const currentPlayer = gameWindow.players[gameWindow.currentPlayerIndex];
+                const propertyInfo = gameWindow.getPropertyInfo(currentPlayer.currentSquare);
+                
+                if (!propertyInfo) {
+                    log('❌ No property info found for current square', 'error');
+                    return;
+                }
+                
+                log(`🏠 Forcing purchase UI for property: ${propertyInfo.square}`);
+                
+                // Force update info panel with property info
+                gameWindow.updateInfoPanel(null, null, propertyInfo);
+                
+                log('✅ Purchase UI refresh completed', 'success');
+                
+            } catch (error) {
+                log(`❌ Error forcing purchase buttons: ${error.message}`, 'error');
+            }
+        }
+
+        function debugMinimizedState() {
+            log('🔍 Debugging minimized state...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                const infoPanel = gameWindow.document.getElementById('info-panel');
+                const minimizedContent = gameWindow.document.getElementById('minimized-content');
+                
+                if (!infoPanel) {
+                    log('❌ Info panel not found', 'error');
+                    return;
+                }
+                
+                log(`📱 Panel classes: ${Array.from(infoPanel.classList).join(', ')}`);
+                log(`📱 Panel display: ${getComputedStyle(infoPanel).display}`);
+                log(`📱 Panel visibility: ${getComputedStyle(infoPanel).visibility}`);
+                
+                if (minimizedContent) {
+                    log(`📱 Minimized content HTML length: ${minimizedContent.innerHTML.length}`);
+                    log(`📱 Minimized content display: ${getComputedStyle(minimizedContent).display}`);
+                    
+                    // Show the first 200 characters of minimized content
+                    const content = minimizedContent.innerHTML.substring(0, 200);
+                    log(`📱 Minimized content preview: ${content}...`);
+                }
+                
+            } catch (error) {
+                log(`❌ Error debugging minimized state: ${error.message}`, 'error');
+            }
+        }
+
+        function testButtonClicks() {
+            log('🧪 Testing button click handlers...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                
+                // Test if the handler functions exist
+                const hasPurchaseHandler = typeof gameWindow.handlePropertyPurchase === 'function';
+                const hasDeclineHandler = typeof gameWindow.handleDeclinePurchase === 'function';
+                const hasMinimizedPurchaseHandler = typeof gameWindow.handleMinimizedPropertyPurchase === 'function';
+                const hasMinimizedDeclineHandler = typeof gameWindow.handleMinimizedDeclinePurchase === 'function';
+                
+                log(`🔧 handlePropertyPurchase exists: ${hasPurchaseHandler}`);
+                log(`🔧 handleDeclinePurchase exists: ${hasDeclineHandler}`);
+                log(`🔧 handleMinimizedPropertyPurchase exists: ${hasMinimizedPurchaseHandler}`);
+                log(`🔧 handleMinimizedDeclinePurchase exists: ${hasMinimizedDeclineHandler}`);
+                
+                // Check window object for the handlers
+                if (gameWindow.window) {
+                    log(`🔧 window.handleMinimizedPropertyPurchase: ${typeof gameWindow.window.handleMinimizedPropertyPurchase}`);
+                    log(`🔧 window.handleMinimizedDeclinePurchase: ${typeof gameWindow.window.handleMinimizedDeclinePurchase}`);
+                }
+                
+            } catch (error) {
+                log(`❌ Error testing button handlers: ${error.message}`, 'error');
+            }
+        }
+
+        function forceUnminimizePanel() {
+            log('🔧 Force unminimizing panel...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                const infoPanel = gameWindow.document.getElementById('info-panel');
+                
+                if (!infoPanel) {
+                    log('❌ Info panel not found', 'error');
+                    return;
+                }
+                
+                // Remove minimized class and restore full panel
+                infoPanel.classList.remove('minimized');
+                
+                // Show all content sections
+                const propertyInfoContent = gameWindow.document.getElementById('property-info-content');
+                const playerInfoContent = gameWindow.document.getElementById('player-info-content');
+                
+                if (propertyInfoContent) {
+                    propertyInfoContent.style.display = '';
+                }
+                if (playerInfoContent) {
+                    playerInfoContent.style.display = '';
+                }
+                
+                // Force update the info panel
+                const currentPlayer = gameWindow.players[gameWindow.currentPlayerIndex];
+                const propertyInfo = gameWindow.getPropertyInfo(currentPlayer.currentSquare);
+                gameWindow.updateInfoPanel(null, null, propertyInfo);
+                
+                log('✅ Panel unminimized successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Error unminimizing panel: ${error.message}`, 'error');
+            }
+        }
+
+        function recreatePurchaseButtons() {
+            log('🔧 Recreating purchase buttons...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                const currentPlayer = gameWindow.players[gameWindow.currentPlayerIndex];
+                const propertyInfo = gameWindow.getPropertyInfo(currentPlayer.currentSquare);
+                
+                if (!propertyInfo || propertyInfo.state.owner) {
+                    log('❌ No unowned property to create buttons for', 'error');
+                    return;
+                }
+                
+                const canAfford = currentPlayer.money >= propertyInfo.cost;
+                const playerIndex = gameWindow.currentPlayerIndex;
+                
+                // Create button HTML
+                const purchaseButton = canAfford ? `
+                    <button onclick="handlePropertyPurchase('${propertyInfo.square}', ${playerIndex})" 
+                            style="margin: 5px; background-color: #00008b; color: white; border: 1px solid #0066ff; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-family: monospace; font-weight: bold;">
+                        Purchase £${propertyInfo.cost}
+                    </button>` : '';
+                
+                const declineButton = `
+                    <button onclick="handleDeclinePurchase('${propertyInfo.square}', ${playerIndex})"
+                            style="margin: 5px; background-color: #f44336; color: white; border: 1px solid #ff6666; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-family: monospace; font-weight: bold;">
+                        Decline
+                    </button>`;
+                
+                // Find where to place the buttons
+                const infoPanel = gameWindow.document.getElementById('info-panel');
+                const isMinimized = infoPanel?.classList.contains('minimized');
+                
+                let targetElement;
+                if (isMinimized) {
+                    targetElement = gameWindow.document.getElementById('minimized-content');
+                } else {
+                    targetElement = gameWindow.document.getElementById('property-info-content');
+                }
+                
+                if (targetElement) {
+                    // Create a button container
+                    const buttonContainer = gameWindow.document.createElement('div');
+                    buttonContainer.id = 'emergency-purchase-buttons';
+                    buttonContainer.style.textAlign = 'center';
+                    buttonContainer.style.padding = '10px';
+                    buttonContainer.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 10px; color: ${propertyInfo.color};">
+                            ${gameWindow.getPropertyDisplayName(propertyInfo)}
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            Cost: £${propertyInfo.cost} | Your money: £${currentPlayer.money}
+                        </div>
+                        <div>
+                            ${purchaseButton}
+                            ${declineButton}
+                        </div>
+                    `;
+                    
+                    // Remove any existing emergency buttons
+                    const existing = gameWindow.document.getElementById('emergency-purchase-buttons');
+                    if (existing) existing.remove();
+                    
+                    // Add the new buttons
+                    targetElement.appendChild(buttonContainer);
+                    
+                    log('✅ Purchase buttons recreated successfully', 'success');
+                } else {
+                    log('❌ Could not find target element for buttons', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error recreating buttons: ${error.message}`, 'error');
+            }
+        }
+
+        function enableDiceAfterDecision() {
+            log('🎲 Enabling dice (skipping purchase decision)...');
+            
+            try {
+                const gameWindow = window.parent !== window ? window.parent : window;
+                const currentPlayer = gameWindow.players[gameWindow.currentPlayerIndex];
+                const propertyInfo = gameWindow.getPropertyInfo(currentPlayer.currentSquare);
+                
+                if (propertyInfo && !propertyInfo.state.owner) {
+                    // Auto-decline the property
+                    log(`📋 Auto-declining property: ${propertyInfo.square}`);
+                    gameWindow.handleDeclinePurchase(propertyInfo.square, gameWindow.currentPlayerIndex);
+                } else {
+                    // Just enable the dice
+                    const diceSection = gameWindow.document.getElementById('dice-section');
+                    if (diceSection) {
+                        diceSection.style.pointerEvents = 'auto';
+                        diceSection.classList.remove('dice-pulse-red');
+                        diceSection.classList.add('dice-pulse');
+                        gameWindow.isDiceRollInProgress = false;
+                        log('✅ Dice enabled manually', 'success');
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Error enabling dice: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run initial check
+        setTimeout(() => {
+            log('🚀 Auto-running initial diagnostics...');
+            checkPurchaseButtonState();
+        }, 1000);
+    </script>
+</body>
+</html>

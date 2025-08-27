@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Game Paywall Bypass Prevention</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+        
+        h1 {
+            color: #ff4444;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .test-section h3 {
+            color: #ff6666;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.3);
+        }
+        
+        button.danger {
+            background: linear-gradient(45deg, #ff6600, #cc4400);
+        }
+        
+        button.success {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+        }
+        
+        .url-test {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .url-test a {
+            color: #66ccff;
+            text-decoration: none;
+            display: block;
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(102, 204, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .url-test a:hover {
+            background: rgba(102, 204, 255, 0.2);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .status.warning {
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid #ffaa00;
+            color: #ffaa00;
+        }
+        
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🛡️ Game Paywall Bypass Prevention Test</h1>
+        
+        <div class="test-section">
+            <h3>Current Payment Status</h3>
+            <div id="payment-status" class="status warning">Checking payment status...</div>
+            <button onclick="checkPaymentStatus()">🔍 Check Payment Status</button>
+            <button onclick="resetPaymentState()" class="danger">🔄 Reset Payment State</button>
+            <button onclick="simulatePayment()" class="success">💳 Simulate Payment</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Direct Game URL Access Tests</h3>
+            <p>These URLs should be blocked for unpaid users and allowed for paid users:</p>
+            
+            <div class="url-test">
+                <strong>Test URLs (click to test):</strong>
+                <a href="game.html?roomId=TestRoom123&player=TestPlayer&autostart=1" target="_blank">
+                    🎮 game.html?roomId=TestRoom123&player=TestPlayer&autostart=1
+                </a>
+                <a href="game.html?roomId=MultiplayerTest&player=PaywallTester" target="_blank">
+                    🎮 game.html?roomId=MultiplayerTest&player=PaywallTester
+                </a>
+                <a href="gamestart.html?roomId=DirectAccess&player=BypassAttempt&autostart=1" target="_blank">
+                    🎮 gamestart.html?roomId=DirectAccess&player=BypassAttempt&autostart=1
+                </a>
+            </div>
+            
+            <div id="url-test-results" class="status warning">
+                Click the URLs above to test direct game access. If paywall is working correctly:
+                <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                    <li><strong>Unpaid users:</strong> Should see paywall modal blocking access</li>
+                    <li><strong>Paid users:</strong> Should be able to access games normally</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Firebase Function Tests</h3>
+            <p>Test backend multiplayer functions directly:</p>
+            
+            <button onclick="testCreateGameRoom()">🏰 Test createGameRoom()</button>
+            <button onclick="testJoinGameRoom()">🚪 Test joinGameRoom()</button>
+            <button onclick="testSmartJoinRoom()">🎯 Test smartJoinRoom()</button>
+            
+            <div id="firebase-test-results" class="status warning">
+                Click buttons above to test Firebase functions. Results will appear here.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Bypass Attempt Simulation</h3>
+            <p>Simulate common bypass attempts:</p>
+            
+            <button onclick="testLocalStorageBypass()" class="danger">🔓 Test localStorage Bypass</button>
+            <button onclick="testDirectFunctionCall()" class="danger">⚡ Test Direct Function Call</button>
+            <button onclick="testURLManipulation()" class="danger">🔗 Test URL Manipulation</button>
+            
+            <div id="bypass-test-results" class="status warning">
+                Bypass test results will appear here. All attempts should be blocked.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Integration Status</h3>
+            <div id="integration-status" class="status warning">Checking integration status...</div>
+            <button onclick="checkIntegrationStatus()">🔍 Check Integration Status</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Log</h3>
+            <div id="console-log" class="log">Console output will appear here...</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Console logging override
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToLog(message, type = 'log') {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6666' : type === 'warn' ? '#ffaa00' : '#ccc';
+            logDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('ERROR: ' + args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog('WARN: ' + args.join(' '), 'warn');
+        };
+
+        // Import paywall system
+        let multiplayerPaywall;
+        try {
+            const paywallModule = await import('./multiplayer-paywall-system.js');
+            multiplayerPaywall = paywallModule.default;
+            console.log('✅ Paywall system loaded');
+        } catch (error) {
+            console.error('❌ Failed to load paywall system:', error);
+        }
+
+        // Test functions
+        window.checkPaymentStatus = async function() {
+            console.log('🔍 Checking payment status...');
+            try {
+                const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+                const statusDiv = document.getElementById('payment-status');
+                
+                if (hasAccess) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Multiplayer access granted - URLs should work';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '🔒 Multiplayer access required - URLs should be blocked';
+                }
+                
+                console.log('Payment status result:', hasAccess);
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+                const statusDiv = document.getElementById('payment-status');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error checking payment status';
+            }
+        };
+
+        window.resetPaymentState = function() {
+            console.log('🔄 Resetting payment state...');
+            localStorage.removeItem('multiplayerPaid');
+            localStorage.removeItem('stripe_session_id');
+            localStorage.removeItem('currentSessionId');
+            sessionStorage.clear();
+            console.log('Payment state reset - all URLs should now be blocked');
+            checkPaymentStatus();
+        };
+
+        window.simulatePayment = function() {
+            console.log('💳 Simulating successful payment...');
+            localStorage.setItem('multiplayerPaid', 'true');
+            console.log('Payment simulation complete - URLs should now work');
+            checkPaymentStatus();
+        };
+
+        window.testCreateGameRoom = async function() {
+            console.log('🏰 Testing createGameRoom function...');
+            const resultsDiv = document.getElementById('firebase-test-results');
+            
+            try {
+                const { createGameRoom } = await import('./firebase-init.js');
+                const result = await createGameRoom('TestPlayer', 4, 0);
+                
+                resultsDiv.className = 'status error';
+                resultsDiv.textContent = '❌ SECURITY ISSUE: createGameRoom succeeded without payment!';
+                console.error('SECURITY ISSUE: createGameRoom should have been blocked');
+            } catch (error) {
+                if (error.message.includes('Multiplayer access required')) {
+                    resultsDiv.className = 'status success';
+                    resultsDiv.textContent = '✅ createGameRoom correctly blocked: ' + error.message;
+                    console.log('✅ createGameRoom correctly blocked:', error.message);
+                } else {
+                    resultsDiv.className = 'status warning';
+                    resultsDiv.textContent = '⚠️ createGameRoom failed for other reason: ' + error.message;
+                    console.warn('createGameRoom failed for other reason:', error.message);
+                }
+            }
+        };
+
+        window.testJoinGameRoom = async function() {
+            console.log('🚪 Testing joinGameRoom function...');
+            const resultsDiv = document.getElementById('firebase-test-results');
+            
+            try {
+                const { joinGameRoom } = await import('./firebase-init.js');
+                const result = await joinGameRoom('TestRoom', 'TestPlayer');
+                
+                resultsDiv.className = 'status error';
+                resultsDiv.textContent = '❌ SECURITY ISSUE: joinGameRoom succeeded without payment!';
+                console.error('SECURITY ISSUE: joinGameRoom should have been blocked');
+            } catch (error) {
+                if (error.message.includes('Multiplayer access required')) {
+                    resultsDiv.className = 'status success';
+                    resultsDiv.textContent = '✅ joinGameRoom correctly blocked: ' + error.message;
+                    console.log('✅ joinGameRoom correctly blocked:', error.message);
+                } else {
+                    resultsDiv.className = 'status warning';
+                    resultsDiv.textContent = '⚠️ joinGameRoom failed for other reason: ' + error.message;
+                    console.warn('joinGameRoom failed for other reason:', error.message);
+                }
+            }
+        };
+
+        window.testSmartJoinRoom = async function() {
+            console.log('🎯 Testing smartJoinRoom function...');
+            const resultsDiv = document.getElementById('firebase-test-results');
+            
+            try {
+                const { smartJoinRoom } = await import('./smart-join-system.js');
+                const result = await smartJoinRoom('TestRoom', 'TestPlayer');
+                
+                if (result.success === false && result.reason === 'Multiplayer access required') {
+                    resultsDiv.className = 'status success';
+                    resultsDiv.textContent = '✅ smartJoinRoom correctly blocked: ' + result.reason;
+                    console.log('✅ smartJoinRoom correctly blocked:', result.reason);
+                } else {
+                    resultsDiv.className = 'status error';
+                    resultsDiv.textContent = '❌ SECURITY ISSUE: smartJoinRoom succeeded without payment!';
+                    console.error('SECURITY ISSUE: smartJoinRoom should have been blocked');
+                }
+            } catch (error) {
+                resultsDiv.className = 'status warning';
+                resultsDiv.textContent = '⚠️ smartJoinRoom failed: ' + error.message;
+                console.warn('smartJoinRoom failed:', error.message);
+            }
+        };
+
+        window.testLocalStorageBypass = function() {
+            console.log('🔓 Testing localStorage bypass attempt...');
+            const resultsDiv = document.getElementById('bypass-test-results');
+            
+            // Try to set payment status directly
+            localStorage.setItem('multiplayerPaid', 'true');
+            localStorage.setItem('stripe_session_id', 'fake_session_123');
+            
+            console.log('Attempted to set fake payment data in localStorage');
+            resultsDiv.className = 'status warning';
+            resultsDiv.textContent = '⚠️ localStorage bypass attempted. Check if backend verification prevents this.';
+        };
+
+        window.testDirectFunctionCall = async function() {
+            console.log('⚡ Testing direct function call bypass...');
+            const resultsDiv = document.getElementById('bypass-test-results');
+            
+            try {
+                // Try to call Firebase functions directly
+                const { createGameRoom } = await import('./firebase-init.js');
+                
+                // This should still be blocked even with direct call
+                await createGameRoom('BypassAttempt', 4, 0);
+                
+                resultsDiv.className = 'status error';
+                resultsDiv.textContent = '❌ CRITICAL: Direct function call bypass succeeded!';
+                console.error('CRITICAL: Direct function call bypass succeeded!');
+            } catch (error) {
+                if (error.message.includes('Multiplayer access required')) {
+                    resultsDiv.className = 'status success';
+                    resultsDiv.textContent = '✅ Direct function call correctly blocked';
+                    console.log('✅ Direct function call correctly blocked');
+                } else {
+                    resultsDiv.className = 'status warning';
+                    resultsDiv.textContent = '⚠️ Direct function call failed for other reason: ' + error.message;
+                }
+            }
+        };
+
+        window.testURLManipulation = function() {
+            console.log('🔗 Testing URL manipulation...');
+            const resultsDiv = document.getElementById('bypass-test-results');
+            
+            // Create test URLs with various parameters
+            const testUrls = [
+                'game.html?roomId=bypass&player=hacker&paid=true',
+                'game.html?roomId=test&player=user&multiplayerPaid=true',
+                'game.html?roomId=room&player=name&access=granted'
+            ];
+            
+            console.log('Test URLs created:', testUrls);
+            resultsDiv.className = 'status warning';
+            resultsDiv.innerHTML = `
+                ⚠️ URL manipulation test URLs created. These should still be blocked:<br>
+                ${testUrls.map(url => `<small style="font-family: monospace;">${url}</small>`).join('<br>')}
+            `;
+        };
+
+        window.checkIntegrationStatus = async function() {
+            console.log('🔍 Checking integration status...');
+            const statusDiv = document.getElementById('integration-status');
+            
+            const checks = {
+                paywallSystem: !!multiplayerPaywall,
+                gameIntegration: !!window.gamePaywallIntegration,
+                firebaseIntegration: false,
+                smartJoinIntegration: false
+            };
+            
+            // Test Firebase integration
+            try {
+                const firebaseModule = await import('./firebase-init.js');
+                checks.firebaseIntegration = !!firebaseModule.createGameRoom;
+            } catch (error) {
+                console.warn('Firebase integration check failed:', error);
+            }
+            
+            // Test smart join integration
+            try {
+                const smartJoinModule = await import('./smart-join-system.js');
+                checks.smartJoinIntegration = !!smartJoinModule.smartJoinRoom;
+            } catch (error) {
+                console.warn('Smart join integration check failed:', error);
+            }
+            
+            const passedChecks = Object.values(checks).filter(Boolean).length;
+            const totalChecks = Object.keys(checks).length;
+            
+            if (passedChecks === totalChecks) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = `✅ All integrations loaded (${passedChecks}/${totalChecks})`;
+            } else {
+                statusDiv.className = 'status warning';
+                statusDiv.textContent = `⚠️ Some integrations missing (${passedChecks}/${totalChecks})`;
+            }
+            
+            console.log('Integration status:', checks);
+        };
+
+        window.clearLog = function() {
+            document.getElementById('console-log').innerHTML = 'Console cleared...';
+        };
+
+        // Initialize
+        console.log('🚀 Game paywall bypass prevention test loaded');
+        setTimeout(() => {
+            checkPaymentStatus();
+            checkIntegrationStatus();
+        }, 1000);
+    </script>
+</body>
+</html>

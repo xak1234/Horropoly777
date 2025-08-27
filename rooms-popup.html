@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Available Dungeons</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('available.png') center/cover no-repeat;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    body {
+      cursor: move;
+    }
+    
+    #roomList {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      overflow-y: auto;
+    }
+    
+    .room-card {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 4px;
+      padding: 6px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+    
+    .room-info {
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+    
+    .room-name {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    
+    .room-details {
+      font-size: 9px;
+      opacity: 0.9;
+    }
+    
+    .join-btn {
+      background: rgba(139,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 3px 6px;
+      border-radius: 2px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 12px;
+    }
+    
+    .join-btn:hover {
+      background: rgba(180,0,0,0.9);
+    }
+    
+    .join-btn:disabled {
+      background: rgba(68,68,68,0.6);
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  
+  <div id="roomList">
+    <!-- Room data will be populated here -->
+  </div>
+  
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+      authDomain: "horropoly.firebaseapp.com",
+      projectId: "horropoly",
+      storageBucket: "horropoly.firebasestorage.app",
+      messagingSenderId: "582020770053",
+      appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const roomsRef = collection(db, 'gameRooms');
+
+    const roomList = document.getElementById('roomList');
+
+    function renderRoom(id, data) {
+      const players = Array.isArray(data.players) ? data.players : [];
+      const hostName = players.find(p => p.isHost)?.name || 'Unknown';
+      const isFull = players.length >= (data.maxPlayers || 2);
+      const isStarted = data.gameStarted || false;
+      const isAvailable = !isStarted && !isFull;
+      
+      // Check if current player is already in this room
+      let currentPlayerName = '';
+      if (window.opener) {
+        const displayNameInput = window.opener.document.getElementById('displayName');
+        if (displayNameInput) {
+          currentPlayerName = displayNameInput.value.trim();
+        }
+      }
+      const isCurrentPlayerInRoom = players.some(p => p.name === currentPlayerName);
+
+      return `
+        <div class="room-card">
+          <div class="room-info">
+            <div class="room-name">Room: ${id}</div>
+            <div class="room-details">Host: ${hostName}</div>
+            <div class="room-details">Players: ${players.length}/${data.maxPlayers || 2}</div>
+            <div class="room-details">Status: ${isStarted ? 'Started' : 'Waiting'}</div>
+            ${players.length > 0 ? `<div class="room-details">Players: ${players.map(p => p.name).join(', ')}</div>` : ''}
+          </div>
+          <div style="display: flex; gap: 5px;">
+            ${isCurrentPlayerInRoom ? 
+              '<button class="join-btn" disabled style="background: rgba(0,128,0,0.8);">Already Joined</button>' :
+              `<button class="join-btn" ${!isAvailable ? 'disabled' : ''} onclick="joinRoom('${id}')">${!isAvailable ? 'Unavailable' : 'Join'}</button>`
+            }
+            <button class="join-btn" onclick="window.close()" style="background: rgba(68,68,68,0.8);">✕</button>
+          </div>
+        </div>`;
+    }
+
+    function updateRooms(snapshot) {
+      roomList.innerHTML = '';
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // Only show rooms that are not started and not full
+        const players = Array.isArray(data.players) ? data.players : [];
+        const hostName = players.find(p => p.isHost)?.name || 'Unknown';
+        const isFull = players.length >= (data.maxPlayers || 2);
+        const isStarted = data.gameStarted || false;
+        
+        // Skip rooms with Unknown creators
+        if (hostName === 'Unknown') {
+          console.log('Skipping room with Unknown creator:', doc.id);
+          return;
+        }
+        
+        if (!isStarted && !isFull) {
+          roomList.innerHTML += renderRoom(doc.id, data);
+        }
+      });
+      
+      // Show message if no available rooms
+      if (roomList.innerHTML === '') {
+        roomList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ccc;">No available rooms found</div>';
+      }
+    }
+
+    onSnapshot(roomsRef, updateRooms, error => {
+      console.error('Firebase error:', error);
+    });
+
+    window.joinRoom = function(id) {
+      // Get player name from the opener window
+      let playerName = '';
+      if (window.opener) {
+        const displayNameInput = window.opener.document.getElementById('displayName');
+        if (displayNameInput) {
+          playerName = displayNameInput.value.trim();
+        }
+      }
+      
+      if (!playerName) {
+        alert('Please enter your name in the main lobby first!');
+        return;
+      }
+      
+      // Call the joinRoom function from the opener window
+      if (window.opener && window.opener.handleJoinRoomFromModal) {
+        window.opener.handleJoinRoomFromModal(id, playerName);
+        window.close();
+      } else {
+        // Fallback: redirect to the game page
+        const gameUrl = `game.html?roomId=${encodeURIComponent(id)}&player=${encodeURIComponent(playerName)}&host=0`;
+        window.opener.location.href = gameUrl;
+        window.close();
+      }
+    };
+
+    // Make window draggable
+    let isDragging = false;
+    let currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+    
+    document.body.addEventListener('mousedown', function(e) {
+      // Don't start dragging if clicking on buttons or interactive elements
+      if (e.target.tagName === 'BUTTON' || e.target.closest('.room-card')) {
+        return;
+      }
+      isDragging = true;
+      initialX = e.clientX - xOffset;
+      initialY = e.clientY - yOffset;
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        e.preventDefault();
+        currentX = e.clientX - initialX;
+        currentY = e.clientY - initialY;
+        xOffset = currentX;
+        yOffset = currentY;
+        document.body.style.transform = 'translate(' + currentX + 'px, ' + currentY + 'px)';
+      }
+    });
+    
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Multiplayer Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .emergency-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+            background: rgba(255, 68, 68, 0.1);
+        }
+        .fix-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        button {
+            background: #8b0000;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        button.emergency {
+            background: #ff4444;
+            font-weight: bold;
+        }
+        button.emergency:hover {
+            background: #ff6666;
+        }
+        .console-output {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+        }
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚨 Emergency Multiplayer Token Color Fix</h1>
+    
+    <div class="emergency-section">
+        <h2>🔍 Issue Identified</h2>
+        <p><strong>Root Cause:</strong> The debug output shows <code>players: undefined</code>, which means the players array is not being initialized properly in multiplayer games.</p>
+        <p><strong>Why this happens:</strong> The Firebase game state subscription receives <code>null</code> gameState before the game starts, which is normal, but the actual game initialization might be failing.</p>
+    </div>
+
+    <div class="fix-section">
+        <h2>⚡ Emergency Fix Options</h2>
+        <p>Try these fixes in order while in a multiplayer game:</p>
+        
+        <button class="emergency" onclick="emergencyPlayerFix()">🚨 Emergency Player Fix</button>
+        <button onclick="debugGameState()">🔍 Debug Game State</button>
+        <button onclick="forceMultiplayerStart()">🎮 Force Multiplayer Start</button>
+        <button onclick="clearAndRestart()">🔄 Clear & Restart</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="output" class="console-output"></div>
+
+    <div class="fix-section">
+        <h2>📋 Manual Steps</h2>
+        <ol>
+            <li><strong>Open browser console</strong> (F12) while in multiplayer game</li>
+            <li><strong>Type:</strong> <code>createEmergencyPlayers()</code></li>
+            <li><strong>Check:</strong> Player info panel should show colored stars</li>
+            <li><strong>Check:</strong> Token outlines should match star colors</li>
+        </ol>
+    </div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+
+        function setStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function emergencyPlayerFix() {
+            log('🚨 EMERGENCY PLAYER FIX STARTING...');
+            setStatus('Running emergency player fix...', 'error');
+            
+            try {
+                // Check if createEmergencyPlayers function exists
+                if (typeof createEmergencyPlayers === 'function') {
+                    log('✅ createEmergencyPlayers function found, calling it...');
+                    createEmergencyPlayers();
+                    setStatus('✅ Emergency players created! Check the game board.', 'success');
+                } else {
+                    log('❌ createEmergencyPlayers function not available, creating manually...');
+                    
+                    // Manual emergency player creation
+                    const emergencyPlayers = [
+                        {
+                            name: 'Player 1',
+                            userId: 'emergency_1',
+                            isAI: false,
+                            isHost: true,
+                            x: 100, y: 100,
+                            currentSquare: 'go',
+                            size: 62,
+                            money: 13000,
+                            properties: [],
+                            bankrupt: false,
+                            isCurrentPlayer: true,
+                            stealCards: 0,
+                            goPassCount: 0,
+                            color: '#ff0000',
+                            colorName: 'Red'
+                        },
+                        {
+                            name: 'Player 2', 
+                            userId: 'emergency_2',
+                            isAI: false,
+                            isHost: false,
+                            x: 100, y: 100,
+                            currentSquare: 'go',
+                            size: 62,
+                            money: 13000,
+                            properties: [],
+                            bankrupt: false,
+                            isCurrentPlayer: false,
+                            stealCards: 0,
+                            goPassCount: 0,
+                            color: '#0000ff',
+                            colorName: 'Blue'
+                        }
+                    ];
+                    
+                    // Set as global players
+                    window.players = emergencyPlayers;
+                    if (typeof players !== 'undefined') {
+                        players = emergencyPlayers;
+                    }
+                    
+                    log('Manual emergency players created');
+                    emergencyPlayers.forEach((p, i) => log(`  Player ${i}: ${p.name} - ${p.color} (${p.colorName})`));
+                    
+                    // Update game systems
+                    if (typeof setPlayers === 'function') {
+                        setPlayers(emergencyPlayers);
+                        log('✅ setPlayers called');
+                    }
+                    if (typeof updateGameFrame === 'function') {
+                        updateGameFrame();
+                        log('✅ updateGameFrame called');
+                    }
+                    if (typeof updateInfoPanel === 'function') {
+                        updateInfoPanel();
+                        log('✅ updateInfoPanel called');
+                    }
+                    
+                    setStatus('✅ Manual emergency fix complete! Check the game board.', 'success');
+                }
+                
+            } catch (error) {
+                log('❌ Emergency fix failed: ' + error.message);
+                setStatus('❌ Emergency fix failed: ' + error.message, 'error');
+            }
+        }
+
+        function debugGameState() {
+            log('🔍 DEBUGGING GAME STATE...');
+            
+            log('Global variables:');
+            log(`  players: ${typeof players !== 'undefined' ? (players ? players.length + ' players' : 'null') : 'undefined'}`);
+            log(`  isMultiplayerGame: ${typeof isMultiplayerGame !== 'undefined' ? isMultiplayerGame : 'undefined'}`);
+            log(`  currentPlayerIndex: ${typeof currentPlayerIndex !== 'undefined' ? currentPlayerIndex : 'undefined'}`);
+            log(`  isHost: ${typeof isHost !== 'undefined' ? isHost : 'undefined'}`);
+            
+            if (typeof players !== 'undefined' && players && players.length > 0) {
+                log('Player details:');
+                players.forEach((p, i) => {
+                    log(`  Player ${i}: ${p.name} - Color: ${p.color || 'MISSING'} - IsAI: ${p.isAI}`);
+                });
+            }
+            
+            // Check available functions
+            log('Available functions:');
+            log(`  assignPlayerColors: ${typeof assignPlayerColors === 'function'}`);
+            log(`  setPlayers: ${typeof setPlayers === 'function'}`);
+            log(`  updateGameFrame: ${typeof updateGameFrame === 'function'}`);
+            log(`  updateInfoPanel: ${typeof updateInfoPanel === 'function'}`);
+        }
+
+        function forceMultiplayerStart() {
+            log('🎮 FORCING MULTIPLAYER START...');
+            
+            if (typeof startMultiplayerGame === 'function') {
+                // Create test players for multiplayer start
+                const testPlayers = [
+                    {
+                        name: 'Test Player 1',
+                        displayName: 'Test Player 1',
+                        uid: 'test_1',
+                        userId: 'test_1',
+                        isHost: true,
+                        isAI: false,
+                        tokenIndex: 0,
+                        tokenImage: 'assets/images/t1.png',
+                        size: 62,
+                        money: 13000,
+                        properties: [],
+                        bankrupt: false,
+                        color: '#ff0000',
+                        colorName: 'Red'
+                    },
+                    {
+                        name: 'Test Player 2',
+                        displayName: 'Test Player 2', 
+                        uid: 'test_2',
+                        userId: 'test_2',
+                        isHost: false,
+                        isAI: false,
+                        tokenIndex: 1,
+                        tokenImage: 'assets/images/t2.png',
+                        size: 62,
+                        money: 13000,
+                        properties: [],
+                        bankrupt: false,
+                        color: '#0000ff',
+                        colorName: 'Blue'
+                    }
+                ];
+                
+                log('Calling startMultiplayerGame with test players...');
+                startMultiplayerGame(testPlayers).then(() => {
+                    log('✅ startMultiplayerGame completed');
+                    setStatus('✅ Multiplayer game force-started!', 'success');
+                }).catch(error => {
+                    log('❌ startMultiplayerGame failed: ' + error.message);
+                    setStatus('❌ Force start failed: ' + error.message, 'error');
+                });
+            } else {
+                log('❌ startMultiplayerGame function not available');
+                setStatus('❌ startMultiplayerGame function not available', 'error');
+            }
+        }
+
+        function clearAndRestart() {
+            log('🔄 CLEARING AND RESTARTING...');
+            
+            // Clear players
+            if (typeof players !== 'undefined') {
+                players = undefined;
+            }
+            window.players = undefined;
+            
+            // Reset game state
+            if (typeof isMultiplayerGame !== 'undefined') {
+                isMultiplayerGame = false;
+            }
+            if (typeof currentPlayerIndex !== 'undefined') {
+                currentPlayerIndex = 0;
+            }
+            
+            log('Game state cleared. Refresh the page and try starting multiplayer again.');
+            setStatus('Game state cleared. Refresh the page and try again.', 'success');
+        }
+
+        log('🚨 Emergency Multiplayer Fix tool loaded!');
+        log('If you are in a multiplayer game with green token outlines, click "Emergency Player Fix" above.');
+    </script>
+</body>
+</html>

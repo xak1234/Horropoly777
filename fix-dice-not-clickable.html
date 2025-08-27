@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Dice Not Clickable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .fix-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #45a049; }
+        button.danger { background-color: #f44336; }
+        button.danger:hover { background-color: #da190b; }
+        button.warning { background-color: #ff9800; }
+        button.warning:hover { background-color: #e68900; }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background-color: #4CAF50; }
+        .status.error { background-color: #f44336; }
+        .status.warning { background-color: #ff9800; }
+        .status.info { background-color: #2196F3; }
+        
+        .diagnostic-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .diagnostic-item {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .flag-true { background-color: #ff4444; }
+        .flag-false { background-color: #44ff44; }
+        
+        .log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-line;
+            border: 1px solid #444;
+        }
+        
+        .code-block {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            border: 1px solid #444;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="fix-container">
+        <h1>🎲 Fix Dice Not Clickable</h1>
+        <p>This tool diagnoses and fixes dice clicking issues in your game.</p>
+
+        <div class="section">
+            <h2>🔍 Current Game State Diagnosis</h2>
+            <button onclick="diagnoseGameState()">Run Full Diagnosis</button>
+            <button onclick="checkDiceElement()">Check Dice Element</button>
+            <div id="diagnosis-status" class="status info">Click "Run Full Diagnosis" to check game state</div>
+            
+            <div class="diagnostic-grid" id="diagnostic-grid">
+                <div class="diagnostic-item">
+                    <div>isDiceRollInProgress</div>
+                    <div id="dice-roll-flag">Unknown</div>
+                </div>
+                <div class="diagnostic-item">
+                    <div>isDiceClickHandlerRunning</div>
+                    <div id="handler-flag">Unknown</div>
+                </div>
+                <div class="diagnostic-item">
+                    <div>isAITurn</div>
+                    <div id="ai-turn-flag">Unknown</div>
+                </div>
+                <div class="diagnostic-item">
+                    <div>isPlayerMoving</div>
+                    <div id="moving-flag">Unknown</div>
+                </div>
+                <div class="diagnostic-item">
+                    <div>isRecordingEyes</div>
+                    <div id="recording-flag">Unknown</div>
+                </div>
+                <div class="diagnostic-item">
+                    <div>Dice PointerEvents</div>
+                    <div id="pointer-events">Unknown</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🛠️ Quick Fixes</h2>
+            <button onclick="resetAllDiceFlags()">Reset All Dice Flags</button>
+            <button onclick="enableDicePointerEvents()">Enable Dice Pointer Events</button>
+            <button onclick="forceDiceClickable()">Force Dice Clickable</button>
+            <button class="warning" onclick="resetGameState()">Reset Game State (Careful!)</button>
+            <div id="fix-status" class="status info">Ready to apply fixes</div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 Test Dice Functionality</h2>
+            <button onclick="testDiceClick()">Test Dice Click</button>
+            <button onclick="simulateValidDiceClick()">Simulate Valid Click</button>
+            <button onclick="checkDiceValidation()">Check Click Validation</button>
+            <div id="test-status" class="status info">Ready to test dice</div>
+        </div>
+
+        <div class="section">
+            <h2>📋 Manual Console Commands</h2>
+            <p>Copy and paste these commands into your browser console if the buttons don't work:</p>
+            
+            <div class="code-block">
+// Reset all dice-related flags
+isDiceRollInProgress = false;
+isDiceClickHandlerRunning = false;
+isPlayerMoving = false;
+console.log('✅ All dice flags reset');
+            </div>
+            
+            <div class="code-block">
+// Force enable dice clicking
+const diceSection = document.getElementById('dice-section');
+if (diceSection) {
+    diceSection.style.pointerEvents = 'auto';
+    diceSection.classList.remove('dice-pulse-red', 'dice-pulse-blue');
+    diceSection.classList.add('dice-pulse');
+    console.log('✅ Dice forced clickable');
+} else {
+    console.log('❌ Dice section not found');
+}
+            </div>
+            
+            <div class="code-block">
+// Check current game state
+console.log('🔍 Current Game State:', {
+    isDiceRollInProgress: typeof isDiceRollInProgress !== 'undefined' ? isDiceRollInProgress : 'undefined',
+    isDiceClickHandlerRunning: typeof isDiceClickHandlerRunning !== 'undefined' ? isDiceClickHandlerRunning : 'undefined',
+    isAITurn: typeof isAITurn !== 'undefined' ? isAITurn : 'undefined',
+    isPlayerMoving: typeof isPlayerMoving !== 'undefined' ? isPlayerMoving : 'undefined',
+    currentPlayerIndex: typeof currentPlayerIndex !== 'undefined' ? currentPlayerIndex : 'undefined',
+    diceElement: document.getElementById('dice-section') ? 'found' : 'not found'
+});
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📝 Diagnostic Log</h2>
+            <div id="diagnostic-log" class="log">Diagnostic log will appear here...\n</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('diagnostic-log');
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('diagnostic-log').textContent = 'Diagnostic log cleared...\n';
+        }
+
+        function updateStatus(elementId, message, type = 'info') {
+            const statusElement = document.getElementById(elementId);
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        function updateDiagnosticFlag(flagId, value, isGoodWhenFalse = true) {
+            const element = document.getElementById(flagId);
+            element.textContent = value;
+            
+            if (typeof value === 'boolean') {
+                if (isGoodWhenFalse) {
+                    element.className = value ? 'flag-true' : 'flag-false';
+                } else {
+                    element.className = value ? 'flag-false' : 'flag-true';
+                }
+            } else {
+                element.className = '';
+            }
+        }
+
+        function diagnoseGameState() {
+            log('🔍 Starting full game state diagnosis...');
+            updateStatus('diagnosis-status', 'Running diagnosis...', 'info');
+
+            try {
+                // Check if we're in the game context
+                const inGameContext = typeof window.isDiceRollInProgress !== 'undefined';
+                
+                if (inGameContext) {
+                    log('✅ Game context detected');
+                    
+                    // Check all flags
+                    const flags = {
+                        isDiceRollInProgress: window.isDiceRollInProgress,
+                        isDiceClickHandlerRunning: window.isDiceClickHandlerRunning,
+                        isAITurn: window.isAITurn,
+                        isPlayerMoving: window.isPlayerMoving,
+                        isRecordingEyes: window.isRecordingEyes
+                    };
+
+                    // Update diagnostic display
+                    updateDiagnosticFlag('dice-roll-flag', flags.isDiceRollInProgress);
+                    updateDiagnosticFlag('handler-flag', flags.isDiceClickHandlerRunning);
+                    updateDiagnosticFlag('ai-turn-flag', flags.isAITurn);
+                    updateDiagnosticFlag('moving-flag', flags.isPlayerMoving);
+                    updateDiagnosticFlag('recording-flag', flags.isRecordingEyes);
+
+                    // Check dice element
+                    const diceSection = document.getElementById('dice-section');
+                    if (diceSection) {
+                        const pointerEvents = diceSection.style.pointerEvents;
+                        updateDiagnosticFlag('pointer-events', pointerEvents);
+                        log(`✅ Dice element found - pointerEvents: ${pointerEvents}`);
+                        log(`   Classes: ${Array.from(diceSection.classList).join(', ')}`);
+                    } else {
+                        updateDiagnosticFlag('pointer-events', 'Element not found');
+                        log('❌ Dice section element not found');
+                    }
+
+                    // Identify issues
+                    const issues = [];
+                    if (flags.isDiceRollInProgress) issues.push('Dice roll in progress');
+                    if (flags.isDiceClickHandlerRunning) issues.push('Click handler running');
+                    if (flags.isAITurn) issues.push('AI turn active');
+                    if (flags.isPlayerMoving) issues.push('Player moving');
+                    if (flags.isRecordingEyes) issues.push('Recording eyes');
+                    if (diceSection && diceSection.style.pointerEvents === 'none') issues.push('Pointer events disabled');
+
+                    if (issues.length > 0) {
+                        updateStatus('diagnosis-status', `Issues found: ${issues.join(', ')}`, 'error');
+                        log(`❌ Issues preventing dice clicks: ${issues.join(', ')}`);
+                    } else {
+                        updateStatus('diagnosis-status', 'No blocking issues found', 'success');
+                        log('✅ No obvious issues found - dice should be clickable');
+                    }
+
+                } else {
+                    log('❌ Not in game context - open this in the main game page');
+                    updateStatus('diagnosis-status', 'Not in game context - open in main game page', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Error during diagnosis: ${error.message}`);
+                updateStatus('diagnosis-status', `Diagnosis error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkDiceElement() {
+            log('🔍 Checking dice element specifically...');
+            
+            const diceSection = document.getElementById('dice-section');
+            if (diceSection) {
+                log(`✅ Dice section found`);
+                log(`   ID: ${diceSection.id}`);
+                log(`   Classes: ${Array.from(diceSection.classList).join(', ')}`);
+                log(`   Pointer Events: ${diceSection.style.pointerEvents}`);
+                log(`   Parent: ${diceSection.parentElement?.id || 'unknown'}`);
+                log(`   Visible: ${window.getComputedStyle(diceSection).display !== 'none'}`);
+                log(`   Position: ${window.getComputedStyle(diceSection).position}`);
+                
+                // Check for event listeners
+                const hasClickListener = diceSection.onclick !== null;
+                log(`   Has onClick: ${hasClickListener}`);
+                
+            } else {
+                log('❌ Dice section not found');
+                
+                // Look for any elements with dice-related classes
+                const diceElements = document.querySelectorAll('.dice-section, [class*="dice"]');
+                if (diceElements.length > 0) {
+                    log(`   Found ${diceElements.length} dice-related elements:`);
+                    diceElements.forEach((el, i) => {
+                        log(`     ${i + 1}: ${el.tagName} - ID: ${el.id} - Classes: ${el.className}`);
+                    });
+                }
+            }
+        }
+
+        function resetAllDiceFlags() {
+            log('🛠️ Resetting all dice flags...');
+            updateStatus('fix-status', 'Resetting flags...', 'info');
+
+            try {
+                if (typeof window.isDiceRollInProgress !== 'undefined') {
+                    window.isDiceRollInProgress = false;
+                    log('✅ isDiceRollInProgress = false');
+                }
+                
+                if (typeof window.isDiceClickHandlerRunning !== 'undefined') {
+                    window.isDiceClickHandlerRunning = false;
+                    log('✅ isDiceClickHandlerRunning = false');
+                }
+                
+                if (typeof window.isPlayerMoving !== 'undefined') {
+                    window.isPlayerMoving = false;
+                    log('✅ isPlayerMoving = false');
+                }
+                
+                if (typeof window.isRecordingEyes !== 'undefined') {
+                    window.isRecordingEyes = false;
+                    log('✅ isRecordingEyes = false');
+                }
+
+                updateStatus('fix-status', 'All dice flags reset successfully', 'success');
+                
+                // Re-run diagnosis
+                setTimeout(diagnoseGameState, 500);
+
+            } catch (error) {
+                log(`❌ Error resetting flags: ${error.message}`);
+                updateStatus('fix-status', `Error resetting flags: ${error.message}`, 'error');
+            }
+        }
+
+        function enableDicePointerEvents() {
+            log('🛠️ Enabling dice pointer events...');
+            updateStatus('fix-status', 'Enabling pointer events...', 'info');
+
+            try {
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection) {
+                    diceSection.style.pointerEvents = 'auto';
+                    log('✅ Dice pointer events set to auto');
+                    updateStatus('fix-status', 'Dice pointer events enabled', 'success');
+                } else {
+                    log('❌ Dice section not found');
+                    updateStatus('fix-status', 'Dice section not found', 'error');
+                }
+
+                // Re-run diagnosis
+                setTimeout(diagnoseGameState, 500);
+
+            } catch (error) {
+                log(`❌ Error enabling pointer events: ${error.message}`);
+                updateStatus('fix-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function forceDiceClickable() {
+            log('🛠️ Force enabling dice clickability...');
+            updateStatus('fix-status', 'Forcing dice clickable...', 'info');
+
+            try {
+                // Reset flags
+                resetAllDiceFlags();
+                
+                // Enable pointer events
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection) {
+                    diceSection.style.pointerEvents = 'auto';
+                    diceSection.classList.remove('dice-pulse-red', 'dice-pulse-blue');
+                    diceSection.classList.add('dice-pulse');
+                    log('✅ Dice forced to clickable state');
+                    
+                    // Try to call enableDiceSection if it exists
+                    if (typeof window.enableDiceSection === 'function') {
+                        window.enableDiceSection();
+                        log('✅ Called enableDiceSection()');
+                    }
+                    
+                    updateStatus('fix-status', 'Dice forced clickable successfully', 'success');
+                } else {
+                    log('❌ Dice section not found');
+                    updateStatus('fix-status', 'Dice section not found', 'error');
+                }
+
+                // Re-run diagnosis
+                setTimeout(diagnoseGameState, 500);
+
+            } catch (error) {
+                log(`❌ Error forcing dice clickable: ${error.message}`);
+                updateStatus('fix-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function resetGameState() {
+            if (confirm('This will reset the game state. Are you sure?')) {
+                log('🛠️ Resetting game state...');
+                updateStatus('fix-status', 'Resetting game state...', 'warning');
+
+                try {
+                    // Reset all possible flags
+                    const flagsToReset = [
+                        'isDiceRollInProgress',
+                        'isDiceClickHandlerRunning',
+                        'isPlayerMoving',
+                        'isRecordingEyes',
+                        'isAITurn'
+                    ];
+
+                    flagsToReset.forEach(flag => {
+                        if (typeof window[flag] !== 'undefined') {
+                            window[flag] = false;
+                            log(`✅ ${flag} = false`);
+                        }
+                    });
+
+                    // Force dice clickable
+                    forceDiceClickable();
+
+                    updateStatus('fix-status', 'Game state reset completed', 'success');
+
+                } catch (error) {
+                    log(`❌ Error resetting game state: ${error.message}`);
+                    updateStatus('fix-status', `Error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function testDiceClick() {
+            log('🧪 Testing dice click...');
+            updateStatus('test-status', 'Testing dice click...', 'info');
+
+            try {
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection) {
+                    log('✅ Dice section found, attempting click...');
+                    
+                    // Try to trigger click event
+                    diceSection.click();
+                    log('✅ Click event triggered');
+                    
+                    // Check if handleDiceClick function exists and call it
+                    if (typeof window.handleDiceClick === 'function') {
+                        window.handleDiceClick('test');
+                        log('✅ Called handleDiceClick(test)');
+                    }
+                    
+                    updateStatus('test-status', 'Dice click test completed', 'success');
+                } else {
+                    log('❌ Dice section not found');
+                    updateStatus('test-status', 'Dice section not found', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Error testing dice click: ${error.message}`);
+                updateStatus('test-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function simulateValidDiceClick() {
+            log('🧪 Simulating valid dice click...');
+            updateStatus('test-status', 'Simulating valid click...', 'info');
+
+            try {
+                // Ensure all conditions are met for a valid click
+                resetAllDiceFlags();
+                enableDicePointerEvents();
+                
+                setTimeout(() => {
+                    testDiceClick();
+                }, 1000);
+
+            } catch (error) {
+                log(`❌ Error simulating dice click: ${error.message}`);
+                updateStatus('test-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkDiceValidation() {
+            log('🧪 Checking dice click validation...');
+            updateStatus('test-status', 'Checking validation...', 'info');
+
+            try {
+                if (typeof window.handleDiceClick === 'function') {
+                    log('✅ handleDiceClick function exists');
+                    
+                    // Try to understand why clicks might be blocked
+                    const validationChecks = {
+                        'isDiceRollInProgress': window.isDiceRollInProgress,
+                        'isDiceClickHandlerRunning': window.isDiceClickHandlerRunning,
+                        'isAITurn': window.isAITurn,
+                        'isPlayerMoving': window.isPlayerMoving,
+                        'isRecordingEyes': window.isRecordingEyes,
+                        'currentPlayerIndex': window.currentPlayerIndex,
+                        'players array': Array.isArray(window.players) ? `${window.players.length} players` : 'invalid'
+                    };
+
+                    log('🔍 Validation check results:');
+                    Object.entries(validationChecks).forEach(([key, value]) => {
+                        log(`   ${key}: ${value}`);
+                    });
+
+                    updateStatus('test-status', 'Validation check completed', 'success');
+                } else {
+                    log('❌ handleDiceClick function not found');
+                    updateStatus('test-status', 'handleDiceClick function not found', 'error');
+                }
+
+            } catch (error) {
+                log(`❌ Error checking validation: ${error.message}`);
+                updateStatus('test-status', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        log('🎲 Dice clickability diagnostic tool initialized');
+        log('💡 Click "Run Full Diagnosis" to start');
+    </script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Purchase Button Timing Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2d2d2d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6600;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #1a4d1a;
+            border: 1px solid #4d994d;
+        }
+        .error {
+            background-color: #4d1a1a;
+            border: 1px solid #994d4d;
+        }
+        .warning {
+            background-color: #4d4d1a;
+            border: 1px solid #99994d;
+        }
+        button {
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #cc5200;
+        }
+        .log-output {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .timer-display {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .mock-purchase-ui {
+            background-color: #2d4d2d;
+            border: 2px solid #4d994d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        .mock-purchase-ui.active {
+            display: block;
+        }
+        .mock-purchase-ui button {
+            background-color: #4d994d;
+            margin: 5px;
+        }
+        .mock-purchase-ui button:hover {
+            background-color: #66b366;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 Purchase Button Timing Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>🚨 Issues Being Fixed</h2>
+        <div class="test-result warning">
+            <strong>Issue 1:</strong> Purchase buttons disappearing too quickly<br>
+            <em>Symptoms:</em> "Starting 15-second timer for purchase action" but buttons vanish immediately
+        </div>
+        <div class="test-result warning">
+            <strong>Issue 2:</strong> Timer still showing 20 seconds for dice rolls<br>
+            <em>Symptoms:</em> "Starting 20-second timer for roll action" instead of 8 seconds
+        </div>
+        <div class="test-result warning">
+            <strong>Issue 3:</strong> Purchase UI getting cleared by Firebase sync<br>
+            <em>Symptoms:</em> Property info panel disappears before player can decide
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Test Controls</h2>
+        
+        <button onclick="loadEmergencyFix()">Load Emergency Fix</button>
+        <button onclick="loadComprehensiveFix()">Load Comprehensive Fix</button>
+        <button onclick="testPurchaseTimer()">Test Purchase Timer</button>
+        <button onclick="testDiceTimer()">Test Dice Timer</button>
+        <button onclick="simulatePurchaseScenario()">Simulate Purchase Scenario</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div class="timer-display" id="timerDisplay">No timer active</div>
+        
+        <div class="mock-purchase-ui" id="mockPurchaseUI">
+            <h3>🏠 Property Purchase Decision</h3>
+            <p><strong>Property:</strong> Blood Manor (b6)</p>
+            <p><strong>Cost:</strong> $280</p>
+            <p><strong>Time Remaining:</strong> <span id="purchaseTimer">30s</span></p>
+            <button onclick="mockPurchase()">Purchase Property</button>
+            <button onclick="mockDecline()">Decline Property</button>
+        </div>
+        
+        <div id="logOutput" class="log-output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Expected Results</h2>
+        <div class="test-result success">
+            <strong>After Emergency Fix:</strong><br>
+            • Purchase timer: 30 seconds (multiplayer) / 20 seconds (single)<br>
+            • Dice timer: 8 seconds (multiplayer) / 5 seconds (single)<br>
+            • Purchase buttons stay visible for minimum 10 seconds<br>
+            • Timer doesn't get cleared prematurely
+        </div>
+        <div class="test-result success">
+            <strong>After Comprehensive Fix:</strong><br>
+            • Purchase timer: 25 seconds (multiplayer) / 15 seconds (single)<br>
+            • Purchase UI forced to stay visible for minimum 8 seconds<br>
+            • Visual timer countdown for purchase decisions<br>
+            • Protection against Firebase sync clearing UI
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('logOutput');
+        let timerDisplay = document.getElementById('timerDisplay');
+        let mockUI = document.getElementById('mockPurchaseUI');
+        let purchaseTimerElement = document.getElementById('purchaseTimer');
+        
+        let activeTimer = null;
+        let purchaseUITimer = null;
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            logElement.textContent = '';
+        }
+        
+        function updateTimerDisplay(text) {
+            timerDisplay.textContent = text;
+        }
+        
+        function loadEmergencyFix() {
+            log('Loading emergency purchase button fix...');
+            
+            const script = document.createElement('script');
+            script.src = 'emergency-purchase-button-fix.js';
+            script.onload = () => {
+                log('✅ Emergency fix loaded successfully');
+            };
+            script.onerror = () => {
+                log('❌ Failed to load emergency fix');
+            };
+            document.head.appendChild(script);
+        }
+        
+        function loadComprehensiveFix() {
+            log('Loading comprehensive purchase timing fix...');
+            
+            const script = document.createElement('script');
+            script.src = 'fix-property-purchase-timing.js';
+            script.onload = () => {
+                log('✅ Comprehensive fix loaded successfully');
+            };
+            script.onerror = () => {
+                log('❌ Failed to load comprehensive fix');
+            };
+            document.head.appendChild(script);
+        }
+        
+        function testPurchaseTimer() {
+            log('Testing purchase timer...');
+            
+            // Mock multiplayer game
+            window.isMultiplayerGame = true;
+            
+            if (typeof window.startAutoActionTimer === 'function') {
+                const delay = window.startAutoActionTimer('purchase');
+                log(`Purchase timer set to ${delay}ms (${delay/1000}s)`);
+                updateTimerDisplay(`Purchase Timer: ${delay/1000}s`);
+                
+                // Simulate countdown
+                let remaining = delay / 1000;
+                const countdown = setInterval(() => {
+                    remaining--;
+                    updateTimerDisplay(`Purchase Timer: ${remaining}s`);
+                    
+                    if (remaining <= 0) {
+                        clearInterval(countdown);
+                        updateTimerDisplay('Purchase Timer: EXPIRED');
+                        log('Purchase timer expired');
+                    }
+                }, 1000);
+            } else {
+                log('⚠️ startAutoActionTimer not found');
+            }
+        }
+        
+        function testDiceTimer() {
+            log('Testing dice timer...');
+            
+            // Mock multiplayer game
+            window.isMultiplayerGame = true;
+            
+            if (typeof window.startAutoActionTimer === 'function') {
+                const delay = window.startAutoActionTimer('roll');
+                log(`Dice timer set to ${delay}ms (${delay/1000}s)`);
+                updateTimerDisplay(`Dice Timer: ${delay/1000}s`);
+                
+                // Simulate countdown
+                let remaining = delay / 1000;
+                const countdown = setInterval(() => {
+                    remaining--;
+                    updateTimerDisplay(`Dice Timer: ${remaining}s`);
+                    
+                    if (remaining <= 0) {
+                        clearInterval(countdown);
+                        updateTimerDisplay('Dice Timer: EXPIRED');
+                        log('Dice timer expired');
+                    }
+                }, 1000);
+            } else {
+                log('⚠️ startAutoActionTimer not found');
+            }
+        }
+        
+        function simulatePurchaseScenario() {
+            log('Simulating property purchase scenario...');
+            
+            // Show mock purchase UI
+            mockUI.classList.add('active');
+            
+            // Start purchase timer
+            window.isMultiplayerGame = true;
+            let timeRemaining = 30; // 30 seconds for multiplayer
+            
+            log(`Purchase decision started - ${timeRemaining}s timer`);
+            
+            const purchaseCountdown = setInterval(() => {
+                timeRemaining--;
+                purchaseTimerElement.textContent = `${timeRemaining}s`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(purchaseCountdown);
+                    mockUI.classList.remove('active');
+                    log('Purchase decision timed out - property declined');
+                }
+            }, 1000);
+            
+            // Store the interval so we can clear it if user makes a decision
+            purchaseUITimer = purchaseCountdown;
+        }
+        
+        function mockPurchase() {
+            log('Player purchased property');
+            mockUI.classList.remove('active');
+            if (purchaseUITimer) {
+                clearInterval(purchaseUITimer);
+                purchaseUITimer = null;
+            }
+        }
+        
+        function mockDecline() {
+            log('Player declined property');
+            mockUI.classList.remove('active');
+            if (purchaseUITimer) {
+                clearInterval(purchaseUITimer);
+                purchaseUITimer = null;
+            }
+        }
+        
+        // Initialize
+        log('Purchase Button Timing Fix Test Page loaded');
+        log('Click the buttons above to test the fixes');
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Version Element</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .result {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { border-color: #00ff00; }
+        .error { border-color: #ff0000; }
+        .warning { border-color: #ffff00; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Version Element Diagnostic</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="runDiagnostics()" style="margin: 10px; padding: 10px; background: #333; color: #fff; border: none; border-radius: 5px;">Run Diagnostics</button>
+    <button onclick="clearResults()" style="margin: 10px; padding: 10px; background: #333; color: #fff; border: none; border-radius: 5px;">Clear Results</button>
+
+    <script>
+        function addResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            resultDiv.innerHTML = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function runDiagnostics() {
+            clearResults();
+            addResult('🔍 Starting diagnostics...', 'info');
+            
+            // Check if version span exists
+            const versionSpan = document.getElementById('version-span');
+            if (versionSpan) {
+                addResult('✅ Version span found!', 'success');
+                addResult(`📝 Element text: "${versionSpan.textContent}"`, 'info');
+                addResult(`🎨 Current color: ${versionSpan.style.color || 'default'}`, 'info');
+                addResult(`👆 Cursor style: ${versionSpan.style.cursor || 'default'}`, 'info');
+            } else {
+                addResult('❌ Version span NOT found!', 'error');
+                addResult('💡 This means the element with id="version-span" does not exist in the DOM', 'warning');
+            }
+            
+            // Check if handleVersionTap function exists
+            if (typeof handleVersionTap === 'function') {
+                addResult('✅ handleVersionTap function exists!', 'success');
+            } else {
+                addResult('❌ handleVersionTap function NOT found!', 'error');
+            }
+            
+            // Check if unlockPaywallForTesting function exists
+            if (typeof unlockPaywallForTesting === 'function') {
+                addResult('✅ unlockPaywallForTesting function exists!', 'success');
+            } else {
+                addResult('❌ unlockPaywallForTesting function NOT found!', 'error');
+            }
+            
+            // Check localStorage
+            const multiplayerPaid = localStorage.getItem('multiplayerPaid');
+            const testingUnlock = localStorage.getItem('testingUnlock');
+            addResult(`💾 localStorage multiplayerPaid: ${multiplayerPaid || 'not set'}`, 'info');
+            addResult(`💾 localStorage testingUnlock: ${testingUnlock || 'not set'}`, 'info');
+            
+            // Check if we can add event listeners
+            if (versionSpan) {
+                try {
+                    versionSpan.addEventListener('test', function() {});
+                    addResult('✅ Event listeners can be added to version span', 'success');
+                } catch (error) {
+                    addResult(`❌ Cannot add event listeners: ${error.message}`, 'error');
+                }
+            }
+            
+            // Check for any JavaScript errors
+            const originalError = window.onerror;
+            let hasErrors = false;
+            window.onerror = function(msg, url, line) {
+                hasErrors = true;
+                addResult(`❌ JavaScript error: ${msg} at line ${line}`, 'error');
+                return false;
+            };
+            
+            // Test click simulation
+            if (versionSpan) {
+                try {
+                    const clickEvent = new Event('click');
+                    versionSpan.dispatchEvent(clickEvent);
+                    addResult('✅ Click event can be dispatched', 'success');
+                } catch (error) {
+                    addResult(`❌ Cannot dispatch click event: ${error.message}`, 'error');
+                }
+            }
+            
+            // Restore original error handler
+            window.onerror = originalError;
+            
+            if (!hasErrors) {
+                addResult('✅ No JavaScript errors detected', 'success');
+            }
+            
+            addResult('🏁 Diagnostics complete!', 'info');
+        }
+
+        // Run diagnostics when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('📄 DOM Content Loaded', 'info');
+            setTimeout(runDiagnostics, 100);
+        });
+    </script>
+</body>
+</html> 

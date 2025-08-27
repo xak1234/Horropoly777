@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Bag Text Adjustment - Horropoly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left: 4px solid #4CAF50;
+        }
+        .info {
+            border-left: 4px solid #2196F3;
+        }
+        .comparison {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .before, .after {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            width: 45%;
+        }
+        .before {
+            border-left: 4px solid #ff9800;
+        }
+        .after {
+            border-left: 4px solid #4CAF50;
+        }
+        .money-example {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        .money-bag {
+            font-size: 48px;
+            margin: 10px 0;
+        }
+        .old-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff0000;
+            position: relative;
+            top: -10px;
+        }
+        .new-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #ff0000;
+            position: relative;
+            top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>💰 Money Bag Text Adjustment - Horropoly</h1>
+    
+    <div class="container">
+        <h2>Changes Made</h2>
+        <div class="status success">
+✅ Font size reduced from 16-20px to 12-14px (with pulse effect)
+✅ Text position moved 8 pixels lower than center
+✅ Fallback text also adjusted for consistency
+✅ Background rectangles repositioned to match new text position
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Visual Comparison</h2>
+        <div class="comparison">
+            <div class="before">
+                <h3>Before</h3>
+                <div class="money-bag">💰</div>
+                <div class="old-text">£1500</div>
+                <p>Font: 16-20px<br>Position: Centered</p>
+            </div>
+            <div class="after">
+                <h3>After</h3>
+                <div class="money-bag">💰</div>
+                <div class="new-text">£1500</div>
+                <p>Font: 12-14px<br>Position: 8px lower</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Technical Details</h2>
+        <div class="status info">
+File Modified: game.js
+Function: drawSnakePathMoney()
+Lines Changed: ~9300-9343
+
+Changes Made:
+1. Font Size Reduction:
+   - Main text: 16 + (pulseValue * 4) → 12 + (pulseValue * 2)
+   - Fallback text: 18 + (pulseValue * 6) → 14 + (pulseValue * 3)
+
+2. Text Position Adjustment:
+   - Added textYOffset = 8 pixels
+   - Applied to both strokeText() and fillText() calls
+   - Updated background rectangle positioning to match
+
+3. Consistency:
+   - Both moneybag image overlay and fallback text use same adjustments
+   - Maintains pulsing animation effects
+   - Preserves red text color and white outline
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>What You'll See</h2>
+        <ul>
+            <li><strong>Smaller Text</strong>: Money amounts are now more proportional to the money bag image</li>
+            <li><strong>Lower Position</strong>: Text sits in the lower portion of the money bag instead of dead center</li>
+            <li><strong>Better Visibility</strong>: Smaller text is less likely to overlap with other game elements</li>
+            <li><strong>Maintained Effects</strong>: Pulsing animation, red color, and white outline are preserved</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Testing</h2>
+        <p>To test the changes:</p>
+        <ol>
+            <li>Start a game and wait for snake path money to spawn (1-4 minutes)</li>
+            <li>Look for money bags on the snake path squares (s1-s19, TT1-TT19)</li>
+            <li>Notice the smaller, lower-positioned amount text</li>
+            <li>The text should pulse with the money bag animation</li>
+        </ol>
+        
+        <div class="status info">
+Note: Snake path money spawns randomly every 1-4 minutes during gameplay.
+You can also use console commands to spawn test money for immediate testing.
+        </div>
+    </div>
+
+    <script>
+        // Show completion message
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('💰 Money bag text adjustments applied successfully!');
+            console.log('Changes: Smaller font (12-14px) and lower position (+8px offset)');
+        });
+    </script>
+</body>
+</html>

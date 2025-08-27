@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Board Transparency Consistency</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+        
+        h1 {
+            color: #ff4444;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .test-section h3 {
+            color: #ff6666;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.3);
+        }
+        
+        button.success {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+        }
+        
+        button.warning {
+            background: linear-gradient(45deg, #ffaa00, #cc8800);
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .status.info {
+            background: rgba(0, 150, 255, 0.2);
+            border: 1px solid #0096ff;
+            color: #0096ff;
+        }
+        
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #ccc;
+        }
+        
+        .transparency-demo {
+            position: relative;
+            width: 200px;
+            height: 150px;
+            margin: 20px auto;
+            border: 2px solid #666;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .demo-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ffff00);
+            background-size: 50px 50px;
+        }
+        
+        .demo-board {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .slider {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .value-display {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 Board Transparency Consistency Test</h1>
+        
+        <div class="test-section">
+            <h3>Current Transparency Status</h3>
+            <div id="transparency-status" class="status info">Checking transparency status...</div>
+            <button onclick="checkTransparencyStatus()">🔍 Check Status</button>
+            <button onclick="debugTransparency()">🐛 Debug Info</button>
+            <button onclick="enforceConsistency()" class="success">✅ Enforce Consistency</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Transparency Demo</h3>
+            <p>This demo shows how the board transparency affects the background visibility:</p>
+            
+            <div class="transparency-demo">
+                <div class="demo-background"></div>
+                <div class="demo-board" id="demo-board">GAME BOARD</div>
+            </div>
+            
+            <div class="controls">
+                <div class="slider">
+                    <label>Board Transparency: </label>
+                    <input type="range" id="transparency-slider" min="0" max="100" value="90" oninput="updateDemoTransparency(this.value)">
+                </div>
+                <div class="value-display" id="transparency-value">90%</div>
+            </div>
+            
+            <p><small>Note: The actual game will maintain consistent transparency regardless of this demo slider.</small></p>
+        </div>
+        
+        <div class="test-section">
+            <h3>Game Mode Tests</h3>
+            <p>Test transparency consistency across different game modes:</p>
+            
+            <button onclick="simulateAIGame()">🤖 Simulate AI Game</button>
+            <button onclick="simulateMultiplayerGame()">👥 Simulate Multiplayer Game</button>
+            <button onclick="testTransparencyFunction()">⚙️ Test setBoardTransparency()</button>
+            
+            <div id="game-mode-results" class="status info">
+                Click buttons above to test transparency consistency across game modes.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Manual Transparency Control</h3>
+            <p>Try to change transparency manually (should be overridden for consistency):</p>
+            
+            <div class="controls">
+                <button onclick="trySetTransparency(0.5)" class="warning">Set 50%</button>
+                <button onclick="trySetTransparency(0.7)" class="warning">Set 70%</button>
+                <button onclick="trySetTransparency(1.0)" class="warning">Set 100%</button>
+                <button onclick="trySetTransparency(0.3)" class="warning">Set 30%</button>
+            </div>
+            
+            <div id="manual-test-results" class="status info">
+                All attempts should result in the same consistent transparency value.
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Log</h3>
+            <div id="console-log" class="log">Console output will appear here...</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the board transparency manager
+        let boardTransparencyManager;
+        try {
+            const module = await import('./board-transparency-fix.js');
+            boardTransparencyManager = module.default;
+            console.log('✅ Board transparency manager loaded');
+        } catch (error) {
+            console.error('❌ Failed to load board transparency manager:', error);
+        }
+
+        // Console logging override
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToLog(message, type = 'log') {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6666' : type === 'warn' ? '#ffaa00' : '#ccc';
+            logDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('ERROR: ' + args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog('WARN: ' + args.join(' '), 'warn');
+        };
+
+        // Test functions
+        window.checkTransparencyStatus = function() {
+            console.log('🔍 Checking transparency status...');
+            const statusDiv = document.getElementById('transparency-status');
+            
+            try {
+                const windowTransparency = window.boardTransparency;
+                const globalTransparency = typeof boardTransparency !== 'undefined' ? boardTransparency : 'undefined';
+                const managerDefault = boardTransparencyManager ? boardTransparencyManager.defaultTransparency : 'N/A';
+                
+                console.log('Transparency values:', {
+                    window: windowTransparency,
+                    global: globalTransparency,
+                    manager: managerDefault
+                });
+                
+                if (windowTransparency === 0.9 || globalTransparency === 0.9) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = `✅ Transparency is consistent: ${Math.round((windowTransparency || globalTransparency) * 100)}%`;
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = `❌ Transparency inconsistency detected`;
+                }
+            } catch (error) {
+                console.error('Error checking transparency status:', error);
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error checking transparency status';
+            }
+        };
+
+        window.debugTransparency = function() {
+            console.log('🐛 Debug transparency info...');
+            if (boardTransparencyManager && typeof boardTransparencyManager.debugTransparencyState === 'function') {
+                boardTransparencyManager.debugTransparencyState();
+            } else {
+                console.log('Board transparency manager not available for debugging');
+            }
+        };
+
+        window.enforceConsistency = function() {
+            console.log('✅ Enforcing transparency consistency...');
+            if (boardTransparencyManager && typeof boardTransparencyManager.enforceConsistency === 'function') {
+                boardTransparencyManager.enforceConsistency();
+                checkTransparencyStatus();
+            } else {
+                console.error('Board transparency manager not available');
+            }
+        };
+
+        window.updateDemoTransparency = function(value) {
+            const opacity = value / 100;
+            const demoBoard = document.getElementById('demo-board');
+            const valueDisplay = document.getElementById('transparency-value');
+            
+            demoBoard.style.background = `rgba(0, 0, 0, ${opacity})`;
+            valueDisplay.textContent = `${value}%`;
+            
+            console.log(`Demo transparency updated to ${value}%`);
+        };
+
+        window.simulateAIGame = function() {
+            console.log('🤖 Simulating AI game mode...');
+            const resultsDiv = document.getElementById('game-mode-results');
+            
+            // Simulate AI game state
+            window.isMultiplayerGame = false;
+            window.gameMode = 'ai';
+            
+            // Check transparency after mode change
+            setTimeout(() => {
+                checkTransparencyStatus();
+                resultsDiv.className = 'status info';
+                resultsDiv.textContent = '🤖 AI game mode simulated. Check transparency status above.';
+            }, 100);
+        };
+
+        window.simulateMultiplayerGame = function() {
+            console.log('👥 Simulating multiplayer game mode...');
+            const resultsDiv = document.getElementById('game-mode-results');
+            
+            // Simulate multiplayer game state
+            window.isMultiplayerGame = true;
+            window.gameMode = 'multiplayer';
+            
+            // Check transparency after mode change
+            setTimeout(() => {
+                checkTransparencyStatus();
+                resultsDiv.className = 'status info';
+                resultsDiv.textContent = '👥 Multiplayer game mode simulated. Check transparency status above.';
+            }, 100);
+        };
+
+        window.testTransparencyFunction = function() {
+            console.log('⚙️ Testing setBoardTransparency function...');
+            const resultsDiv = document.getElementById('game-mode-results');
+            
+            if (typeof window.setBoardTransparency === 'function') {
+                // Try to set different values - should all be overridden
+                window.setBoardTransparency(0.5);
+                window.setBoardTransparency(0.8);
+                window.setBoardTransparency(1.0);
+                
+                resultsDiv.className = 'status success';
+                resultsDiv.textContent = '⚙️ setBoardTransparency function tested. Check console for override messages.';
+            } else {
+                resultsDiv.className = 'status error';
+                resultsDiv.textContent = '❌ setBoardTransparency function not found';
+            }
+            
+            checkTransparencyStatus();
+        };
+
+        window.trySetTransparency = function(opacity) {
+            console.log(`⚠️ Attempting to set transparency to ${opacity}...`);
+            const resultsDiv = document.getElementById('manual-test-results');
+            
+            if (typeof window.setBoardTransparency === 'function') {
+                window.setBoardTransparency(opacity);
+                
+                setTimeout(() => {
+                    checkTransparencyStatus();
+                    resultsDiv.className = 'status info';
+                    resultsDiv.textContent = `Attempted to set ${Math.round(opacity * 100)}%. Check if it was overridden for consistency.`;
+                }, 100);
+            } else {
+                resultsDiv.className = 'status error';
+                resultsDiv.textContent = '❌ setBoardTransparency function not available';
+            }
+        };
+
+        window.clearLog = function() {
+            document.getElementById('console-log').innerHTML = 'Console cleared...';
+        };
+
+        // Initialize
+        console.log('🚀 Board transparency test page loaded');
+        setTimeout(() => {
+            checkTransparencyStatus();
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Horropoly - Enhanced Payment Integration Example</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url('assets/images/front.jpg') center/cover no-repeat fixed #000;
+      color: #eee;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .lobby-panel {
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 20px 30px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 400px;
+      width: 100%;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 0;
+      color: #ff6666;
+    }
+    h1 {
+      font-size: 48px;
+      color: #ff0000;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    h2 {
+      font-size: 28px;
+      color: #ff0000;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #222;
+      color: #fff;
+    }
+    select {
+      height: 40px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    input {
+      height: 40px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    button {
+      cursor: pointer;
+      background: #8b0000;
+      border: none;
+    }
+    button:hover {
+      background: #cc0000;
+    }
+    .room-entry {
+      border: 1px solid #555;
+      padding: 6px;
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #current {
+      margin-top: 20px;
+      border-top: 1px solid #555;
+      padding-top: 10px;
+    }
+    .payment-status {
+      text-align: center;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .payment-status.unlocked {
+      background: rgba(0, 255, 0, 0.2);
+      border: 1px solid #00ff00;
+      color: #00ff00;
+    }
+    .payment-status.locked {
+      background: rgba(255, 0, 0, 0.2);
+      border: 1px solid #ff0000;
+      color: #ff0000;
+    }
+  </style>
+</head>
+<body>
+<div class="lobby-panel">
+  <h1>Horropoly</h1>
+  <p style="text-align: center; margin: 10px 0 20px 0; color: #ff6666; font-size: 18px;">Evil Bots Plays Human</p>
+  
+  <!-- Payment Status Display -->
+  <div id="payment-status" class="payment-status locked">
+    🔒 Multiplayer Access: Locked
+  </div>
+  
+  <input id="displayName" placeholder="Your name" style="caret-color: #ff0000; caret-shape: block;" />
+  <label for="humanCount" style="text-align: center; display: block; color: #ffff00; font-size: 16px;">BOTS:</label>
+  <select id="humanCount">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+  <button id="ai-btn" style="font-size: 20px; font-weight: bold; background: #8b0000; color: white;">Play vs BOTS</button>
+
+  <div style="border-top: 3px solid #8b0000; margin: 30px 0 20px 0; box-shadow: 0 2px 4px rgba(139,0,0,0.3);"></div>
+  <h2 style="margin-top: 30px;">Multiplayer Dungeons</h2>
+  
+  <!-- Enhanced Payment Wall -->
+  <div id="multiplayer-payment-wall" style="text-align: center; padding: 20px; background: rgba(255, 0, 0, 0.1); border: 2px solid #ff0000; border-radius: 8px; margin-bottom: 20px;">
+    <p style="color: #ff0000; font-weight: bold; margin-bottom: 15px;">🔒 Premium Multiplayer Access</p>
+    <p style="color: #fff; margin-bottom: 15px;">Unlock multiplayer features for just £1.99 (one-time payment)</p>
+    <p style="color: #ccc; font-size: 12px; margin-bottom: 15px;">
+      🔒 Secure payment via Stripe<br>
+      🛡️ Fraud protection enabled<br>
+      📱 Works on up to 3 devices
+    </p>
+    <button id="unlock-multiplayer-btn" style="background: linear-gradient(45deg, #ff0000, #cc0000); color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 8px rgba(255,0,0,0.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      🔓 Unlock Multiplayer - £1.99
+    </button>
+  </div>
+  
+  <!-- Multiplayer Content (Hidden until payment) -->
+  <div id="multiplayer-content" style="display: none;">
+    <input id="roomName" placeholder="Room name" style="font-size: 18px; font-weight: bold;" />
+    <select id="minPlayers">
+      <option value="2">2 Players</option>
+      <option value="3">3 Players</option>
+    </select>
+    <label for="roomAiCount" style="text-align: center; display: block; color: #ffff00; font-size: 16px;">BOTS:</label>
+    <select id="roomAiCount">
+      <option value="0">0</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+    </select>
+    <button id="createBtn">Create Dungeon</button>
+
+    <h2 style="margin-top: 30px;">Available Rooms</h2>
+    <div id="rooms"></div>
+  </div>
+
+  <div id="current" style="display:none;">
+    <h3 id="roomHeader"></h3>
+    <div id="players"></div>
+    <button id="startBtn" style="display:none;">Start Game</button>
+  </div>
+</div>
+
+<script type="module">
+  // Import the enhanced payment system
+  import { initializePaymentSystem } from './payment-system.js';
+  
+  // Initialize the payment system
+  const paymentSystem = initializePaymentSystem();
+  
+  // Check payment status on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    checkPaymentStatus();
+    
+    // Check for payment completion from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    const sessionId = urlParams.get('session_id');
+    
+    if (paymentStatus === 'success' && sessionId) {
+      handlePaymentSuccess(sessionId);
+    }
+  });
+  
+  // Check if user has already paid
+  async function checkPaymentStatus() {
+    const hasPaid = localStorage.getItem('multiplayerPaid') === 'true';
+    const sessionId = localStorage.getItem('stripe_session_id');
+    
+    if (hasPaid && sessionId) {
+      // Verify the payment is still valid
+      const verified = await paymentSystem.verifyPayment(sessionId);
+      if (verified.verified) {
+        unlockMultiplayer();
+      } else {
+        // Payment verification failed, reset status
+        localStorage.removeItem('multiplayerPaid');
+        localStorage.removeItem('stripe_session_id');
+        lockMultiplayer();
+      }
+    } else {
+      lockMultiplayer();
+    }
+  }
+  
+  // Handle successful payment
+  async function handlePaymentSuccess(sessionId) {
+    const userId = localStorage.getItem('userId') || crypto.randomUUID();
+    localStorage.setItem('userId', userId);
+    
+    // Record payment in Firebase
+    const paymentData = {
+      payment_intent: sessionId,
+      session_id: sessionId
+    };
+    
+    const recorded = await paymentSystem.recordPayment(userId, paymentData);
+    
+    if (recorded) {
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Unlock multiplayer
+      localStorage.setItem('multiplayerPaid', 'true');
+      localStorage.setItem('stripe_session_id', sessionId);
+      
+      unlockMultiplayer();
+      
+      // Show success message
+      showPaymentSuccess();
+    } else {
+      showPaymentError('Payment recording failed. Please contact support.');
+    }
+  }
+  
+  // Unlock multiplayer access
+  function unlockMultiplayer() {
+    // Update payment status
+    const statusDiv = document.getElementById('payment-status');
+    statusDiv.className = 'payment-status unlocked';
+    statusDiv.innerHTML = '✅ Multiplayer Access: Unlocked';
+    
+    // Hide paywall
+    const paywall = document.getElementById('multiplayer-payment-wall');
+    if (paywall) {
+      paywall.style.display = 'none';
+    }
+    
+    // Show multiplayer content
+    const multiplayerContent = document.getElementById('multiplayer-content');
+    if (multiplayerContent) {
+      multiplayerContent.style.display = 'block';
+    }
+  }
+  
+  // Lock multiplayer access
+  function lockMultiplayer() {
+    // Update payment status
+    const statusDiv = document.getElementById('payment-status');
+    statusDiv.className = 'payment-status locked';
+    statusDiv.innerHTML = '🔒 Multiplayer Access: Locked';
+    
+    // Show paywall
+    const paywall = document.getElementById('multiplayer-payment-wall');
+    if (paywall) {
+      paywall.style.display = 'block';
+    }
+    
+    // Hide multiplayer content
+    const multiplayerContent = document.getElementById('multiplayer-content');
+    if (multiplayerContent) {
+      multiplayerContent.style.display = 'none';
+    }
+  }
+  
+  // Show payment success message
+  function showPaymentSuccess() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+      <div style="
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #00ff00;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+        max-width: 400px;
+        width: 90%;
+      ">
+        <h2 style="color: #00ff00; margin-bottom: 20px;">✅ Payment Successful!</h2>
+        <p style="margin-bottom: 20px;">Multiplayer access has been unlocked for this device.</p>
+        <p style="font-size: 12px; color: #ccc; margin-bottom: 20px;">
+          🔒 Device fingerprint recorded<br>
+          🛡️ Fraud protection active<br>
+          📱 Works on up to 3 devices
+        </p>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: linear-gradient(45deg, #00ff00, #00cc00);
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+        ">🎮 Start Playing!</button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  }
+  
+  // Show payment error message
+  function showPaymentError(message) {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+      <div style="
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #ff0000;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        color: white;
+        max-width: 400px;
+        width: 90%;
+      ">
+        <h2 style="color: #ff0000; margin-bottom: 20px;">❌ Payment Error</h2>
+        <p style="margin-bottom: 20px;">${message}</p>
+        <button onclick="this.parentElement.parentElement.remove()" style="
+          background: #333;
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+        ">❌ Close</button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+  }
+  
+  // Add event listener for unlock button
+  document.getElementById('unlock-multiplayer-btn').addEventListener('click', () => {
+    paymentSystem.startPayment();
+  });
+  
+  // Add event listeners for other buttons
+  document.getElementById('ai-btn').addEventListener('click', () => {
+    const displayName = document.getElementById('displayName').value;
+    const humanCount = document.getElementById('humanCount').value;
+    
+    if (!displayName.trim()) {
+      alert('Please enter your name');
+      return;
+    }
+    
+    // Start AI game (this would integrate with your existing game logic)
+    console.log('Starting AI game with:', { displayName, humanCount });
+    // window.location.href = `game.html?mode=ai&players=${humanCount}&name=${encodeURIComponent(displayName)}`;
+  });
+  
+  document.getElementById('createBtn').addEventListener('click', () => {
+    const displayName = document.getElementById('displayName').value;
+    const roomName = document.getElementById('roomName').value;
+    const minPlayers = document.getElementById('minPlayers').value;
+    const aiCount = document.getElementById('roomAiCount').value;
+    
+    if (!displayName.trim() || !roomName.trim()) {
+      alert('Please enter your name and room name');
+      return;
+    }
+    
+    // Create multiplayer room (this would integrate with your existing room logic)
+    console.log('Creating room:', { displayName, roomName, minPlayers, aiCount });
+    // createRoom(roomName, displayName, minPlayers);
+  });
+</script>
+</body>
+</html> 

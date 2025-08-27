@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Cancelled - Horropoly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .cancelled-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+        }
+        .cancelled-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .close-button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+        .close-button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="cancelled-container">
+        <div class="cancelled-icon">❌</div>
+        <h1>Payment Cancelled</h1>
+        <p>Your payment was cancelled.</p>
+        <p>You can try again when you're ready.</p>
+        <button class="close-button" onclick="closeWindow()">Close Window</button>
+    </div>
+
+    <script>
+        // Signal cancellation to parent window
+        if (window.opener) {
+            // Send message to parent window
+            window.opener.postMessage({
+                type: 'payment_cancelled'
+            }, '*');
+        }
+        
+        function closeWindow() {
+            window.close();
+        }
+        
+        // Auto-close after 3 seconds
+        setTimeout(() => {
+            window.close();
+        }, 3000);
+    </script>
+</body>
+</html> 

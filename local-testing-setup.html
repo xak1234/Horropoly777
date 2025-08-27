@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Testing Setup - Robust Firebase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .code-block {
+            background-color: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .status {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left: 4px solid #4CAF50;
+        }
+        .warning {
+            border-left: 4px solid #ff9800;
+        }
+        .info {
+            border-left: 4px solid #2196F3;
+        }
+        h1, h2, h3 {
+            color: #4CAF50;
+        }
+        .step {
+            background-color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ff9800;
+        }
+        .step-number {
+            background-color: #ff9800;
+            color: #000;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 Local Testing Setup - Robust Firebase</h1>
+    
+    <div class="container">
+        <h2>🎯 Quick Fix for Local Testing</h2>
+        <div class="status success">
+Since you're testing locally without the backend server, here's how to use the robust Firebase initialization while keeping your existing client-side room creation working.
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔧 Simple Integration</h2>
+        
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Add to your index.html (before existing scripts):</strong>
+            <div class="code-block">
+&lt;!-- Add this BEFORE your existing Firebase scripts --&gt;
+&lt;script type="module"&gt;
+  import { initHorropolyFirebase } from "./firebase-init-fixed.js";
+  
+  // Replace old Firebase initialization with robust version
+  window.addEventListener('DOMContentLoaded', () => {
+    console.log("🔄 Using robust Firebase initialization...");
+    
+    try {
+      // Initialize robust Firebase
+      initHorropolyFirebase();
+      
+      // Set global db variable for compatibility
+      if (window.firebaseDb) {
+        window.db = window.firebaseDb;
+      }
+      
+      console.log("✅ Robust Firebase ready for local testing");
+    } catch (error) {
+      console.error("❌ Robust Firebase failed, using fallback:", error);
+    }
+  });
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Add to your gamestart.html (before existing scripts):</strong>
+            <div class="code-block">
+&lt;!-- Add this BEFORE your existing gamestart scripts --&gt;
+&lt;script type="module"&gt;
+  import { initHorropolyFirebase } from "./firebase-init-fixed.js";
+  import { waitForAuthReady } from "./auth-gate.js";
+  
+  window.addEventListener('DOMContentLoaded', async () => {
+    console.log("🎮 Initializing robust Firebase for gamestart...");
+    
+    try {
+      // Initialize robust Firebase
+      initHorropolyFirebase();
+      
+      // Wait for authentication
+      await waitForAuthReady(10000);
+      console.log("✅ Authentication ready for game");
+      
+      // Set global db variable for compatibility
+      if (window.firebaseDb) {
+        window.db = window.firebaseDb;
+      }
+      
+      console.log("✅ Robust Firebase ready for game");
+    } catch (error) {
+      console.error("❌ Robust Firebase/Auth failed:", error);
+    }
+  });
+&lt;/script&gt;
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>That's it! Your existing code should work with robust Firebase.</strong>
+            <div class="status info">
+The robust Firebase initialization will:
+✅ Fix WebChannel transport errors
+✅ Provide better connection stability  
+✅ Enable persistent local cache
+✅ Work with your existing room creation code
+✅ Maintain backward compatibility
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 What This Fixes</h2>
+        <div class="status success">
+Your console output shows:
+❌ Old: "🔄 Initializing Firebase with enhanced error handling..."
+✅ New: "✅ Firebase initialized (robust transport enabled)"
+
+The robust system will eliminate:
+- WebChannel connection errors
+- Transport layer issues  
+- Authentication timing problems
+- Connection instability
+
+While keeping your existing:
+- Client-side room creation
+- Preset button handlers
+- Game initialization logic
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📋 Expected Console Output</h2>
+        <div class="code-block">
+🔄 Using robust Firebase initialization...
+✅ Firebase initialized (robust transport enabled)
+✅ Robust Firebase ready for local testing
+🧟 joinPresetRoom called with type: 5
+🧟 Joining preset room: Zombie Nightmare
+✅ Authentication ready for game
+🎮 Creating Zombie Nightmare with 3 AI opponents...
+✅ Local room created: [ROOM_ID]
+🎮 Starting gamestart initialization...
+✅ Authentication ready for game
+✅ Robust Firebase ready for game
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🧪 Testing</h2>
+        <div class="status warning">
+After adding the scripts:
+
+1. Refresh your index.html page
+2. Check console for "✅ Firebase initialized (robust transport enabled)"
+3. Try "Zombie Nightmare" preset
+4. Should see improved connection stability
+5. No more WebChannel errors
+6. Faster authentication
+
+The robust Firebase system works as a drop-in replacement for your existing Firebase initialization while providing better stability and performance.
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔄 Fallback Safety</h2>
+        <div class="status info">
+The integration includes fallback handling:
+
+If robust Firebase fails → Falls back to your existing firebase-init.js
+If authentication fails → Continues with existing auth flow
+If any errors occur → Logs clearly and continues
+
+This ensures your game keeps working even if there are any compatibility issues with the robust system.
+        </div>
+    </div>
+</body>
+</html>

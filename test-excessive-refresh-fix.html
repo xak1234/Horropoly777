@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Excessive Refresh Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .success { background: rgba(0, 255, 0, 0.2); }
+        .warning { background: rgba(255, 255, 0, 0.2); }
+        .error { background: rgba(255, 0, 0, 0.2); }
+        #log {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #0066ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0052cc;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Excessive Refresh Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Fix Status</h2>
+        <div id="fix-status">Loading...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Performance Monitoring</h2>
+        <div id="performance-stats">
+            <div>updateGameFrame calls: <span id="update-count">0</span></div>
+            <div>updateGameFromState calls: <span id="state-count">0</span></div>
+            <div>renderTokens calls: <span id="render-count">0</span></div>
+            <div>Average FPS: <span id="fps">0</span></div>
+        </div>
+        <button onclick="resetCounters()">Reset Counters</button>
+        <button onclick="simulateActivity()">Simulate Game Activity</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <div id="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Load the fix -->
+    <script src="fix-excessive-refreshes.js"></script>
+    
+    <script>
+        let updateCount = 0;
+        let stateCount = 0;
+        let renderCount = 0;
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let fps = 0;
+        
+        // Mock game functions for testing
+        function mockUpdateGameFrame() {
+            updateCount++;
+            document.getElementById('update-count').textContent = updateCount;
+            
+            // Calculate FPS
+            const now = performance.now();
+            frameCount++;
+            if (now - lastFrameTime >= 1000) {
+                fps = Math.round(frameCount * 1000 / (now - lastFrameTime));
+                document.getElementById('fps').textContent = fps;
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+            
+            return Promise.resolve();
+        }
+        
+        function mockUpdateGameFromState(gameState) {
+            stateCount++;
+            document.getElementById('state-count').textContent = stateCount;
+            log(`updateGameFromState called with: ${JSON.stringify(gameState).substring(0, 100)}...`);
+        }
+        
+        function mockRenderTokens(players) {
+            renderCount++;
+            document.getElementById('render-count').textContent = renderCount;
+            log(`renderTokens called with ${players ? players.length : 0} players`);
+        }
+        
+        // Set up mock functions
+        window.updateGameFrame = mockUpdateGameFrame;
+        window.updateGameFromState = mockUpdateGameFromState;
+        window.renderTokens = mockRenderTokens;
+        
+        // Mock positions map
+        window.positionsMap = new Map([
+            ['t1', { x: 100, y: 100 }],
+            ['t2', { x: 200, y: 100 }],
+            ['t3', { x: 300, y: 100 }]
+        ]);
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function resetCounters() {
+            updateCount = 0;
+            stateCount = 0;
+            renderCount = 0;
+            frameCount = 0;
+            lastFrameTime = performance.now();
+            document.getElementById('update-count').textContent = '0';
+            document.getElementById('state-count').textContent = '0';
+            document.getElementById('render-count').textContent = '0';
+            document.getElementById('fps').textContent = '0';
+            log('Counters reset');
+        }
+        
+        function simulateActivity() {
+            log('Simulating game activity...');
+            
+            // Simulate rapid updateGameFrame calls
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => window.updateGameFrame(), i * 10);
+            }
+            
+            // Simulate updateGameFromState calls with similar data
+            const mockGameState = {
+                players: [
+                    { name: 'Player1', x: 100, y: 100, currentSquare: 't1' },
+                    { name: 'Player2', x: 200, y: 100, currentSquare: 't2' }
+                ]
+            };
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    // Slightly modify positions to test stability
+                    const state = JSON.parse(JSON.stringify(mockGameState));
+                    state.players[0].x += Math.random() * 5; // Small random movement
+                    window.updateGameFromState(state);
+                }, i * 100);
+            }
+            
+            // Simulate renderTokens calls
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    window.renderTokens(mockGameState.players);
+                }, i * 50);
+            }
+        }
+        
+        function checkFixStatus() {
+            const statusDiv = document.getElementById('fix-status');
+            let status = '';
+            
+            // Check if functions are wrapped
+            const isUpdateFrameWrapped = window.updateGameFrame && 
+                window.updateGameFrame.toString().includes('throttled');
+            const isUpdateStateWrapped = window.updateGameFromState && 
+                window.updateGameFromState.toString().includes('stabilized');
+            const isRenderTokensWrapped = window.renderTokens && 
+                window.renderTokens.toString().includes('validated');
+            
+            if (isUpdateFrameWrapped) {
+                status += '<div class="status success">✅ updateGameFrame throttling applied</div>';
+            } else {
+                status += '<div class="status error">❌ updateGameFrame throttling not applied</div>';
+            }
+            
+            if (isUpdateStateWrapped) {
+                status += '<div class="status success">✅ updateGameFromState stabilization applied</div>';
+            } else {
+                status += '<div class="status error">❌ updateGameFromState stabilization not applied</div>';
+            }
+            
+            if (isRenderTokensWrapped) {
+                status += '<div class="status success">✅ renderTokens validation applied</div>';
+            } else {
+                status += '<div class="status warning">⚠️ renderTokens validation not applied</div>';
+            }
+            
+            statusDiv.innerHTML = status;
+            
+            if (isUpdateFrameWrapped && isUpdateStateWrapped) {
+                log('✅ Excessive refresh fix is working correctly');
+            } else {
+                log('❌ Some parts of the fix are not working');
+            }
+        }
+        
+        // Check status after a delay to allow the fix to load
+        setTimeout(checkFixStatus, 2000);
+        
+        log('Test page loaded. Click "Simulate Game Activity" to test the fix.');
+    </script>
+</body>
+</html>

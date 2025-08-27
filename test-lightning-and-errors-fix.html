@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Lightning & Errors Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        .success { background: rgba(0, 255, 0, 0.2); }
+        .warning { background: rgba(255, 255, 0, 0.2); }
+        .error { background: rgba(255, 0, 0, 0.2); }
+        #log {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 4px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #0066ff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0052cc;
+        }
+        .property-test {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚡ Lightning & Errors Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Fix Status</h2>
+        <div id="fix-status">Loading...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Lightning Strike Tests</h2>
+        <div id="property-tests">
+            <div class="property-test">
+                <strong>Test Property: t1</strong>
+                <div>Owner: <span id="t1-owner">TestPlayer</span></div>
+                <div>Graveyards: <span id="t1-graveyards">0</span></div>
+                <div>Has Crypt: <span id="t1-crypt">false</span></div>
+                <button onclick="testLightningStrike('t1')">⚡ Strike t1</button>
+            </div>
+            <div class="property-test">
+                <strong>Test Property: t2</strong>
+                <div>Owner: <span id="t2-owner">TestPlayer</span></div>
+                <div>Graveyards: <span id="t2-graveyards">2</span></div>
+                <div>Has Crypt: <span id="t2-crypt">false</span></div>
+                <button onclick="testLightningStrike('t2')">⚡ Strike t2</button>
+            </div>
+            <div class="property-test">
+                <strong>Test Property: t3</strong>
+                <div>Owner: <span id="t3-owner">TestPlayer</span></div>
+                <div>Graveyards: <span id="t3-graveyards">0</span></div>
+                <div>Has Crypt: <span id="t3-crypt">true</span></div>
+                <button onclick="testLightningStrike('t3')">⚡ Strike t3</button>
+            </div>
+        </div>
+        <button onclick="resetProperties()">Reset Properties</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Error Suppression Tests</h2>
+        <button onclick="testFirebaseAuthError()">Test Firebase Auth 400 Error</button>
+        <button onclick="testBackendConnectionError()">Test Backend Connection Error</button>
+        <button onclick="testUncaughtPromiseError()">Test Uncaught Promise Error</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <div id="log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <!-- Load the fix -->
+    <script src="fix-lightning-and-errors.js"></script>
+    
+    <script>
+        // Mock game state for testing
+        window.propertyState = {
+            t1: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: false, declined: false },
+            t2: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 2, hasCrypt: false, declined: false },
+            t3: { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: true, declined: false }
+        };
+        
+        window.players = [
+            { name: 'TestPlayer', properties: ['t1', 't2', 't3'], money: 5000 }
+        ];
+        
+        // Mock game functions
+        window.getPropertyInfo = function(property) {
+            return { square: property, group: 'test', cost: 100 };
+        };
+        
+        window.getPropertyDisplayName = function(propertyInfo) {
+            return `Test Property ${propertyInfo.square.toUpperCase()}`;
+        };
+        
+        window.showAdvisory = function(message, type) {
+            log(`Advisory (${type}): ${message}`);
+        };
+        
+        window.playStrikeHouseSound = function() {
+            log('🔊 Playing strike house sound');
+        };
+        
+        window.updateGameFrame = function() {
+            log('🎮 Game frame updated');
+        };
+        
+        window.updateInfoPanel = function() {
+            log('📊 Info panel updated');
+        };
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        function updatePropertyDisplay(property) {
+            const data = window.propertyState[property];
+            document.getElementById(`${property}-owner`).textContent = data.owner || 'None';
+            document.getElementById(`${property}-graveyards`).textContent = data.graveyards;
+            document.getElementById(`${property}-crypt`).textContent = data.hasCrypt;
+        }
+        
+        function resetProperties() {
+            window.propertyState.t1 = { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: false, declined: false };
+            window.propertyState.t2 = { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 2, hasCrypt: false, declined: false };
+            window.propertyState.t3 = { owner: 'TestPlayer', ownerColor: '#ff0000', graveyards: 0, hasCrypt: true, declined: false };
+            
+            window.players[0].properties = ['t1', 't2', 't3'];
+            
+            updatePropertyDisplay('t1');
+            updatePropertyDisplay('t2');
+            updatePropertyDisplay('t3');
+            
+            log('🔄 Properties reset to initial state');
+        }
+        
+        async function testLightningStrike(property) {
+            log(`⚡ Testing lightning strike on ${property}...`);
+            
+            const beforeState = JSON.parse(JSON.stringify(window.propertyState[property]));
+            log(`Before: owner=${beforeState.owner}, graveyards=${beforeState.graveyards}, crypt=${beforeState.hasCrypt}`);
+            
+            if (typeof window.applyLightningPropertyEffects === 'function') {
+                const result = await window.applyLightningPropertyEffects(property);
+                
+                const afterState = window.propertyState[property];
+                log(`After: owner=${afterState.owner}, graveyards=${afterState.graveyards}, crypt=${afterState.hasCrypt}`);
+                log(`Result: ${result || 'No effect message'}`);
+                
+                updatePropertyDisplay(property);
+            } else {
+                log('❌ applyLightningPropertyEffects function not found');
+            }
+        }
+        
+        async function testFirebaseAuthError() {
+            log('🧪 Testing Firebase Auth 400 error suppression...');
+            
+            try {
+                const response = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=test', {
+                    method: 'POST',
+                    body: JSON.stringify({ invalid: 'data' })
+                });
+                
+                log(`Firebase Auth test result: ${response.status} ${response.ok ? 'OK' : 'Error'}`);
+            } catch (error) {
+                log(`Firebase Auth test error: ${error.message}`);
+            }
+        }
+        
+        async function testBackendConnectionError() {
+            log('🧪 Testing backend connection error suppression...');
+            
+            try {
+                const response = await fetch('http://localhost:3001/api/health');
+                log(`Backend test result: ${response.status} ${response.ok ? 'OK' : 'Error'}`);
+            } catch (error) {
+                log(`Backend test error: ${error.message}`);
+            }
+        }
+        
+        function testUncaughtPromiseError() {
+            log('🧪 Testing uncaught promise error handling...');
+            
+            // Create an uncaught promise rejection
+            Promise.reject(new Error('Test uncaught promise error'));
+            
+            setTimeout(() => {
+                log('✅ If no "Uncaught (in promise)" error appeared in console, the fix is working');
+            }, 1000);
+        }
+        
+        function checkFixStatus() {
+            const statusDiv = document.getElementById('fix-status');
+            let status = '';
+            
+            // Check if lightning function is wrapped
+            const isLightningFixed = window.applyLightningPropertyEffects && 
+                window.applyLightningPropertyEffects.toString().includes('[FIXED]');
+            
+            // Check if fetch is wrapped
+            const isFetchWrapped = window.fetch.toString().includes('Firebase Auth') || 
+                                 window.fetch.toString().includes('Intercepting');
+            
+            if (isLightningFixed) {
+                status += '<div class="status success">✅ Lightning strike ownership removal fix applied</div>';
+            } else {
+                status += '<div class="status error">❌ Lightning strike fix not applied</div>';
+            }
+            
+            if (isFetchWrapped) {
+                status += '<div class="status success">✅ Error suppression fixes applied</div>';
+            } else {
+                status += '<div class="status error">❌ Error suppression fixes not applied</div>';
+            }
+            
+            statusDiv.innerHTML = status;
+            
+            if (isLightningFixed && isFetchWrapped) {
+                log('✅ All fixes are working correctly');
+            } else {
+                log('❌ Some fixes are not working');
+            }
+        }
+        
+        // Initialize displays
+        setTimeout(() => {
+            updatePropertyDisplay('t1');
+            updatePropertyDisplay('t2');
+            updatePropertyDisplay('t3');
+            checkFixStatus();
+        }, 2000);
+        
+        log('Test page loaded. Try the lightning strike tests to see if ownership is properly removed.');
+    </script>
+</body>
+</html>

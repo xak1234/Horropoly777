@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Room Capacity</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .fix-section {
+            background: #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .result {
+            background: #222;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .error {
+            color: #f44336;
+        }
+        .info {
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Room Capacity Issue</h1>
+        
+        <div class="fix-section">
+            <h2>Problem</h2>
+            <p class="error">Room "SvEvWyFyonxJqFsYNtDz" is showing "Room is full" error when trying to join.</p>
+            <p class="info">This is likely because the room was created with a default max of 2 players, but more players are trying to join.</p>
+        </div>
+
+        <div class="fix-section">
+            <h2>Solution</h2>
+            <p>Click the button below to increase the room's maximum player capacity to 6 players:</p>
+            <button onclick="fixRoomCapacity()">🔧 Fix Room Capacity (Set to 6 players)</button>
+            <div id="fix-result" class="result"></div>
+        </div>
+
+        <div class="fix-section">
+            <h2>Alternative Solutions</h2>
+            <p>If the fix above doesn't work, you can:</p>
+            <ol>
+                <li>Create a new room with higher capacity</li>
+                <li>Ask the host to increase the room capacity</li>
+                <li>Wait for a spot to open up</li>
+            </ol>
+            <button onclick="createNewRoom()">🏠 Create New Room (6 players)</button>
+            <div id="create-result" class="result"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { 
+            initFirebaseHorropoly, 
+            updateRoomMaxPlayers, 
+            createGameRoom,
+            checkRoomStatus
+        } from './firebase-init.js';
+
+        // Initialize Firebase on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                initFirebaseHorropoly();
+                console.log('Firebase initialized for room capacity fix');
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+            }
+        });
+
+        window.fixRoomCapacity = async () => {
+            try {
+                const result = document.getElementById('fix-result');
+                result.textContent = '🔧 Fixing room capacity...';
+                
+                const roomId = 'SvEvWyFyonxJqFsYNtDz';
+                const newMaxPlayers = 6;
+                
+                // First check current room status
+                const status = await checkRoomStatus(roomId);
+                result.textContent += `\n📊 Current room status: ${JSON.stringify(status, null, 2)}`;
+                
+                // Update the room capacity
+                const updateResult = await updateRoomMaxPlayers(roomId, newMaxPlayers);
+                result.textContent += `\n✅ Room capacity updated successfully!`;
+                result.textContent += `\n📈 New max players: ${newMaxPlayers}`;
+                result.textContent += `\n🎮 You can now try joining the room again.`;
+                
+                console.log('Room capacity fix completed:', updateResult);
+            } catch (error) {
+                document.getElementById('fix-result').textContent = `❌ Error fixing room capacity: ${error.message}`;
+                console.error('Fix room capacity error:', error);
+            }
+        };
+
+        window.createNewRoom = async () => {
+            try {
+                const result = document.getElementById('create-result');
+                result.textContent = '🏠 Creating new room...';
+                
+                const playerName = 'NewPlayer_' + Math.random().toString(36).substring(2, 6);
+                const maxPlayers = 6;
+                
+                const roomResult = await createGameRoom(playerName, maxPlayers);
+                result.textContent = `✅ New room created successfully!`;
+                result.textContent += `\n🏠 Room ID: ${roomResult.roomId}`;
+                result.textContent += `\n👤 Host: ${playerName}`;
+                result.textContent += `\n👥 Max Players: ${maxPlayers}`;
+                result.textContent += `\n🔗 Share this room ID with others to join!`;
+                
+                console.log('New room created:', roomResult);
+            } catch (error) {
+                document.getElementById('create-result').textContent = `❌ Error creating new room: ${error.message}`;
+                console.error('Create new room error:', error);
+            }
+        };
+    </script>
+</body>
+</html> 

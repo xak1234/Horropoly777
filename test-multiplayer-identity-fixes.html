@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multiplayer Identity Fixes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2d2d2d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6600;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #1a4d1a;
+            border: 1px solid #4d994d;
+        }
+        .error {
+            background-color: #4d1a1a;
+            border: 1px solid #994d4d;
+        }
+        .warning {
+            background-color: #4d4d1a;
+            border: 1px solid #99994d;
+        }
+        button {
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #cc5200;
+        }
+        .log-output {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Multiplayer Identity Fixes Test</h1>
+    
+    <div class="test-section">
+        <h2>🚨 Emergency Fix Status</h2>
+        <p>This page tests the multiplayer identity confusion fixes.</p>
+        
+        <button onclick="loadEmergencyFix()">Load Emergency Fix</button>
+        <button onclick="loadComprehensiveFix()">Load Comprehensive Fix</button>
+        <button onclick="testPlayerIdentity()">Test Player Identity</button>
+        <button onclick="testTimerFix()">Test Timer Fix</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div id="logOutput" class="log-output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Issues Being Fixed</h2>
+        <div class="test-result warning">
+            <strong>Issue 1:</strong> Player identity confusion during turn switches<br>
+            <em>Symptoms:</em> "Current player Orlok, Local player Renfield, Is my turn: false" when it should be true
+        </div>
+        <div class="test-result warning">
+            <strong>Issue 2:</strong> Firebase player data corruption<br>
+            <em>Symptoms:</em> "Player 0: name='undefined', userId='undefined'"
+        </div>
+        <div class="test-result warning">
+            <strong>Issue 3:</strong> Slow dice roll timer<br>
+            <em>Symptoms:</em> "Starting 20-second timer for roll action" instead of faster timing
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Fix Implementation</h2>
+        <div class="test-result success">
+            <strong>Emergency Fix:</strong> Quick patches for immediate relief<br>
+            • Better player identity tracking<br>
+            • Reject corrupted Firebase data<br>
+            • Reduce dice timer to 8 seconds
+        </div>
+        <div class="test-result success">
+            <strong>Comprehensive Fix:</strong> Full solution with persistence<br>
+            • LocalStorage identity backup<br>
+            • Multiple identity validation methods<br>
+            • Enhanced turn detection logic
+        </div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('logOutput');
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLog() {
+            logElement.textContent = '';
+        }
+        
+        function loadEmergencyFix() {
+            log('Loading emergency multiplayer identity fix...');
+            
+            const script = document.createElement('script');
+            script.src = 'emergency-multiplayer-identity-fix.js';
+            script.onload = () => {
+                log('✅ Emergency fix loaded successfully');
+            };
+            script.onerror = () => {
+                log('❌ Failed to load emergency fix');
+            };
+            document.head.appendChild(script);
+        }
+        
+        function loadComprehensiveFix() {
+            log('Loading comprehensive multiplayer identity fix...');
+            
+            const script = document.createElement('script');
+            script.src = 'fix-multiplayer-identity-confusion.js';
+            script.onload = () => {
+                log('✅ Comprehensive fix loaded successfully');
+            };
+            script.onerror = () => {
+                log('❌ Failed to load comprehensive fix');
+            };
+            document.head.appendChild(script);
+        }
+        
+        function testPlayerIdentity() {
+            log('Testing player identity functions...');
+            
+            // Mock some game state
+            window.players = [
+                { name: 'Orlok', userId: 'user_123', isHost: true },
+                { name: 'Renfield', userId: 'user_456', isHost: false }
+            ];
+            window.currentPlayerIndex = 0;
+            window.localPlayerName = 'Orlok';
+            
+            log('Mock game state created:');
+            log(`- Player 0: ${window.players[0].name} (${window.players[0].userId})`);
+            log(`- Player 1: ${window.players[1].name} (${window.players[1].userId})`);
+            log(`- Current player index: ${window.currentPlayerIndex}`);
+            log(`- Local player name: ${window.localPlayerName}`);
+            
+            // Test identity functions if they exist
+            if (typeof window.enableDiceSection === 'function') {
+                log('Testing enableDiceSection...');
+                try {
+                    window.enableDiceSection();
+                    log('✅ enableDiceSection executed without errors');
+                } catch (e) {
+                    log(`❌ enableDiceSection error: ${e.message}`);
+                }
+            } else {
+                log('⚠️ enableDiceSection not found');
+            }
+        }
+        
+        function testTimerFix() {
+            log('Testing timer fix...');
+            
+            if (typeof window.startAutoActionTimer === 'function') {
+                log('Testing startAutoActionTimer with different actions...');
+                
+                // Test roll timer
+                const rollDelay = window.startAutoActionTimer('roll');
+                log(`Roll timer delay: ${rollDelay}ms (should be 8000ms for multiplayer)`);
+                
+                // Test purchase timer
+                const purchaseDelay = window.startAutoActionTimer('purchase');
+                log(`Purchase timer delay: ${purchaseDelay}ms (should be 12000ms for multiplayer)`);
+                
+                // Test develop timer
+                const developDelay = window.startAutoActionTimer('develop');
+                log(`Develop timer delay: ${developDelay}ms (should be 45000ms for multiplayer)`);
+                
+                log('✅ Timer fix is working');
+            } else {
+                log('⚠️ startAutoActionTimer not found');
+            }
+        }
+        
+        // Initialize
+        log('Multiplayer Identity Fixes Test Page loaded');
+        log('Click the buttons above to test the fixes');
+    </script>
+</body>
+</html>

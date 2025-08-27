@@ -1,0 +1,4911 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horropoly Lobby</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url('assets/images/front.jpg') center/cover no-repeat fixed #000;
+      color: #eee;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .lobby-panel {
+      background: rgba(0,0,0,0.7);
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 280px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 0;
+      color: #ff6666;
+    }
+    h1 {
+      font-size: 48px;
+      color: #ff0000;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    h2 {
+      font-size: 28px;
+      color: #ff0000;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    /* Responsive design for smaller screens */
+    @media (max-width: 480px) {
+      .lobby-panel {
+        max-width: 80vw;
+        padding: 10px;
+      }
+      h1 {
+        font-size: 36px;
+      }
+      h2 {
+        font-size: 22px;
+      }
+      input, select, button {
+        font-size: 14px;
+        padding: 10px 8px;
+      }
+      button {
+        white-space: normal;
+        line-height: 1.3;
+        min-height: 44px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .lobby-panel {
+        max-width: 85vw;
+        padding: 8px;
+      }
+      h1 {
+        font-size: 32px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+      input, select, button {
+        font-size: 13px;
+        padding: 8px 6px;
+      }
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #222;
+      color: #fff;
+      box-sizing: border-box;
+      font-size: 14px;
+      word-wrap: break-word;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    select {
+      height: 40px;
+      text-align: center;
+    }
+    input {
+      height: 40px;
+      text-align: center;
+    }
+    button {
+      cursor: pointer;
+      background: #8b0000;
+      border: none;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    button:hover {
+      background: #cc0000;
+    }
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    input:disabled, select:disabled {
+      background: #333;
+      color: #666;
+      cursor: not-allowed;
+    }
+    .room-entry {
+      border: 1px solid #555;
+      padding: 6px;
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #current {
+      margin-top: 20px;
+      border-top: 1px solid #555;
+      padding-top: 10px;
+    }
+    
+    @keyframes pulse {
+      0% { 
+        transform: scale(1); 
+        box-shadow: 0 4px 8px rgba(139,0,0,0.3); 
+      }
+      50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 6px 12px rgba(139,0,0,0.6); 
+      }
+      100% { 
+        transform: scale(1); 
+        box-shadow: 0 4px 8px rgba(139,0,0,0.3); 
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Audio element for rain sound -->
+<audio id="rainSound" src="assets/sounds/rain.mp3" preload="auto"></audio>
+
+<div class="lobby-panel">
+  <h1>Horropoly <span id="version-span" style="font-size: 0.6em; color: #ffff00; cursor: pointer; user-select: none;" onclick="console.log('🔧 Inline onclick triggered!'); handleVersionTap();">xV3.5</span></h1>
+  <p style="text-align: center; margin: 5px 0 15px 0; color: #ff6666; font-size: 16px;">Evil Bots Plays Human</p>
+  <input id="displayName" placeholder="Victims Name" maxlength="20" style="caret-color: #ff0000; caret-shape: block; font-size: 18px; font-weight: bold; color: #ffffff;" />
+  
+
+  
+  <label for="humanCount" id="bots-label" style="display: none; text-align: center; color: #ffff00; font-size: 16px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;" onclick="handleBotsClick(event)" ontouchstart="handleBotsTouch(event)" ontouchend="handleBotsTouchEnd(event)">Zombie Bots:</label>
+  <select id="humanCount" style="display: none;">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+  </select>
+  <button id="ai-btn" style="display: none; font-size: 18px; font-weight: bold; background: #8b0000; color: white; white-space: normal; line-height: 1.2;">Victims vs Zombie Bots</button>
+
+  <div style="border-top: 2px solid #8b0000; margin: 20px 0 15px 0; box-shadow: 0 1px 2px rgba(139,0,0,0.3);"></div>
+  <h2 style="margin-top: 0; margin-bottom: 15px;">Dungeons</h2>
+
+  <!-- Dungeons Button - Always Visible -->
+  <button id="view-rooms-btn" onclick="window.showRoomsModal && window.showRoomsModal()" style="background: linear-gradient(45deg, #8b0000, #cc0000); color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; box-shadow: 0 4px 8px rgba(139,0,0,0.3); margin-top: 10px; width: 100%; box-sizing: border-box; white-space: normal; line-height: 1.3;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+    Dungeons <span id="room-count" style="margin-left: 8px; font-size: 18px; font-weight: bold; color: #ffff00;">💀</span>
+  </button>
+
+</div>
+
+<!-- Rooms Modal -->
+<div id="rooms-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(5px);">
+  <div id="rooms-modal-content" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border: 2px solid #8b0000; border-radius: 10px; padding: 15px; max-width: 300px; width: 80%; max-height: 80vh; overflow-y: auto; box-shadow: 0 0 30px rgba(139,0,0,0.5);">
+    <!-- Close button positioned absolutely -->
+    <button id="close-rooms-modal" style="position: absolute; top: 8px; right: 8px; background: #8b0000; color: white; border: none; padding: 3px 6px; border-radius: 2px; cursor: pointer; font-size: 12px; font-weight: bold; z-index: 1;" onclick="closeRoomsModal()">✕</button>
+    
+    <!-- Title on its own line -->
+    <div style="text-align: center; margin-bottom: 20px; border-bottom: 1px solid #8b0000; padding-bottom: 10px;">
+      <h2 style="color: #ff0000; margin: 0; font-size: 24px; font-weight: bold;">Available Dungeons</h2>
+    </div>
+    
+    <!-- Multiplayer Payment Wall (Covers Create Dungeon Section) -->
+    <div id="multiplayer-payment-wall-modal" style="text-align: center; padding: 20px; background: rgba(255, 0, 0, 0.1); border: 2px solid #ff0000; border-radius: 8px; margin-bottom: 20px;">
+      <p style="color: #ff0000; font-weight: bold; margin-bottom: 15px;">🔒 Premium Multiplayer Access</p>
+      <p style="color: #fff; margin-bottom: 15px;">Unlock multiplayer features for just £1.99 (one-time payment)</p>
+      <button id="unlock-multiplayer-btn-modal" style="background: linear-gradient(45deg, #ff0000, #cc0000); color: white; border: none; padding: 12px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 15px; box-shadow: 0 4px 8px rgba(255,0,0,0.3); white-space: normal; line-height: 1.3; width: 100%; box-sizing: border-box;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        🔓 Unlock Multiplayer - £1.99
+      </button>
+    </div>
+
+    <!-- Create Dungeon Section (Hidden behind payment wall) -->
+    <div id="create-dungeon-section" style="display: none; background: rgba(139,0,0,0.2); border: 1px solid #8b0000; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+      <h3 style="color: #ff0000; margin: 0 0 10px 0; font-size: 18px; text-align: center;">Create New Dungeon</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <select id="minPlayers-modal" style="flex: 0 0 120px; padding: 8px; border-radius: 4px; border: 1px solid #555; background: #222; color: #fff; height: 40px; box-sizing: border-box; font-size: 12px;">
+            <option value="2">1 Friend</option>
+            <option value="3">2 Fiends</option>
+            <option value="4">3 Fiends</option>
+          </select>
+          <button id="createBtn-modal" onclick="handleModalCreateClick()" style="flex: 1; padding: 8px 12px; border-radius: 4px; border: none; background: linear-gradient(45deg, #8b0000, #cc0000); color: white; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap;">Create Dungeon</button>
+        </div>
+        <input id="roomName-modal" placeholder="Dungeon name" maxlength="20" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #555; background: #222; color: #fff; font-size: 14px; font-weight: bold; box-sizing: border-box;" />
+      </div>
+    </div>
+    
+    <!-- Preset Dungeons Section -->
+    <div style="border-top: 1px solid #8b0000; padding-top: 15px; margin-bottom: 20px;">
+      <h3 style="color: #ff0000; margin: 0 0 15px 0; font-size: 16px; text-align: center;">🧟 Zombie Dungeons 🧟</h3>
+      <div style="font-size: 11px; color: #ccc; text-align: center; margin-bottom: 15px; font-style: italic;">Quick join with AI zombie bots</div>
+      
+      <!-- Preset Room 1: Solo vs 1 Zombie -->
+      <div class="preset-room" style="background: rgba(139,0,0,0.15); border: 1px solid #8b0000; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onclick="joinPresetRoom(1)" onmouseover="this.style.background='rgba(139,0,0,0.25)'" onmouseout="this.style.background='rgba(139,0,0,0.15)'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="color: #ff6666; font-weight: bold; font-size: 14px;">🧟 Solo Zombie Hunt ⚡</div>
+            <div style="color: #ccc; font-size: 11px;">You vs 1 AI Zombie Bot • Starts instantly!</div>
+          </div>
+          <div style="color: #00ff00; font-size: 12px; font-weight: bold;">SOLO 🎮</div>
+        </div>
+      </div>
+      
+      <!-- Preset Room 2: Solo vs 1 Zombie -->
+      <div class="preset-room" style="background: rgba(139,0,0,0.15); border: 1px solid #8b0000; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onclick="joinPresetRoom(2)" onmouseover="this.style.background='rgba(139,0,0,0.25)'" onmouseout="this.style.background='rgba(139,0,0,0.15)'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="color: #ff6666; font-weight: bold; font-size: 14px;">🧟 Zombie Hunter ⚡</div>
+            <div style="color: #ccc; font-size: 11px;">You vs 1 AI Zombie Bot • Starts instantly!</div>
+          </div>
+          <div style="color: #00ff00; font-size: 12px; font-weight: bold;">SOLO 🎮</div>
+        </div>
+      </div>
+      
+      <!-- Preset Room 3: Solo vs 2 Zombies -->
+      <div class="preset-room" style="background: rgba(139,0,0,0.15); border: 1px solid #8b0000; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onclick="joinPresetRoom(3)" onmouseover="this.style.background='rgba(139,0,0,0.25)'" onmouseout="this.style.background='rgba(139,0,0,0.15)'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="color: #ff6666; font-weight: bold; font-size: 14px;">🧟🧟 Zombie Swarm ⚡</div>
+            <div style="color: #ccc; font-size: 11px;">You vs 2 AI Zombie Bots • Starts instantly!</div>
+          </div>
+          <div style="color: #00ff00; font-size: 12px; font-weight: bold;">SOLO 🎮</div>
+        </div>
+      </div>
+      
+      <!-- Preset Room 4: Solo vs 2 Zombies -->
+      <div class="preset-room" style="background: rgba(139,0,0,0.15); border: 1px solid #8b0000; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onclick="joinPresetRoom(4)" onmouseover="this.style.background='rgba(139,0,0,0.25)'" onmouseout="this.style.background='rgba(139,0,0,0.15)'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="color: #ff6666; font-weight: bold; font-size: 14px;">🧟🧟 Zombie Apocalypse ⚡</div>
+            <div style="color: #ccc; font-size: 11px;">You vs 2 AI Zombie Bots • Starts instantly!</div>
+          </div>
+          <div style="color: #00ff00; font-size: 12px; font-weight: bold;">SOLO 🎮</div>
+        </div>
+      </div>
+      
+      <!-- Preset Room 5: Solo vs 3 Zombies -->
+      <div class="preset-room" style="background: rgba(139,0,0,0.15); border: 1px solid #8b0000; border-radius: 6px; padding: 10px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s;" onclick="joinPresetRoom(5)" onmouseover="this.style.background='rgba(139,0,0,0.25)'" onmouseout="this.style.background='rgba(139,0,0,0.15)'">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="color: #ff6666; font-weight: bold; font-size: 14px;">🧟🧟🧟 Zombie Nightmare ⚡</div>
+            <div style="color: #ccc; font-size: 11px;">You vs 3 AI Zombie Bots • Starts instantly!</div>
+          </div>
+          <div style="color: #00ff00; font-size: 12px; font-weight: bold;">SOLO 🎮</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multiplayer Dungeons Section -->
+    <div style="border-top: 1px solid #8b0000; padding-top: 15px;">
+      <h3 style="color: #ff0000; margin: 0 0 15px 0; font-size: 16px; text-align: center;">Multiplayer Dungeons</h3>
+      
+      <!-- Rooms List (Always visible) -->
+      <div id="rooms-modal-list">
+        <!-- Room data will be populated here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script src="./force-clearLobbyRooms.js"></script>
+    <script src="./global-fallback.js"></script>
+    
+    <!-- TEMPORARY TESTING: BOTS tap functionality -->
+    <script>
+    
+
+    // Global BOTS tap variables
+    window.botsTapCount = 0;
+    window.botsTapTimeout = null;
+    
+    // BOTS click handler function
+    window.handleBotsClick = function(event) {
+      console.log('🔍 BOTS clicked via onclick!');
+      event.preventDefault();
+      event.stopPropagation();
+      
+      window.botsTapCount++;
+      console.log('🔍 Tap count:', window.botsTapCount);
+      
+      // Clear previous timeout
+      if (window.botsTapTimeout) {
+        clearTimeout(window.botsTapTimeout);
+      }
+      
+      // Visual feedback for tap
+      event.target.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        event.target.style.transform = 'scale(1)';
+      }, 150);
+      
+      // Check if we've reached 6 taps
+      if (window.botsTapCount >= 6) {
+        console.log('🎮 TEMPORARY TESTING: Multiplayer unlocked via BOTS tap!');
+        
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 255, 0, 0.9);
+          color: white;
+          padding: 20px;
+          border-radius: 10px;
+          font-weight: bold;
+          font-size: 18px;
+          z-index: 10000;
+          text-align: center;
+          box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        `;
+        successMsg.innerHTML = '🎮 Multiplayer Unlocked!<br><small>(Temporary testing feature)</small>';
+        document.body.appendChild(successMsg);
+        
+        // Remove message after 3 seconds
+        setTimeout(() => {
+          if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+          }
+        }, 3000);
+        
+        // Unlock multiplayer
+        const paymentWall = document.getElementById('multiplayer-payment-wall');
+        const multiplayerContent = document.getElementById('multiplayer-content');
+        
+        if (paymentWall && multiplayerContent) {
+          paymentWall.style.display = 'none';
+          multiplayerContent.style.display = 'block';
+          console.log('🔍 Multiplayer unlocked successfully');
+        } else {
+          console.log('🔍 ERROR: Could not find payment wall or multiplayer content');
+        }
+        
+        // Reset tap count
+        window.botsTapCount = 0;
+      } else {
+        // Set timeout to reset tap count if not tapped again within 2 seconds
+        window.botsTapTimeout = setTimeout(() => {
+          window.botsTapCount = 0;
+          console.log('🔍 Tap count reset - tap "BOTS" 6 times to unlock multiplayer');
+        }, 2000);
+      }
+    };
+
+    // Mobile-specific touch handlers for BOTS tap
+    window.handleBotsTouch = function(event) {
+      // Prevent default touch behavior but don't stop the touch event
+      event.preventDefault();
+      
+      // Add visual feedback for touch start
+      event.target.style.transform = 'scale(1.05)';
+      event.target.style.background = 'rgba(255, 255, 0, 0.1)';
+      
+      console.log('🔍 BOTS touched on mobile');
+    };
+
+    window.handleBotsTouchEnd = function(event) {
+      // Prevent click event from firing after touchend
+      event.preventDefault();
+      event.stopPropagation();
+      
+      // Reset visual feedback
+      event.target.style.transform = 'scale(1)';
+      event.target.style.background = 'transparent';
+      
+      console.log('🔍 BOTS touch ended - triggering tap logic');
+      
+      // Call the same logic as click handler
+      handleBotsClick(event);
+    };
+    
+      console.log('🔍 BOTS tap functionality loaded via inline script (with mobile support)');
+
+    // Enhanced function to get a unique room name that's not already in use
+    async function getUniqueRoomName() {
+      try {
+        let usedRoomNames = [];
+        
+        // Get all currently active room names
+        if (window.getAvailableRooms) {
+          const rooms = await getAvailableRooms();
+          usedRoomNames = rooms.map(room => room.roomName).filter(name => name);
+        }
+        
+        // Comprehensive horror dungeon names
+        const horrorRoomNames = [
+          'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+          'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal',
+          'Witch Dungeon', 'Spectral Woods', 'Cursed Cathedral', 'Phantom Theater',
+          'Dark Sanctuary', 'Bone Chapel', 'Terror Tower', 'Shadow Realm',
+          'Haunted Cemetery', 'Monster Lab', 'Ghoul Haven', 'Sinister Sanctum',
+          'Dracula Castle', 'Frankenstein Lab', 'Wolfman Woods', 'Mummy Tomb',
+          'Phantom Opera', 'Nosferatu Keep', 'Bates Motel', 'Overlook Hotel',
+          'Amityville House', 'Elm Street', 'Crystal Lake', 'Haddonfield',
+          'Silent Hill', 'Raccoon City', 'Arkham Asylum', 'Blackwater Falls',
+          'Ravens Hollow', 'Sleepy Hollow', 'Salem Witch House', 'Transylvania',
+          'Gothic Mansion', 'Abandoned Asylum', 'Cursed Graveyard', 'Demon Church',
+          'Bloody Morgue', 'Haunted Hospital', 'Ghost Ship', 'Zombie Factory',
+          'Vampire Catacombs', 'Werewolf Den', 'Banshee Bog', 'Poltergeist House',
+          'Necromancer Tower', 'Lich Dungeon', 'Skeleton Crypt', 'Wraith Ruins',
+          'Hellish Depths', 'Infernal Pit', 'Demonic Lair', 'Satanic Chapel',
+          'Torture Chamber', 'Death Maze', 'Horror Halls', 'Nightmare Nest'
+        ];
+        
+        // Filter out room names already in use (case-insensitive)
+        const availableRoomNames = horrorRoomNames.filter(roomName => 
+          !usedRoomNames.some(usedName => 
+            usedName.toLowerCase() === roomName.toLowerCase()
+          )
+        );
+        
+        // If all room names are taken, return a room name with number suffix
+        if (availableRoomNames.length === 0) {
+          const baseRoomName = horrorRoomNames[Math.floor(Math.random() * horrorRoomNames.length)];
+          let counter = 2;
+          let uniqueRoomName = `${baseRoomName} ${counter}`;
+          
+          while (usedRoomNames.some(usedName => 
+            usedName.toLowerCase() === uniqueRoomName.toLowerCase()
+          )) {
+            counter++;
+            uniqueRoomName = `${baseRoomName} ${counter}`;
+          }
+          
+          console.log(`All room names in use, generated: ${uniqueRoomName}`);
+          return uniqueRoomName;
+        }
+        
+        // Return a random available room name
+        const selectedRoomName = availableRoomNames[Math.floor(Math.random() * availableRoomNames.length)];
+        console.log(`Selected unique room name: ${selectedRoomName} (${availableRoomNames.length} available)`);
+        return selectedRoomName;
+        
+      } catch (error) {
+        console.warn('Error getting unique room name:', error);
+        // Fallback to basic random room name
+        const fallbackNames = [
+          'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+          'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal'
+        ];
+        return fallbackNames[Math.floor(Math.random() * fallbackNames.length)];
+      }
+    }
+
+    // Initialize form fields with default values
+    window.addEventListener('DOMContentLoaded', function() {
+      // Initialize rain sound loop
+      const rainSound = document.getElementById('rainSound');
+      if (rainSound) {
+        rainSound.volume = 0.3; // Set volume to 30%
+        
+        function playRainSound() {
+          rainSound.currentTime = 0; // Reset to start
+          rainSound.play().catch(function(error) {
+            console.log("Rain sound playback failed:", error);
+          });
+        }
+        
+        // Play rain sound every 15 seconds
+        playRainSound(); // Play immediately
+        setInterval(playRainSound, 15000); // Then every 15 seconds
+      }
+      
+      // Horror-themed victim names from classic films and horror history
+      const victimNames = [
+        'Dracula', 'Frankenstein', 'Wolfman', 'Mummy', 'Phantom',
+        'Nosferatu', 'Orlok', 'Renfield', 'VanHelsing', 'Harker',
+        'Wednesday', 'Morticia', 'Gomez', 'Lurch', 'Fester',
+        'Carrie', 'Danny', 'Regan', 'Damien', 'Chucky',
+        'Jason', 'Freddy', 'Michael', 'Leatherface', 'Pinhead',
+        'Beetlejuice', 'Pennywise', 'Annabelle', 'Valak', 'Conjuring',
+        'Babadook', 'Sinister', 'Insidious', 'Hereditary', 'Midsommar',
+        'Rosemary', 'Norman', 'Psycho', 'Hannibal', 'Clarice',
+        'Jigsaw', 'Saw', 'Scream', 'Ghostface', 'Sidney',
+        'Laurie', 'Ellen', 'Ash', 'Buffy', 'Blade'
+      ];
+      
+      // Comprehensive horror-themed dungeon names from classic films and horror lore
+      const horrorRoomNames = [
+        'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+        'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal',
+        'Witch Dungeon', 'Spectral Woods', 'Cursed Cathedral', 'Phantom Theater',
+        'Dark Sanctuary', 'Bone Chapel', 'Terror Tower', 'Shadow Realm',
+        'Haunted Cemetery', 'Monster Lab', 'Ghoul Haven', 'Sinister Sanctum',
+        'Dracula Castle', 'Frankenstein Lab', 'Wolfman Woods', 'Mummy Tomb',
+        'Phantom Opera', 'Nosferatu Keep', 'Bates Motel', 'Overlook Hotel',
+        'Amityville House', 'Elm Street', 'Crystal Lake', 'Haddonfield',
+        'Silent Hill', 'Raccoon City', 'Arkham Asylum', 'Blackwater Falls',
+        'Ravens Hollow', 'Sleepy Hollow', 'Salem Witch House', 'Transylvania',
+        'Gothic Mansion', 'Abandoned Asylum', 'Cursed Graveyard', 'Demon Church',
+        'Bloody Morgue', 'Haunted Hospital', 'Ghost Ship', 'Zombie Factory',
+        'Vampire Catacombs', 'Werewolf Den', 'Banshee Bog', 'Poltergeist House',
+        'Necromancer Tower', 'Lich Dungeon', 'Skeleton Crypt', 'Wraith Ruins',
+        'Hellish Depths', 'Infernal Pit', 'Demonic Lair', 'Satanic Chapel',
+        'Torture Chamber', 'Death Maze', 'Horror Halls', 'Nightmare Nest'
+      ];
+      
+      // Set random victim name
+      const displayNameInput = document.getElementById('displayName');
+      if (displayNameInput) {
+        const randomVictimName = victimNames[Math.floor(Math.random() * victimNames.length)];
+        displayNameInput.value = randomVictimName;
+      }
+      
+      // Set random room name (with duplicate checking)
+      const roomNameInput = document.getElementById('roomName');
+      if (roomNameInput) {
+        // Check if function exists before calling
+        if (typeof getUniqueRoomName === 'function') {
+          getUniqueRoomName().then(uniqueRoomName => {
+            roomNameInput.value = uniqueRoomName;
+          }).catch((error) => {
+            console.warn('getUniqueRoomName failed:', error);
+            // Fallback to basic random selection if unique checking fails
+            const fallbackRoomNames = [
+              'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+              'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal',
+              'Witch Dungeon', 'Spectral Woods', 'Cursed Cathedral', 'Phantom Theater'
+            ];
+            const randomRoomName = fallbackRoomNames[Math.floor(Math.random() * fallbackRoomNames.length)];
+            roomNameInput.value = randomRoomName;
+          });
+        } else {
+          console.error('getUniqueRoomName function not found, using fallback');
+          // Direct fallback if function doesn't exist
+          const fallbackRoomNames = [
+            'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+            'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal',
+            'Witch Dungeon', 'Spectral Woods', 'Cursed Cathedral', 'Phantom Theater'
+          ];
+          const randomRoomName = fallbackRoomNames[Math.floor(Math.random() * fallbackRoomNames.length)];
+          roomNameInput.value = randomRoomName;
+        }
+      }
+      
+      console.log('🎭 Form fields initialized with default values');
+    });
+
+    // Cleanup ping notifications when page unloads
+    window.addEventListener('beforeunload', () => {
+      if (typeof stopWaitingRoomPing === 'function') {
+        stopWaitingRoomPing();
+      }
+      if (typeof stopAutomaticCleanup === 'function') {
+        stopAutomaticCleanup();
+      }
+    });
+  
+  // Advisory message function
+  window.showAdvisory = function(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    // Create advisory element
+    const advisory = document.createElement('div');
+    advisory.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'success' ? 'rgba(0, 255, 0, 0.9)' : type === 'error' ? 'rgba(255, 0, 0, 0.9)' : 'rgba(0, 0, 255, 0.9)'};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      z-index: 10000;
+      max-width: 300px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    advisory.textContent = message;
+    
+    document.body.appendChild(advisory);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+      if (advisory.parentNode) {
+        advisory.parentNode.removeChild(advisory);
+      }
+    }, 5000);
+  };
+  
+  // Auto-start logic for rooms (using global variables)
+  let currentRoomId = null;
+  let roomUpdateListener = null;
+  let waitingRoomPingTimer = null;
+  
+  // Create ping sound for waiting room notifications
+  const waitingRoomPing = new Audio('assets/sounds/ping.mp3');
+  waitingRoomPing.volume = 0.4;
+  
+  // Function to start ping notifications for waiting room
+  function startWaitingRoomPing() {
+    // Clear any existing timer
+    if (waitingRoomPingTimer) {
+      clearInterval(waitingRoomPingTimer);
+    }
+    
+    console.log('🔔 Starting waiting room ping notifications every 20 seconds');
+    
+    // Start pinging every 20 seconds
+    waitingRoomPingTimer = setInterval(async () => {
+      try {
+        waitingRoomPing.currentTime = 0; // Reset to start
+        await waitingRoomPing.play();
+        console.log('🔔 Ping! Waiting for players...');
+      } catch (error) {
+        console.warn('Could not play waiting room ping:', error);
+      }
+    }, 20000); // 20 seconds
+  }
+  
+  // Function to stop ping notifications
+  function stopWaitingRoomPing() {
+    if (waitingRoomPingTimer) {
+      clearInterval(waitingRoomPingTimer);
+      waitingRoomPingTimer = null;
+      console.log('🔔 Stopped waiting room ping notifications');
+    }
+  }
+  
+  // Function to start listening for room updates
+  window.startRoomMonitoring = function(roomId) {
+    // Prevent multiple monitoring of the same room
+    if (currentRoomId === roomId && roomUpdateListener) {
+      console.log('🔍 Already monitoring room:', roomId);
+      return;
+    }
+    
+    if (roomUpdateListener) {
+      roomUpdateListener(); // Unsubscribe from previous listener
+    }
+    
+    // Stop any existing ping notifications when switching rooms
+    stopWaitingRoomPing();
+    
+    currentRoomId = roomId;
+    console.log('🔍 Starting room monitoring for:', roomId);
+    
+    // Import and use the listenToRoomUpdates function
+    import('./rooms.js').then(async ({ listenToRoomUpdates }) => {
+      try {
+        roomUpdateListener = await listenToRoomUpdates(roomId, (roomData) => {
+          console.log('🔍 Room update received:', roomData);
+          
+          // Debug: Log all room data to understand the structure
+          console.log('🔍 Room data details:', {
+            status: roomData.status,
+            players: roomData.players,
+            playerCount: roomData.players ? roomData.players.length : 0,
+            minPlayers: roomData.minPlayers,
+            roomId: roomId
+          });
+          
+          if (roomData.status === 'waiting_for_players') {
+            const playerCount = roomData.players ? roomData.players.length : 0;
+            const maxPlayers = roomData.maxPlayers || 2;
+            
+            console.log(`🔍 Room has ${playerCount}/${maxPlayers} players`);
+            
+            // Start ping notifications if not already running
+            if (!waitingRoomPingTimer) {
+              startWaitingRoomPing();
+            }
+            
+            if (playerCount >= maxPlayers && !window.gameAutoStartTriggered) {
+              console.log('🎮 Auto-starting game - enough players joined!');
+              showAdvisory('All players joined! Starting game...', 'success');
+              
+              // Prevent multiple auto-start attempts
+              window.gameAutoStartTriggered = true;
+              
+              // Stop ping notifications before starting game
+              stopWaitingRoomPing();
+              
+              // For game rooms, redirect directly to game page instead of calling startGameFromRoom
+              const playerName = document.getElementById('displayName').value.trim();
+              const gameUrl = `game.html?roomId=${encodeURIComponent(roomId)}&player=${encodeURIComponent(playerName)}&autostart=1`;
+              console.log('🎮 Redirecting to game:', gameUrl);
+              window.location.href = gameUrl;
+            }
+          } else if (roomData.status === 'in_progress' || roomData.gameStarted) {
+            console.log('🎮 Game already started, redirecting to game page...');
+            // Stop ping notifications
+            stopWaitingRoomPing();
+            
+            // Redirect to the game if it has started
+            const playerName = document.getElementById('displayName').value.trim();
+            const gameUrl = `game.html?roomId=${encodeURIComponent(roomId)}&player=${encodeURIComponent(playerName)}&autostart=1`;
+            console.log('🎮 Redirecting to active game:', gameUrl);
+            window.location.href = gameUrl;
+          } else {
+            // Room is no longer waiting - stop ping notifications
+            stopWaitingRoomPing();
+          }
+        });
+      } catch (error) {
+        console.error('Error setting up room monitoring:', error);
+        showAdvisory('Failed to monitor room updates', 'error');
+      }
+    });
+  };
+  
+  // Function to start game from room
+  window.startGameFromRoom = async function(roomId) {
+    try {
+      console.log('🎮 Starting game from room:', roomId);
+      
+      const { startGame } = await import('./rooms.js');
+      const gameRoomId = await startGame(roomId);
+      
+      console.log('🎮 Game started with room ID:', gameRoomId);
+      showAdvisory('Game started successfully!', 'success');
+      
+      // Redirect to game page with auto-start parameters
+      const playerName = document.getElementById('displayName').value.trim();
+      const gameUrl = `game.html?roomId=${encodeURIComponent(gameRoomId)}&player=${encodeURIComponent(playerName)}&host=${window.isHost ? '1' : '0'}&autostart=1`;
+      window.location.href = gameUrl;
+      
+    } catch (error) {
+      console.error('Error starting game:', error);
+      showAdvisory('Failed to start game: ' + error.message, 'error');
+    }
+  };
+  </script>
+  
+  <script type="module">
+// Import rooms functions with fallback for clearLobbyRooms  
+let createRoom, joinRoom, startGame, listenToRoomUpdates, listenToAvailableRooms, clearLobbyRooms;
+
+try {
+  const roomsModule = await import('./rooms.js');
+  createRoom = roomsModule.createRoom;
+  joinRoom = roomsModule.joinRoom;
+  startGame = roomsModule.startGame;
+  listenToRoomUpdates = roomsModule.listenToRoomUpdates;
+  listenToAvailableRooms = roomsModule.listenToAvailableRooms;
+  clearLobbyRooms = roomsModule.clearLobbyRooms;
+} catch (error) {
+  console.error('Failed to import rooms.js:', error);
+  // Fallback: use the global clearLobbyRooms function
+  clearLobbyRooms = window.clearLobbyRooms || (async () => {
+    console.log('clearLobbyRooms not available, skipping room clearing');
+  });
+}
+
+// Initialize Firebase for payment tracking
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+// Production Firebase config for Horropoly
+const firebaseConfig = {
+  apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+  authDomain: "horropoly.firebaseapp.com",
+  projectId: "horropoly",
+  storageBucket: "horropoly.firebasestorage.app",
+  messagingSenderId: "582020770053",
+  appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+};
+
+// Fallback for when Firebase is not configured
+let firebaseAvailable = false;
+
+// Production Backend API configuration (unused by new payment system; kept for legacy UI only)
+const API_BASE_URL = 'https://horropoly.com';
+
+// Initialize Firebase (only if not already initialized)
+let app, db;
+
+try {
+  // Check if Firebase is already initialized
+  if (typeof window.firebaseApp === 'undefined') {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    // Store globally to prevent double initialization
+    window.firebaseApp = app;
+    window.firebaseDb = db;
+    firebaseAvailable = true;
+    console.log('Firebase initialized successfully');
+  } else {
+    // Use existing Firebase instance
+    app = window.firebaseApp;
+    db = window.firebaseDb;
+    firebaseAvailable = true;
+    console.log('Using existing Firebase instance');
+  }
+} catch (error) {
+  console.log('Firebase not configured, using localStorage fallback');
+  firebaseAvailable = false;
+}
+
+// Check for payment completion on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Check if user returned from payment
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentStatus = urlParams.get('payment_status');
+  const sessionId = urlParams.get('session_id');
+  
+  if (paymentStatus === 'success' && sessionId) {
+    // User returned from successful payment
+    const userId = localStorage.getItem('userId') || crypto.randomUUID();
+    localStorage.setItem('userId', userId);
+    
+    const paymentData = {
+      payment_intent: sessionId,
+      session_id: sessionId
+    };
+    
+    recordPaymentInFirebase(userId, paymentData).then(() => {
+      // Clean URL and show QR code
+      window.history.replaceState({}, document.title, window.location.pathname);
+      showQRUnlockModal();
+    });
+  }
+  
+  // Add keyboard shortcut to cancel payment processes
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      // Check if any payment modals are open
+      const paymentModals = document.querySelectorAll('#payment-loading-modal, #payment-detection-modal, div[style*="Alternative Payment Methods"], div[style*="Payment Error"], div[style*="Payment Verification Timeout"]');
+      if (paymentModals.length > 0) {
+        event.preventDefault();
+        cancelAllPaymentProcesses();
+        console.log('Payment cancelled via Escape key');
+      }
+    }
+  });
+});
+
+const lobbyPanel = document.querySelector('.lobby-panel');
+
+const displayNameInput = document.getElementById('displayName');
+const roomNameInput = document.getElementById('roomName');
+const minPlayersSelect = document.getElementById('minPlayers');
+
+
+
+const startBtn = document.getElementById('startBtn');
+let unsubscribeRoom = null;
+let playerName = '';
+let playerUid = '';
+let isHost = false;
+let autoStarted = false;
+
+// Function to get a random horror-themed name from classic films and horror history
+function getRandomName() {
+  const names = [
+    'Dracula', 'Frankenstein', 'Wolfman', 'Mummy', 'Phantom',
+    'Nosferatu', 'Orlok', 'Renfield', 'VanHelsing', 'Harker',
+    'Wednesday', 'Morticia', 'Gomez', 'Lurch', 'Fester',
+    'Carrie', 'Danny', 'Regan', 'Damien', 'Chucky',
+    'Jason', 'Freddy', 'Michael', 'Leatherface', 'Pinhead',
+    'Beetlejuice', 'Pennywise', 'Annabelle', 'Valak', 'Conjuring',
+    'Babadook', 'Sinister', 'Insidious', 'Hereditary', 'Midsommar',
+    'Rosemary', 'Norman', 'Psycho', 'Hannibal', 'Clarice',
+    'Jigsaw', 'Saw', 'Scream', 'Ghostface', 'Sidney',
+    'Laurie', 'Ellen', 'Ash', 'Buffy', 'Blade'
+  ];
+  return names[Math.floor(Math.random() * names.length)];
+}
+
+// Function to get player name with fallback to random name
+function getPlayerName() {
+  const enteredName = displayNameInput.value.trim();
+  return enteredName || getRandomName();
+}
+
+// Enhanced function to get a unique random name that's not already in use
+async function getUniqueRandomName(roomId = null) {
+  try {
+    let usedNames = [];
+    
+    // If joining a specific room, get names already in use
+    if (roomId && window.getAvailableRooms) {
+      const rooms = await getAvailableRooms();
+      const targetRoom = rooms.find(room => room.id === roomId || room.roomName === roomId);
+      if (targetRoom && targetRoom.players) {
+        usedNames = targetRoom.players.map(p => p.name || p.displayName).filter(name => name);
+      }
+    }
+    
+    // Get all horror names
+    const horrorNames = [
+      'Dracula', 'Frankenstein', 'Wolfman', 'Mummy', 'Phantom',
+      'Nosferatu', 'Orlok', 'Renfield', 'VanHelsing', 'Harker',
+      'Wednesday', 'Morticia', 'Gomez', 'Lurch', 'Fester',
+      'Carrie', 'Danny', 'Regan', 'Damien', 'Chucky',
+      'Jason', 'Freddy', 'Michael', 'Leatherface', 'Pinhead',
+      'Beetlejuice', 'Pennywise', 'Annabelle', 'Valak', 'Conjuring',
+      'Babadook', 'Sinister', 'Insidious', 'Hereditary', 'Midsommar',
+      'Rosemary', 'Norman', 'Psycho', 'Hannibal', 'Clarice',
+      'Jigsaw', 'Saw', 'Scream', 'Ghostface', 'Sidney',
+      'Laurie', 'Ellen', 'Ash', 'Buffy', 'Blade'
+    ];
+    
+    // Filter out names already in use (case-insensitive)
+    const availableNames = horrorNames.filter(name => 
+      !usedNames.some(usedName => 
+        usedName.toLowerCase() === name.toLowerCase()
+      )
+    );
+    
+    // If all names are taken, return a random name with number suffix
+    if (availableNames.length === 0) {
+      const baseName = horrorNames[Math.floor(Math.random() * horrorNames.length)];
+      let counter = 2;
+      let uniqueName = `${baseName} ${counter}`;
+      
+      while (usedNames.some(usedName => 
+        usedName.toLowerCase() === uniqueName.toLowerCase()
+      )) {
+        counter++;
+        uniqueName = `${baseName} ${counter}`;
+      }
+      
+      return uniqueName;
+    }
+    
+    // Return a random available name
+    return availableNames[Math.floor(Math.random() * availableNames.length)];
+    
+  } catch (error) {
+    console.warn('Error getting unique random name:', error);
+    return getRandomName(); // Fallback to basic random name
+  }
+}
+
+// Payment verification functions
+function checkMultiplayerAccess() {
+  return localStorage.getItem('multiplayerPaid') === 'true';
+}
+
+async function unlockMultiplayer() {
+  try {
+    // Import and initialize the new payment system
+    const { initializePaymentSystem } = await import('./payment-system.js');
+    const paymentSystem = initializePaymentSystem();
+    
+    // Start the payment process
+    await paymentSystem.startPayment();
+    
+  } catch (error) {
+    console.error('Payment system error:', error);
+    showPaymentError('Failed to start payment system. Please try again.');
+  }
+}
+
+// 🧪 TESTING FUNCTION - Bypass payment wall for development
+function unlockMultiplayerForTesting() {
+  console.log('🧪 TESTING: Unlocking multiplayer without payment...');
+  
+  // Set localStorage flag to indicate payment is complete
+  localStorage.setItem('multiplayerPaid', 'true');
+  
+  // Hide all payment walls
+  const paymentWalls = [
+    document.getElementById('multiplayer-payment-wall'),
+    document.getElementById('multiplayer-payment-wall-modal'),
+    document.querySelector('.payment-wall'),
+    document.querySelector('[id*="payment"]')
+  ];
+  
+  paymentWalls.forEach(wall => {
+    if (wall) {
+      wall.style.display = 'none';
+      console.log('🧪 Hidden payment wall:', wall.id || wall.className);
+    }
+  });
+  
+  // Show multiplayer content
+  const multiplayerContent = [
+    document.getElementById('multiplayer-content'),
+    document.getElementById('create-dungeon-section'),
+    document.querySelector('.multiplayer-features')
+  ];
+  
+  multiplayerContent.forEach(content => {
+    if (content) {
+      content.style.display = 'block';
+      console.log('🧪 Shown multiplayer content:', content.id || content.className);
+    }
+  });
+  
+  // Show success message
+  const successMsg = document.createElement('div');
+  successMsg.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 200, 0, 0.95);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    z-index: 10000;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0, 200, 0, 0.6);
+    border: 2px solid #00ff00;
+  `;
+  successMsg.innerHTML = `
+    🧪 <strong>Testing Mode</strong><br>
+    Multiplayer Unlocked!<br>
+    <small style="font-size: 14px; opacity: 0.8;">No payment required for testing</small>
+  `;
+  document.body.appendChild(successMsg);
+  
+  // Remove message after 4 seconds
+  setTimeout(() => {
+    if (successMsg.parentNode) {
+      successMsg.parentNode.removeChild(successMsg);
+    }
+  }, 4000);
+  
+  // Trigger verification to update UI
+  verifyPayment();
+  
+  console.log('✅ TESTING: Multiplayer unlocked successfully!');
+  console.log('💡 To reset: localStorage.removeItem("multiplayerPaid") and refresh page');
+  
+  return true;
+}
+
+// 🧪 TESTING FUNCTION - Reset payment wall for testing
+function resetMultiplayerPaymentWall() {
+  console.log('🧪 TESTING: Resetting payment wall...');
+  
+  // Remove localStorage flag
+  localStorage.removeItem('multiplayerPaid');
+  
+  // Show all payment walls
+  const paymentWalls = [
+    document.getElementById('multiplayer-payment-wall'),
+    document.getElementById('multiplayer-payment-wall-modal')
+  ];
+  
+  paymentWalls.forEach(wall => {
+    if (wall) {
+      wall.style.display = 'block';
+      console.log('🧪 Shown payment wall:', wall.id);
+    }
+  });
+  
+  // Hide multiplayer content
+  const multiplayerContent = [
+    document.getElementById('multiplayer-content'),
+    document.getElementById('create-dungeon-section')
+  ];
+  
+  multiplayerContent.forEach(content => {
+    if (content) {
+      content.style.display = 'none';
+      console.log('🧪 Hidden multiplayer content:', content.id);
+    }
+  });
+  
+  // Show reset message
+  const resetMsg = document.createElement('div');
+  resetMsg.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 100, 0, 0.95);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 18px;
+    z-index: 10000;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(255, 100, 0, 0.6);
+    border: 2px solid #ff6600;
+  `;
+  resetMsg.innerHTML = `
+    🔄 <strong>Testing Mode</strong><br>
+    Payment Wall Restored!<br>
+    <small style="font-size: 14px; opacity: 0.8;">Ready for testing unlock again</small>
+  `;
+  document.body.appendChild(resetMsg);
+  
+  // Remove message after 3 seconds
+  setTimeout(() => {
+    if (resetMsg.parentNode) {
+      resetMsg.parentNode.removeChild(resetMsg);
+    }
+  }, 3000);
+  
+  // Trigger verification to update UI
+  verifyPayment();
+  
+  console.log('✅ TESTING: Payment wall reset successfully!');
+  
+  return true;
+}
+
+function showPaymentLoading() {
+  const modal = document.createElement('div');
+  modal.id = 'payment-loading-modal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">💳 Processing Payment</h2>
+      <div style="margin: 20px 0;">
+        <div style="
+          width: 40px;
+          height: 40px;
+          border: 4px solid #333;
+          border-top: 4px solid #ff0000;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto;
+        "></div>
+      </div>
+      <p style="margin-bottom: 20px;">Opening secure payment page...</p>
+      <p style="font-size: 14px; color: #ccc;">If the payment page doesn't open, please check your popup blocker.</p>
+      <button onclick="cancelAllPaymentProcesses()" style="
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Cancel Payment</button>
+      <br>
+      <button onclick="openStripePayment()" style="
+        background: linear-gradient(45deg, #00ff00, #00cc00);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+      ">Open Payment Page</button>
+    </div>
+  `;
+  
+  // Add CSS animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  document.body.appendChild(modal);
+}
+
+function showPopupBlockedMessage() {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">⚠️ Popup Blocked</h2>
+      <p style="margin-bottom: 20px;">Your browser blocked the payment popup. Please:</p>
+      <ol style="text-align: left; margin-bottom: 20px;">
+        <li>Allow popups for this site</li>
+        <li>Or click the link below to pay directly</li>
+      </ol>
+      <a href="https://buy.stripe.com/fZu7sLfBa4Ju7Uz0Kvfbq0j" target="_blank" style="
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+        color: white;
+        text-decoration: none;
+        padding: 15px 30px;
+        border-radius: 6px;
+        display: inline-block;
+        font-weight: bold;
+        margin: 10px;
+      ">Open Payment Page</a>
+      <br>
+      <button onclick="this.parentElement.parentElement.remove()" style="
+        background: #333;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      ">Close</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+function showPaymentError(message) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">❌ Payment Error</h2>
+      <p style="margin-bottom: 20px;">${message}</p>
+      <button onclick="this.parentElement.parentElement.remove()" style="
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Close</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Global variable to track payment polling interval
+let paymentPollingInterval = null;
+
+function closePaymentLoadingModal() {
+  const modal = document.getElementById('payment-loading-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+// Comprehensive payment cancellation function
+function cancelAllPaymentProcesses() {
+  console.log('Cancelling all payment processes...');
+  
+  // Stop payment polling
+  if (paymentPollingInterval) {
+    clearInterval(paymentPollingInterval);
+    paymentPollingInterval = null;
+    console.log('Payment polling stopped');
+  }
+  
+  // Close payment loading modal
+  const loadingModal = document.getElementById('payment-loading-modal');
+  if (loadingModal) {
+    loadingModal.remove();
+    console.log('Payment loading modal closed');
+  }
+  
+  // Close payment detection modal
+  const detectionModal = document.getElementById('payment-detection-modal');
+  if (detectionModal) {
+    detectionModal.remove();
+    console.log('Payment detection modal closed');
+  }
+  
+  // Close any alternative payment modals (created by openStripePayment)
+  const alternativeModals = document.querySelectorAll('div[style*="Alternative Payment Methods"]');
+  alternativeModals.forEach(modal => {
+    modal.parentElement.remove();
+    console.log('Alternative payment modal closed');
+  });
+  
+  // Close any payment error modals
+  const errorModals = document.querySelectorAll('div[style*="Payment Error"]');
+  errorModals.forEach(modal => {
+    modal.remove();
+    console.log('Payment error modal closed');
+  });
+  
+  // Close any payment timeout modals
+  const timeoutModals = document.querySelectorAll('div[style*="Payment Verification Timeout"]');
+  timeoutModals.forEach(modal => {
+    modal.remove();
+    console.log('Payment timeout modal closed');
+  });
+  
+  // Clear any stored payment session data
+  localStorage.removeItem('stripe_session_id');
+  console.log('Payment session data cleared');
+  
+  console.log('All payment processes cancelled successfully');
+}
+
+function openStripePayment() {
+  closePaymentLoadingModal();
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 500px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">💳 Alternative Payment Methods</h2>
+      <p style="margin-bottom: 20px;">Choose your preferred payment method:</p>
+      
+      <div style="margin: 20px 0;">
+        <button onclick="startPaymentDetection()" style="
+          background: linear-gradient(45deg, #ff0000, #cc0000);
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          margin: 10px 0;
+          width: 100%;
+        ">💳 Pay £1.99</button>
+        
+
+      </div>
+      
+      <p style="font-size: 14px; color: #ccc; margin-top: 20px;">
+        After payment, return to this page and the system will detect your payment.
+      </p>
+      
+      <button onclick="cancelAllPaymentProcesses()" style="
+        background: #333;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 10px;
+      ">Cancel Payment</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+async function recordPaymentInFirebase(userId, paymentData) {
+  console.log('recordPaymentInFirebase called with:', { userId, paymentData });
+  
+  if (!firebaseAvailable) {
+    console.log('Firebase not available, skipping Firebase record');
+    return true; // Return true so the flow continues
+  }
+  
+  console.log('Firebase is available, attempting to record...');
+  
+  // Check if Firebase config is using placeholder values
+  if (firebaseConfig.projectId === 'your-project-id' || !firebaseConfig.projectId) {
+    console.log('Firebase using placeholder config, skipping Firebase record');
+    return true; // Return true so the flow continues
+  }
+  
+  try {
+    console.log('Importing Firebase modules...');
+    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    console.log('Firebase modules imported successfully');
+    
+    console.log('Creating payment reference...');
+    const paymentRef = doc(db, 'payments', userId);
+    console.log('Payment reference created');
+    
+    console.log('Setting payment data...');
+    
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Firebase operation timed out')), 5000); // 5 second timeout
+    });
+    
+    const setDocPromise = setDoc(paymentRef, {
+      userId: userId,
+      paymentId: paymentData.payment_intent || 'stripe_payment',
+      amount: 199, // $1.99 in cents
+      currency: 'usd',
+      status: 'completed',
+      timestamp: new Date().toISOString(),
+      feature: 'multiplayer_access',
+      stripeSessionId: paymentData.session_id || null
+    });
+    
+    // Race between setDoc and timeout
+    await Promise.race([setDocPromise, timeoutPromise]);
+    
+    console.log('Payment recorded in Firebase for user:', userId);
+    return true;
+  } catch (error) {
+    console.error('Error recording payment in Firebase:', error);
+    console.log('Returning false due to Firebase error');
+    return false;
+  }
+}
+
+async function checkPaymentStatus() {
+  const userId = localStorage.getItem('userId') || crypto.randomUUID();
+  localStorage.setItem('userId', userId);
+  
+  try {
+    // Check if user has already paid
+    const hasPaid = checkMultiplayerAccess();
+    if (hasPaid) {
+      verifyPayment();
+      return;
+    }
+    
+    // Check for payment verification via URL parameters (Stripe redirect)
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment_status');
+    const sessionId = urlParams.get('session_id');
+    
+    if (paymentStatus === 'success' && sessionId) {
+      // Payment was successful - record in Firebase
+      const paymentData = {
+        payment_intent: sessionId,
+        session_id: sessionId
+      };
+      
+      const paymentRecorded = await recordPaymentInFirebase(userId, paymentData);
+      
+      if (paymentRecorded) {
+        // Clean URL and show QR code
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showQRUnlockModal();
+      }
+    } else {
+      // Set up polling for payment completion
+      pollForPaymentCompletion(userId);
+    }
+    
+  } catch (error) {
+    console.error('Error checking payment status:', error);
+  }
+}
+
+// Enhanced payment detection with manual verification
+async function startPaymentDetection() {
+  try {
+    // Import and initialize the new payment system
+    const { initializePaymentSystem } = await import('./payment-system.js');
+    const paymentSystem = initializePaymentSystem();
+    
+    // Start the payment process
+    await paymentSystem.startPayment();
+    
+  } catch (error) {
+    console.error('Payment detection error:', error);
+    showPaymentError('Failed to start payment detection. Please try again.');
+  }
+}
+
+function showPaymentDetectionModal() {
+  const modal = document.createElement('div');
+  modal.id = 'payment-detection-modal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 500px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">💳 Payment Detection Active</h2>
+      <div style="margin: 20px 0;">
+        <div style="
+          width: 40px;
+          height: 40px;
+          border: 4px solid #333;
+          border-top: 4px solid #ff0000;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto;
+        "></div>
+      </div>
+      <p style="margin-bottom: 20px;">Waiting for payment completion...</p>
+      <p style="font-size: 14px; color: #ccc; margin-bottom: 20px;">
+        If you've completed payment, the system will automatically detect it.<br>
+        <strong style="color: #ff0000;">Webhook verification is required - no manual bypass available.</strong>
+      </p>
+      
+      <div style="margin: 20px 0;">
+        <button id="manual-payment-btn" style="
+          background: linear-gradient(45deg, #00ff00, #00cc00);
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          margin: 10px;
+        ">✅ Check Webhook Status</button>
+        
+        <button id="cancel-payment-btn" style="
+          background: #333;
+          color: white;
+          border: none;
+          padding: 15px 30px;
+          border-radius: 6px;
+          cursor: pointer;
+          font-weight: bold;
+          margin: 10px;
+        ">❌ Cancel</button>
+      </div>
+      
+      <p style="font-size: 12px; color: #999;">
+        Payment detection will continue for 5 minutes
+      </p>
+      
+      <div style="font-size: 12px; color: #999; margin-top: 10px;">
+        <div>Firebase: ${firebaseAvailable ? '✅ Available' : '❌ Not Configured'}</div>
+        <div>localStorage: ✅ Available</div>
+      </div>
+      
+
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Add event listeners after modal is created
+  document.getElementById('manual-payment-btn').addEventListener('click', manualPaymentVerification);
+  document.getElementById('cancel-payment-btn').addEventListener('click', cancelAllPaymentProcesses);
+}
+
+function closePaymentDetectionModal() {
+  console.log('Closing payment detection modal...');
+  const modal = document.getElementById('payment-detection-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function closeQRModal() {
+  console.log('Closing QR modal...');
+  const modal = document.getElementById('qr-unlock-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function manualUnlockFromQR() {
+  console.log('Manual unlock from QR triggered...');
+  
+  // Check if user has actually paid
+  const hasPaid = checkMultiplayerAccess();
+  const stripeSessionId = localStorage.getItem('stripe_session_id');
+  
+  if (!hasPaid && !stripeSessionId) {
+    console.log('No payment found - manual unlock blocked');
+    alert('❌ Payment required. Please complete payment first.');
+    return;
+  }
+  
+  // Verify webhook confirmation before allowing unlock
+  if (stripeSessionId) {
+    const hasValidPayment = await verifyStripePayment(stripeSessionId);
+    if (!hasValidPayment) {
+      alert('❌ Webhook verification required!\n\nPayment must be confirmed via Stripe webhook before multiplayer can be unlocked.\n\nPlease complete payment through Stripe and wait for automatic verification.');
+      return;
+       }
+  }
+  
+  // Only unlock if webhook verification passed
+  localStorage.setItem('multiplayerPaid', 'true');
+  
+  // Remove any unlock token
+  localStorage.removeItem('unlock_token');
+  
+  // Remove the manual unlock modal
+  const modal = document.querySelector('div[style*="Manual Unlock Required"]');
+  if (modal) modal.remove();
+  
+  // Show success message
+  alert('🎉 Multiplayer unlocked successfully!');
+  
+  // Refresh the page to update the UI
+  window.location.reload();
+}
+
+function generateDeviceFingerprint() {
+  // DISABLED: Device fingerprinting has been disabled for privacy reasons
+  // Return a static fingerprint instead of generating a real one
+  const staticFingerprint = {
+    userAgent: 'Mozilla/5.0 (Generic Browser)',
+    screen: '1920x1080',
+    timezone: 'UTC',
+    language: 'en-US',
+    platform: 'Generic Platform',
+    timestamp: Date.now(),
+    disabled: true,
+    note: 'Device fingerprinting has been disabled for privacy'
+  };
+  
+  // Create a hash of the static fingerprint
+  const fingerprintString = JSON.stringify(staticFingerprint);
+  const hash = btoa(fingerprintString).slice(0, 16); // Simple hash
+  
+  return hash;
+}
+
+function validateUnlockToken(token) {
+  
+  try {
+    // Get stored token data
+    const storedToken = localStorage.getItem('unlock_token');
+    const tokenDataString = localStorage.getItem('unlock_token_data');
+    
+    if (!storedToken || !tokenDataString) {
+      return { valid: false, reason: 'No token data found' };
+    }
+    
+    const tokenData = JSON.parse(tokenDataString);
+    
+    // Check if token matches
+    if (token !== tokenData.token) {
+      return { valid: false, reason: 'Invalid token' };
+    }
+    
+    // Check if token is expired
+    const now = Date.now();
+    if (now > tokenData.expiresAt) {
+      return { valid: false, reason: 'Token expired' };
+    }
+    
+    // Check if device limit reached
+    if (tokenData.usedDevices.length >= tokenData.maxUses) {
+      return { valid: false, reason: 'Device limit reached' };
+    }
+    
+    // Generate current device fingerprint
+    const deviceId = generateDeviceFingerprint();
+    
+    // Check if this device already used the token
+    if (tokenData.usedDevices.includes(deviceId)) {
+      return { valid: false, reason: 'Device already used this token' };
+    }
+    
+    // Calculate time remaining
+    const expiresIn = Math.ceil((tokenData.expiresAt - now) / (60 * 1000));
+    
+    return {
+      valid: true,
+      deviceId: deviceId,
+      expiresIn: expiresIn,
+      usedDevices: tokenData.usedDevices.length,
+      maxUses: tokenData.maxUses
+    };
+    
+  } catch (error) {
+    console.error('Error validating token:', error);
+    return { valid: false, reason: 'Validation error' };
+  }
+}
+
+function trackDeviceUsage(token) {
+  try {
+    const tokenDataString = localStorage.getItem('unlock_token_data');
+    if (tokenDataString) {
+      const tokenData = JSON.parse(tokenDataString);
+      const deviceId = generateDeviceFingerprint();
+      
+      // Add device to used devices list
+      if (!tokenData.usedDevices.includes(deviceId)) {
+        tokenData.usedDevices.push(deviceId);
+        localStorage.setItem('unlock_token_data', JSON.stringify(tokenData));
+      }
+    }
+  } catch (error) {
+    console.error('Error tracking device usage:', error);
+  }
+}
+
+function showTokenValidationError(validationResult) {
+  const errorMessages = {
+    'No token data found': 'QR code data not found. Please generate a new QR code.',
+    'Invalid token': 'Invalid QR code. Please use the correct QR code.',
+    'Token expired': 'QR code has expired. Please generate a new QR code.',
+    'Device limit reached': 'QR code has been used on maximum devices (3). Please generate a new QR code.',
+    'Device already used this token': 'This device has already used this QR code.',
+    'Validation error': 'QR code validation failed. Please try again.'
+  };
+  
+  const message = errorMessages[validationResult.reason] || 'Unknown error occurred.';
+  
+  const errorDiv = document.createElement('div');
+  errorDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #ff0000;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    color: white;
+    z-index: 10000;
+    max-width: 400px;
+    width: 90%;
+  `;
+  
+  errorDiv.innerHTML = `
+    <h3 style="color: #ff0000; margin-bottom: 20px;">🔒 QR Code Error</h3>
+    <p style="margin-bottom: 20px;">${message}</p>
+    <p style="font-size: 12px; color: #ccc; margin-bottom: 20px;">
+      Error: ${validationResult.reason}
+    </p>
+    <button onclick="manualUnlockFromQR()" style="
+      background: linear-gradient(45deg, #00ff00, #00cc00);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 10px;
+    ">🔓 Manual Unlock</button>
+    <button onclick="this.parentElement.remove()" style="
+      background: #333;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    ">❌ Close</button>
+  `;
+  
+  document.body.appendChild(errorDiv);
+}
+
+async function checkFirebasePayment(userId) {
+  if (!userId || !firebaseAvailable || firebaseConfig.projectId === 'your-project-id' || !firebaseConfig.projectId) {
+    return false;
+  }
+  
+  try {
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    const paymentRef = doc(db, 'payments', userId);
+    const paymentDoc = await getDoc(paymentRef);
+    
+    if (paymentDoc.exists()) {
+      const paymentData = paymentDoc.data();
+      console.log('Firebase payment data:', paymentData);
+      return paymentData.status === 'completed';
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking Firebase payment:', error);
+    return false;
+  }
+}
+
+async function manualPaymentVerification() {
+  console.log('Webhook status check started...');
+  
+  const userId = localStorage.getItem('userId') || crypto.randomUUID();
+  localStorage.setItem('userId', userId);
+  
+  // Show loading state
+  const button = document.getElementById('manual-payment-btn');
+  if (button) {
+    button.textContent = '🔄 Checking Webhook...';
+    button.disabled = true;
+  }
+  
+  try {
+    // Check webhook verification status
+    await manualPaymentRecord(userId);
+  } catch (error) {
+    console.error('Webhook check error:', error);
+    showPaymentError('Webhook verification failed. Please try again.');
+    
+    // Reset button
+    if (button) {
+      button.textContent = '✅ Check Webhook Status';
+      button.disabled = false;
+    }
+  }
+}
+
+async function manualPaymentRecord(userId) {
+  console.log('Recording manual payment for user:', userId);
+  
+  try {
+    // Check if user has actually paid via Stripe
+    const stripeSessionId = localStorage.getItem('stripe_session_id');
+    const hasValidPayment = await verifyStripePayment(stripeSessionId);
+    
+    if (!hasValidPayment) {
+      console.log('No valid payment found - manual verification blocked');
+      showPaymentError('❌ Webhook verification required!\n\nPayment must be confirmed via Stripe webhook before multiplayer can be unlocked.\n\nPlease complete payment through Stripe and wait for automatic verification.');
+      return;
+    }
+    
+    // Only proceed if webhook verification was successful
+    console.log('Webhook verification successful, proceeding with unlock');
+    
+    // Create payment data for recording
+    const paymentData = {
+      payment_intent: stripeSessionId || 'webhook_verified_' + Date.now(),
+      session_id: stripeSessionId || 'webhook_session_' + Date.now()
+    };
+    
+    console.log('Payment data:', paymentData);
+    
+    // Record in Firebase
+    console.log('About to call recordPaymentInFirebase...');
+    const paymentRecorded = await recordPaymentInFirebase(userId, paymentData);
+    console.log('Payment recorded in Firebase:', paymentRecorded);
+    
+    // Set localStorage only after webhook verification
+    console.log('Setting localStorage...');
+    localStorage.setItem('multiplayerPaid', 'true');
+    console.log('localStorage set to true');
+    
+    // Close modal and show QR code
+    console.log('Closing payment detection modal...');
+    closePaymentDetectionModal();
+    console.log('Payment detection modal closed');
+    
+    console.log('Showing QR unlock modal...');
+    showQRUnlockModal();
+    console.log('QR unlock modal should be showing');
+    
+  } catch (error) {
+    console.error('Manual payment record error:', error);
+    showPaymentError('Payment verification failed. Please try again.');
+  }
+}
+
+function pollForPaymentCompletion(userId) {
+  let pollCount = 0;
+  const maxPolls = 30; // 5 minutes at 10-second intervals (reduced frequency)
+  
+  // Clear any existing polling interval
+  if (paymentPollingInterval) {
+    clearInterval(paymentPollingInterval);
+  }
+  
+  // Poll every 10 seconds for payment completion (reduced from 2 seconds)
+  paymentPollingInterval = setInterval(async () => {
+    try {
+      pollCount++;
+      
+      // Check if payment was completed
+      const paymentCompleted = await checkPaymentWithBackend(userId);
+      
+      if (paymentCompleted) {
+        clearInterval(paymentPollingInterval);
+        paymentPollingInterval = null;
+        showQRUnlockModal();
+        return;
+      }
+      
+      // Stop polling after max attempts
+      if (pollCount >= maxPolls) {
+        clearInterval(paymentPollingInterval);
+        paymentPollingInterval = null;
+        showPaymentTimeoutMessage();
+      }
+    } catch (error) {
+      // Only log non-Firebase offline errors
+      if (!error.message.includes('offline') && !error.message.includes('Failed to get document')) {
+        console.error('Payment polling error:', error);
+      }
+      pollCount++;
+      
+      if (pollCount >= maxPolls) {
+        clearInterval(paymentPollingInterval);
+        paymentPollingInterval = null;
+        showPaymentTimeoutMessage();
+      }
+    }
+  }, 10000); // Increased from 2000ms to 10000ms
+}
+
+function showPaymentTimeoutMessage() {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">⚠️ Payment Verification Timeout</h2>
+      <p style="margin-bottom: 20px;">Payment verification is taking longer than expected. Please try again or contact support if you've already paid.</p>
+      <button onclick="cancelAllPaymentProcesses()" style="
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      ">Cancel Payment</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+async function checkPaymentWithBackend(userId) {
+  // Check localStorage first (fastest)
+  const hasPaid = localStorage.getItem('multiplayerPaid') === 'true';
+  if (hasPaid) {
+    console.log('Payment found in localStorage for user:', userId);
+    return true;
+  }
+  
+  // Check for Stripe session in localStorage - webhook verification required
+  const stripeSession = localStorage.getItem('stripe_session_id');
+  if (stripeSession) {
+    // Verify with Stripe API via webhook
+    const verified = await verifyStripeSession(stripeSession);
+    if (verified) {
+      console.log('Webhook verification successful for user:', userId);
+      localStorage.removeItem('stripe_session_id');
+      return true;
+    } else {
+      console.log('Webhook verification failed for user:', userId);
+      return false;
+    }
+  }
+  
+  // Check if Firebase is available and properly configured
+  if (!firebaseAvailable || firebaseConfig.projectId === 'your-project-id' || !firebaseConfig.projectId) {
+    console.log('Firebase not available or using placeholder config');
+    return false;
+  }
+  
+  try {
+    // Check Firebase for payment status (only if webhook verified)
+    const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    
+    const paymentRef = doc(db, 'payments', userId);
+    const paymentDoc = await getDoc(paymentRef);
+    
+    if (paymentDoc.exists()) {
+      const paymentData = paymentDoc.data();
+      
+      // Check if payment is recent (within last 10 minutes) and webhook verified
+      const paymentTime = new Date(paymentData.timestamp);
+      const now = new Date();
+      const timeDiff = now - paymentTime;
+      const tenMinutes = 10 * 60 * 1000;
+      
+      if (timeDiff < tenMinutes && paymentData.status === 'completed' && paymentData.stripeSessionId) {
+        console.log('Payment verified in Firebase for user:', userId);
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error checking payment with backend:', error);
+    // Don't log Firebase offline errors as they're expected with placeholder config
+    if (!error.message.includes('offline') && !error.message.includes('Failed to get document')) {
+      console.error('Payment verification error:', error);
+    }
+    return false;
+  }
+}
+
+async function verifyStripePayment(sessionId) {
+  if (!sessionId) {
+    console.log('No Stripe session ID found');
+    return false;
+  }
+  
+  try {
+    // Use unified payment system with backend URL fallback
+    const { initializePaymentSystem } = await import('./payment-system.js');
+    const { paymentVerifier } = initializePaymentSystem();
+    const result = await paymentVerifier.verifyPayment(sessionId);
+    console.log('Stripe payment verification result:', result);
+    return !!result.verified;
+  } catch (error) {
+    // Handle CORS and network errors gracefully
+    if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+      console.log('CORS/Network error - backend API not accessible');
+      console.log('This is expected if the backend is not deployed or CORS is not configured');
+      return false;
+    }
+    
+    console.error('Error verifying Stripe payment:', error);
+    return false;
+  }
+}
+
+async function verifyStripeSession(sessionId) {
+  return await verifyStripePayment(sessionId);
+}
+
+// Manual payment check function
+async function manualPaymentCheck() {
+  console.log('Manual payment check triggered...');
+  // Prevent multiple simultaneous checks
+  const button = document.getElementById('manual-verify-btn');
+  if (button && button.disabled) return;
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Verifying...';
+  }
+  try {
+    // Check URL parameters first
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    const paymentStatus = urlParams.get('payment_status');
+    console.log('Manual check - session_id:', sessionId, 'payment_status:', paymentStatus);
+    if (sessionId && paymentStatus === 'success') {
+      console.log('Session found in URL, verifying...');
+      const { initializePaymentSystem } = await import('./payment-system.js');
+      const { paymentVerifier } = initializePaymentSystem();
+      const { verified, unlockCode } = await paymentVerifier.verifyPayment(sessionId);
+      if (verified) {
+          // Show unlock code
+          const unlockDisplay = document.getElementById('unlock-code-display');
+          const unlockSection = document.getElementById('unlock-success-section');
+          if (unlockDisplay) unlockDisplay.textContent = unlockCode;
+          if (unlockSection) unlockSection.style.display = 'block';
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          // Update button
+          const paymentButton = document.getElementById('unlock-multiplayer-btn');
+          if (paymentButton) {
+            paymentButton.textContent = 'Payment Successful!';
+            paymentButton.style.background = 'linear-gradient(45deg, #00ff00, #00cc00)';
+          }
+          alert('🎉 Payment verified successfully! Multiplayer access unlocked automatically.');
+      } else {
+        alert('❌ Payment verification failed. Please try again or contact support.');
+      }
+    } else {
+      // No session in URL, ask user to provide payment details
+      const confirmed = confirm('No payment session found in URL.\n\nIf you have completed payment through Stripe, please provide your payment session ID or payment intent ID.\n\nIf you haven\'t paid yet, click Cancel and complete payment first.');
+      if (confirmed) {
+        // Ask user for payment details
+        const paymentId = prompt('Please enter your Stripe payment session ID or payment intent ID:');
+        if (!paymentId) {
+          alert('No payment ID provided. Please complete payment through Stripe first.');
+          return;
+        }
+        // Try manual verification
+        const { initializePaymentSystem } = await import('./payment-system.js');
+        const { paymentVerifier } = initializePaymentSystem();
+        const payload = {
+          sessionId: paymentId.startsWith('cs_') ? paymentId : null,
+          paymentIntentId: paymentId.startsWith('pi_') ? paymentId : null
+        };
+        const resp = await paymentVerifier.fetchWithFallback('/api/verify-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          const { verified, unlockCode } = await resp.json();
+          if (verified) {
+            // Auto-unlock multiplayer
+            const unlockSection = document.getElementById('unlock-success-section');
+            if (unlockSection) unlockSection.style.display = 'block';
+            // Store unlock status locally
+            localStorage.setItem('unlockTimestamp', new Date().toISOString());
+            const paymentButton = document.getElementById('unlock-multiplayer-btn');
+            if (paymentButton) {
+              paymentButton.textContent = 'Payment Successful!';
+              paymentButton.style.background = 'linear-gradient(45deg, #00ff00, #00cc00)';
+            }
+            alert('🎉 Manual verification successful! Multiplayer access unlocked automatically.');
+          } else {
+            alert('❌ Manual verification failed. Please contact support.');
+          }
+        } else if (resp.status === 402) {
+          const errorData = await resp.json();
+          alert('❌ Payment verification failed.\n\n' + errorData.message + '\n\nPlease complete payment through Stripe first.');
+        } else {
+          alert('❌ Backend verification failed. Please try again.');
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Manual payment check error:', error);
+    alert('❌ Error during manual verification. Please try again.');
+  } finally {
+    // Re-enable button
+    if (button) {
+      button.disabled = false;
+      button.textContent = '🔍 I\'ve Completed Payment - Verify Now';
+    }
+  }
+}
+window.manualPaymentCheck = manualPaymentCheck;
+
+// Also attach other functions that might be called from HTML
+window.cancelAllPaymentProcesses = cancelAllPaymentProcesses;
+window.openStripePayment = openStripePayment;
+window.startPaymentDetection = startPaymentDetection;
+window.manualUnlockFromQR = manualUnlockFromQR;
+window.closeQRModal = closeQRModal;
+window.unlockThisDevice = unlockThisDevice;
+
+async function showQRUnlockModal() {
+  // Check if modal already exists
+  const existingModal = document.getElementById('qr-unlock-modal');
+  if (existingModal) {
+    existingModal.remove();
+  }
+  
+  // Create QR unlock modal
+  const modal = document.createElement('div');
+  modal.id = 'qr-unlock-modal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: rgba(0, 0, 0, 0.95);
+      border: 2px solid #ff0000;
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      color: white;
+      max-width: 400px;
+      width: 90%;
+    ">
+      <h2 style="color: #ff0000; margin-bottom: 20px;">🔐 Multiplayer Unlock Required</h2>
+      <p style="margin-bottom: 20px;">Payment successful! Scan this QR code with another device to unlock multiplayer access.</p>
+      <div id="qr-container" style="margin: 20px 0; padding: 20px; background: white; border-radius: 10px; display: inline-block;">
+        <canvas id="qr-code" style="max-width: 200px; height: auto;"></canvas>
+      </div>
+      <p style="font-size: 12px; color: #ccc; margin-top: 15px;">
+        🔒 Security: 5-minute expiration, max 3 devices<br>
+        📱 Device tracking enabled<br>
+        Or click below to unlock on this device
+      </p>
+      <button id="unlock-this-device" style="
+        background: linear-gradient(45deg, #ff0000, #cc0000);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 15px;
+      ">🔓 Unlock This Device</button>
+      
+
+      
+      <button onclick="closeQRModal()" style="
+        background: #333;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        margin-top: 10px;
+      ">❌ Close</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Generate QR code
+  await generateQRCode();
+  
+  // Set up unlock button
+  document.getElementById('unlock-this-device').onclick = unlockThisDevice;
+  
+  // Start polling for QR scan
+  startQRPolling();
+}
+
+async function generateQRCode() {
+  try {
+    // Try to import QR code library
+    const QRCode = await import('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm');
+    
+    // Generate unique token with security data
+    const token = crypto.randomUUID();
+    const tokenData = {
+      token: token,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (5 * 60 * 1000), // 5 minutes expiration
+      maxUses: 3, // Maximum 3 devices per QR code
+      usedDevices: [],
+      createdBy: localStorage.getItem('userId') || 'unknown'
+    };
+    
+    localStorage.setItem('unlock_token', token);
+    localStorage.setItem('unlock_token_data', JSON.stringify(tokenData));
+    
+    // Create unlock URL - use primary domain for QR codes
+    const unlockUrl = `https://horropoly.com?unlock=${token}`;
+    
+    // Get the canvas element
+    const canvas = document.getElementById('qr-code');
+    if (!canvas) {
+      throw new Error('QR code canvas element not found');
+    }
+    
+    // Generate QR code
+    await QRCode.toCanvas(canvas, unlockUrl, {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+  } catch (error) {
+    console.error('Error generating QR code:', error);
+    
+    // Fallback: Show manual unlock option
+    const qrContainer = document.getElementById('qr-container');
+    if (qrContainer) {
+      qrContainer.innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <p style="color: #ff0000; font-weight: bold; margin-bottom: 10px;">QR Code Generation Failed</p>
+          <p style="color: #333; margin-bottom: 15px;">Please use the button below to unlock on this device:</p>
+          <button onclick="unlockThisDevice()" style="
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+          ">🔓 Unlock This Device Now</button>
+        </div>
+      `;
+    }
+    
+    // Also try alternative QR code method
+    try {
+      const token = localStorage.getItem('unlock_token') || crypto.randomUUID();
+      const unlockUrl = `https://horropoly.com?unlock=${token}`;
+      
+      // Use a simple QR code service as fallback
+      const qrServiceUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(unlockUrl)}`;
+      
+      const qrContainer = document.getElementById('qr-container');
+      if (qrContainer) {
+        qrContainer.innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #333; margin-bottom: 15px;">Alternative QR Code:</p>
+            <img src="${qrServiceUrl}" alt="QR Code" style="max-width: 200px; height: auto; border: 2px solid #333;">
+            <p style="color: #333; margin-top: 15px; font-size: 12px;">Or use the button below:</p>
+            <button onclick="unlockThisDevice()" style="
+              background: linear-gradient(45deg, #00ff00, #00cc00);
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: bold;
+              margin-top: 10px;
+            ">🔓 Unlock This Device</button>
+          </div>
+        `;
+      }
+    } catch (fallbackError) {
+      console.error('Alternative QR code method also failed:', fallbackError);
+    }
+  }
+}
+
+async function unlockThisDevice() {
+  const token = localStorage.getItem('unlock_token');
+  const stripeSessionId = localStorage.getItem('stripe_session_id');
+  
+  if (token) {
+    // Verify webhook confirmation before allowing unlock
+    if (stripeSessionId) {
+      const hasValidPayment = await verifyStripePayment(stripeSessionId);
+      if (!hasValidPayment) {
+        alert('❌ Webhook verification required!\n\nPayment must be confirmed via Stripe webhook before multiplayer can be unlocked.\n\nPlease complete payment through Stripe and wait for automatic verification.');
+        return;
+      }
+    }
+    
+    // Only unlock if webhook verification passed
+    localStorage.setItem('multiplayerPaid', 'true');
+    localStorage.removeItem('unlock_token');
+    
+    // Close modal and refresh
+    document.getElementById('qr-unlock-modal').remove();
+    window.location.reload();
+  }
+}
+
+function startQRPolling() {
+  
+  // Check for unlock token in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const unlockToken = urlParams.get('unlock');
+  
+  if (unlockToken) {
+    // Enhanced security validation
+    const validationResult = validateUnlockToken(unlockToken);
+    
+    if (validationResult.valid) {
+      // Valid token - unlock multiplayer
+      localStorage.setItem('multiplayerPaid', 'true');
+      
+      // Track device usage
+      trackDeviceUsage(unlockToken);
+      
+      // Show success message
+      alert(`🎉 Multiplayer unlocked successfully!\n\n📱 Device: ${validationResult.deviceId}\n⏰ Expires: ${validationResult.expiresIn} minutes`);
+      
+      // Remove token from URL - use current domain
+      const newUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      
+      // Close modal if open and refresh
+      const modal = document.getElementById('qr-unlock-modal');
+      if (modal) {
+        modal.remove();
+      }
+      
+      window.location.reload();
+    } else {
+      // Show detailed error message
+      showTokenValidationError(validationResult);
+    }
+  } else {
+    // No unlock token in URL - this is normal
+    console.log('No unlock token found in URL - normal operation');
+  }
+}
+
+function verifyPayment() {
+  const hasPaid = checkMultiplayerAccess();
+  
+  if (hasPaid) {
+    // Hide modal payment wall (dungeons)
+    const modalPaywall = document.getElementById('multiplayer-payment-wall-modal');
+    if (modalPaywall) {
+      modalPaywall.style.display = 'none';
+    }
+    
+    // Show create dungeon section
+    const createDungeonSection = document.getElementById('create-dungeon-section');
+    if (createDungeonSection) {
+      createDungeonSection.style.display = 'block';
+    }
+    
+    console.log('Multiplayer access verified - unlocked');
+  } else {
+    // Show modal payment wall (dungeons)
+    const modalPaywall = document.getElementById('multiplayer-payment-wall-modal');
+    if (modalPaywall) {
+      modalPaywall.style.display = 'block';
+    }
+    
+    // Hide create dungeon section
+    const createDungeonSection = document.getElementById('create-dungeon-section');
+    if (createDungeonSection) {
+      createDungeonSection.style.display = 'none';
+    }
+    
+    console.log('Multiplayer access verified - locked');
+  }
+}
+
+function makeDraggable(el) {
+  let dragging = false;
+  let offsetX = 0, offsetY = 0;
+
+  el.addEventListener('mousedown', e => {
+    if (['INPUT','BUTTON','SELECT'].includes(e.target.tagName)) return;
+    dragging = true;
+    const rect = el.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+    el.style.position = 'fixed';
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    el.style.left = (e.clientX - offsetX) + 'px';
+    el.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+  });
+
+  el.addEventListener('touchstart', e => {
+    if (['INPUT','BUTTON','SELECT'].includes(e.target.tagName)) return;
+    const t = e.touches[0];
+    dragging = true;
+    const rect = el.getBoundingClientRect();
+    offsetX = t.clientX - rect.left;
+    offsetY = t.clientY - rect.top;
+    el.style.position = 'fixed';
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const t = e.touches[0];
+    el.style.left = (t.clientX - offsetX) + 'px';
+    el.style.top = (t.clientY - offsetY) + 'px';
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => {
+    dragging = false;
+  });
+}
+
+
+
+// Skip auto-cleanup in production - only use manual cleanup functions
+// Auto-cleanup is disabled to prevent accidental data loss in production
+if (lobbyPanel) makeDraggable(lobbyPanel);
+
+// Set up payment system for modal button (dungeons)
+const modalPaymentBtn = document.getElementById('unlock-multiplayer-btn-modal');
+if (modalPaymentBtn) {
+  modalPaymentBtn.onclick = unlockMultiplayer;
+}
+
+verifyPayment();
+
+// Check for QR unlock token on page load
+startQRPolling();
+
+
+
+async function joinExisting(id){
+  const playerName = displayNameInput.value.trim();
+  if (!playerName) {
+    alert('Please enter your name first!');
+    displayNameInput.focus();
+    return;
+  }
+  localStorage.setItem('lobbyPlayerName', playerName);
+  window.localPlayerName = playerName;  // Set local player name for game identification
+  playerUid = crypto.randomUUID();
+  await joinRoom(id,{uid:playerUid,displayName:playerName});
+  isHost=false;
+}
+
+// Direct onclick handler for modal create button (fallback)
+window.handleModalCreateClick = async function() {
+  console.log('🟢 handleModalCreateClick called (direct onclick)');
+  
+  const createBtnModal = document.getElementById('createBtn-modal');
+  const roomNameModalInput = document.getElementById('roomName-modal');
+  const minPlayersModalSelect = document.getElementById('minPlayers-modal');
+  
+  const playerName = displayNameInput.value.trim();
+  const dungeonName = roomNameModalInput ? roomNameModalInput.value.trim() : '';
+  
+  console.log('🟢 Form values:', { playerName, dungeonName });
+  
+  // Double-check validation
+  if (!playerName || !dungeonName) {
+    alert('Please enter both your name and a dungeon name!');
+    if (!playerName) displayNameInput.focus();
+    else if (!dungeonName && roomNameModalInput) roomNameModalInput.focus();
+    return;
+  }
+  
+  console.log('🟢 Validation passed, proceeding with room creation');
+  
+  try {
+    const { createGameRoom } = await import('./firebase-init.js');
+    const maxPlayers = parseInt(minPlayersModalSelect ? minPlayersModalSelect.value : '4', 10) || 4;
+    
+    console.log('🟢 Creating new room with:', { playerName, dungeonName, maxPlayers });
+    const room = await createGameRoom(playerName, maxPlayers, 0, null, null, dungeonName); // Pass dungeonName as roomName
+    
+    localStorage.setItem('lobbyPlayerName', playerName);
+    window.localPlayerName = playerName;  // Set local player name for game identification
+    playerUid = room.userId;
+    isHost = true;
+    
+    console.log('🟢 Room created successfully:', room);
+    
+    // Show success message
+    showAdvisory(`Dungeon "${dungeonName}" created! Room ID: ${room.roomId}`, 'success');
+    
+    // Close the modal after creating room
+    closeRoomsModal();
+    
+    // Update room count immediately to show the new room
+    if (typeof updateRoomCount === 'function') {
+      updateRoomCount();
+    }
+    
+    // Start ping notifications immediately since we're waiting for players
+    if (typeof startWaitingRoomPing === 'function') {
+      startWaitingRoomPing();
+    }
+    
+    // Start monitoring the room for auto-start
+    if (typeof startRoomMonitoring === 'function') {
+      startRoomMonitoring(room.roomId);
+    }
+    
+  } catch (error) {
+    console.error('🟢 Error creating room:', error);
+    showAdvisory(`Failed to create room: ${error.message}`, 'error');
+  }
+};
+
+// Function to join preset zombie dungeon rooms - works exactly like "Victims vs Zombie Bots" button
+window.joinPresetRoom = async function(roomType) {
+  console.log('🧟 joinPresetRoom called with type:', roomType);
+  
+  const playerName = displayNameInput.value.trim();
+  
+  if (!playerName) {
+    alert('Please enter your name first!');
+    displayNameInput.focus();
+    return;
+  }
+  
+  // Define preset room configurations
+  const presetConfigs = {
+    1: { aiBots: 1, name: 'Solo Zombie Hunt' },
+    2: { aiBots: 1, name: 'Zombie Hunter' },
+    3: { aiBots: 2, name: 'Zombie Swarm' },
+    4: { aiBots: 2, name: 'Zombie Apocalypse' },
+    5: { aiBots: 3, name: 'Zombie Nightmare' }
+  };
+  
+  const config = presetConfigs[roomType];
+  if (!config) {
+    console.error('Invalid preset room type:', roomType);
+    return;
+  }
+  
+  console.log('🧟 Joining preset room:', config);
+  
+  // Close the modal first
+  closeRoomsModal();
+  
+  // Store player info (same as "Victims vs Zombie Bots" button)
+  localStorage.setItem('lobbyPlayerName', playerName);
+  window.localPlayerName = playerName;
+  
+  // Show loading message
+  showAdvisory(`Joining ${config.name}...`, 'info');
+  
+  // Redirect to gamestart.html with the same parameters as "Victims vs Zombie Bots" button
+  const aiCount = config.aiBots;
+  const humanCount = 1; // Always 1 human (same as the button)
+  
+  console.log('🧟 Redirecting to gamestart.html with:', { playerName, aiCount, humanCount });
+  
+  // Use the exact same URL format as the "Victims vs Zombie Bots" button
+  window.location.href = `gamestart.html?player=${encodeURIComponent(playerName)}&ai=${aiCount}&humans=${humanCount}&autostart=1`;
+};
+
+// Set up modal-based create button functionality
+function setupModalCreateButton() {
+  console.log('🟡 setupModalCreateButton called');
+  const createBtnModal = document.getElementById('createBtn-modal');
+  const roomNameModalInput = document.getElementById('roomName-modal');
+  const minPlayersModalSelect = document.getElementById('minPlayers-modal');
+  
+  console.log('🟡 Modal elements found:', {
+    createBtn: createBtnModal,
+    roomInput: roomNameModalInput,
+    playersSelect: minPlayersModalSelect
+  });
+  
+  if (!createBtnModal) {
+    console.error('🟡 createBtn-modal not found!');
+    return;
+  }
+  
+  console.log('🟡 Setting up onclick handler for create button');
+  createBtnModal.onclick = async () => {
+    console.log('🟡 Create button clicked!');
+    const playerName = displayNameInput.value.trim();
+    const dungeonName = roomNameModalInput.value.trim();
+    
+    // Validate inputs when button is clicked
+    if (!playerName) {
+      showAdvisory('Please enter your player name', 'error');
+      return;
+    }
+    if (!dungeonName) {
+      showAdvisory('Please enter a dungeon name', 'error');
+      return;
+    }
+    
+    console.log('🟡 Form values:', { playerName, dungeonName });
+    
+    // Double-check validation (button should be disabled if invalid, but just in case)
+    if (!playerName || !dungeonName) {
+      alert('Please enter both your name and a dungeon name!');
+      if (!playerName) displayNameInput.focus();
+      else if (!dungeonName && roomNameModalInput) roomNameModalInput.focus();
+      return;
+    }
+    
+    console.log('🟡 Validation passed, proceeding with room creation');
+    
+    // Check if player already has an active room and offer options
+    const existingRoomId = createBtnModal.dataset.existingRoomId;
+    const existingRoomName = createBtnModal.dataset.existingRoomName;
+  
+      if (existingRoomId && existingRoomName) {
+      // Player is already in a room - offer choice
+      const choice = confirm(`You're already in "${existingRoomName}".\n\nWould you like to:\n- Click OK to join that room\n- Click Cancel to create a new room`);
+      
+      if (choice) {
+        // Join existing room
+        try {
+          const { joinGameRoom } = await import('./firebase-init.js');
+          await joinGameRoom(existingRoomId, playerName);
+          showAdvisory(`Joined existing room: "${existingRoomName}"`, 'success');
+          
+          // Redirect to game
+          window.location.href = `gamestart.html?roomId=${existingRoomId}&player=${encodeURIComponent(playerName)}&host=0&autostart=1`;
+          return;
+        } catch (error) {
+          console.error('Error joining existing room:', error);
+          showAdvisory(`Failed to join "${existingRoomName}": ${error.message}`, 'error');
+          return;
+        }
+      }
+      // If user clicked Cancel, continue with creating new room
+    }
+    
+    // Create new room using the new firebase-init.js system
+    try {
+      const { createGameRoom } = await import('./firebase-init.js');
+      const maxPlayers = parseInt(minPlayersModalSelect.value, 10) || 4;
+      
+      console.log('Creating new room with:', { playerName, dungeonName, maxPlayers });
+      const room = await createGameRoom(playerName, maxPlayers, 0, null, null, dungeonName); // Pass dungeonName as roomName
+      
+      localStorage.setItem('lobbyPlayerName', playerName);
+      window.localPlayerName = playerName;  // Set local player name for game identification
+      playerUid = room.userId;
+      isHost = true;
+      
+      console.log('Room created successfully:', room);
+      console.log('Creator player UID:', playerUid);
+      
+      // Show success message
+      showAdvisory(`Dungeon "${dungeonName}" created! Room ID: ${room.roomId}`, 'success');
+      
+      // Close the modal after creating room
+      closeRoomsModal();
+      
+      // Update room count immediately to show the new room
+      updateRoomCount();
+      
+      // Add visual feedback - pulse the Dungeons button briefly
+      const roomsBtn = document.getElementById('view-rooms-btn');
+      if (roomsBtn) {
+        roomsBtn.style.animation = 'pulse 0.5s ease-in-out 3';
+        setTimeout(() => {
+          // Reset to normal pulse if there are rooms
+          const countElement = document.getElementById('room-count');
+          if (countElement && countElement.textContent.includes('💀') && countElement.textContent.length > 1) {
+            roomsBtn.style.animation = 'pulse 2s infinite';
+          }
+        }, 1500);
+      }
+      
+      // Start ping notifications immediately since we're waiting for players
+      startWaitingRoomPing();
+      
+      // Start monitoring the room for auto-start
+      startRoomMonitoring(room.roomId);
+      
+    } catch (error) {
+      console.error('Error creating room:', error);
+      showAdvisory(`Failed to create room: ${error.message}`, 'error');
+    }
+  };  // Close the onclick function
+}  // Close the setupModalCreateButton function
+
+// Call setup function when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  setupModalCreateButton();
+  
+  // Start automatic stale dungeon cleanup
+  startAutomaticCleanup();
+  
+  // Log available debug functions
+  console.log('🔧 Debug functions available:');
+  console.log('- manualCleanup() - Clean up stale dungeons manually');
+  console.log('- testFirebase() - Test Firebase connection');
+  console.log('- testPaymentStatus() - Check payment status');
+  console.log('- resetPaymentStatus() - Reset payment for testing');
+});
+
+
+
+const humanCountSelect = document.getElementById('humanCount');
+
+// Function to check if player name and dungeon name are valid and update UI accordingly
+function validateInputs() {
+  const playerName = displayNameInput.value.trim();
+  const dungeonName = roomNameInput ? roomNameInput.value.trim() : '';
+  const dungeonNameModal = document.getElementById('roomName-modal');
+  const dungeonNameModalValue = dungeonNameModal ? dungeonNameModal.value.trim() : '';
+  const isPlayerNameValid = playerName.length > 0;
+  const isDungeonNameValid = dungeonName.length > 0;
+  const isDungeonNameModalValid = dungeonNameModalValue.length > 0;
+  
+  // Disable/enable elements based on validation
+  const elementsToDisable = [
+    humanCountSelect,
+    document.getElementById('ai-btn'),
+    minPlayersSelect
+  ];
+  
+  // Disable these if player name is invalid
+  elementsToDisable.forEach(element => {
+    if (element) {
+      element.disabled = !isPlayerNameValid;
+    }
+  });
+  
+  // Check for existing rooms and disable create button accordingly
+  checkExistingRoomsAndUpdateButton(isPlayerNameValid, isDungeonNameValid);
+  
+  // Update modal create button styling (but don't disable it)
+  const createBtnModal = document.getElementById('createBtn-modal');
+  if (createBtnModal) {
+    const shouldStyle = !isPlayerNameValid || !isDungeonNameModalValid;
+    // Don't disable the button, just style it differently
+    
+    if (shouldStyle) {
+      createBtnModal.style.background = '#666666';
+      createBtnModal.style.cursor = 'pointer';
+      createBtnModal.title = 'Click to create (validation will be checked)';
+    } else {
+      createBtnModal.style.background = 'linear-gradient(45deg, #8b0000, #cc0000)';
+      createBtnModal.style.cursor = 'pointer';
+      createBtnModal.title = 'Create a new dungeon';
+    }
+  }
+  
+  // Update input styling
+  updateInputStyling();
+}
+
+// Async function to check existing rooms and update create button
+async function checkExistingRoomsAndUpdateButton(isPlayerNameValid, isDungeonNameValid) {
+  const createBtn = document.getElementById('createBtn');
+  const playerName = displayNameInput.value.trim();
+  
+  if (!createBtn) return;
+  
+  let hasExistingRoom = false;
+  let existingRoomName = '';
+  let existingRoomId = '';
+  
+  // Check for existing rooms if player name is valid
+  if (isPlayerNameValid && playerName) {
+    try {
+      // Use the new firebase-init.js system instead of the old rooms.js
+      const { findAvailableRooms } = await import('./firebase-init.js');
+      const existingRooms = await findAvailableRooms();
+      
+      // Check for active rooms where the player is present
+      const playerExistingRoom = existingRooms.find(room => 
+        room.players && Array.isArray(room.players) && room.players.some(player => 
+          player.name && player.name.toLowerCase() === playerName.toLowerCase()
+        )
+      );
+      
+      if (playerExistingRoom) {
+        hasExistingRoom = true;
+        existingRoomName = playerExistingRoom.roomName || playerExistingRoom.id;
+        existingRoomId = playerExistingRoom.id;
+      }
+    } catch (error) {
+      console.error('Error checking existing rooms:', error);
+      // If there's an error, don't block the user - allow them to proceed
+      hasExistingRoom = false;
+    }
+  }
+  
+  // Only disable create button if names are invalid
+  // Don't disable for existing rooms - allow players to create new rooms
+  const shouldDisable = !isPlayerNameValid || !isDungeonNameValid;
+  createBtn.disabled = shouldDisable;
+  
+  // Update button text and styling based on state
+  if (hasExistingRoom) {
+    createBtn.textContent = `Join "${existingRoomName}" or Create New`;
+    createBtn.style.background = 'linear-gradient(45deg, #ff6600, #cc5500)';
+    createBtn.style.cursor = 'pointer';
+    createBtn.title = `You're already in "${existingRoomName}". Click to join that room or create a new one.`;
+    
+    // Store the existing room info for potential use
+    createBtn.dataset.existingRoomId = existingRoomId;
+    createBtn.dataset.existingRoomName = existingRoomName;
+  } else if (!isPlayerNameValid || !isDungeonNameValid) {
+    createBtn.textContent = 'Create Dungeon';
+    createBtn.style.background = '#666666';
+    createBtn.style.cursor = 'not-allowed';
+    createBtn.title = 'Please enter both your name and a dungeon name';
+  } else {
+    createBtn.textContent = 'Create Dungeon';
+    createBtn.style.background = 'linear-gradient(45deg, #8b0000, #cc0000)';
+    createBtn.style.cursor = 'pointer';
+    createBtn.title = 'Create a new dungeon';
+  }
+}
+
+// Function to update input styling
+function updateInputStyling() {
+  const playerName = displayNameInput.value.trim();
+  const dungeonName = roomNameInput ? roomNameInput.value.trim() : '';
+  const dungeonNameModal = document.getElementById('roomName-modal');
+  const dungeonNameModalValue = dungeonNameModal ? dungeonNameModal.value.trim() : '';
+  const isPlayerNameValid = playerName.length > 0;
+  const isDungeonNameValid = dungeonName.length > 0;
+  const isDungeonNameModalValid = dungeonNameModalValue.length > 0;
+  
+  // Update name input styling
+  if (isPlayerNameValid) {
+    displayNameInput.style.borderColor = '#008000';
+    displayNameInput.style.boxShadow = '0 0 5px rgba(0,128,0,0.5)';
+  } else {
+    displayNameInput.style.borderColor = '#ff0000';
+    displayNameInput.style.boxShadow = '0 0 5px rgba(255,0,0,0.5)';
+  }
+  
+  // Update dungeon name input styling (original)
+  if (roomNameInput) {
+    if (isDungeonNameValid) {
+      roomNameInput.style.borderColor = '#008000';
+      roomNameInput.style.boxShadow = '0 0 5px rgba(0,128,0,0.5)';
+    } else {
+      roomNameInput.style.borderColor = '#ff0000';
+      roomNameInput.style.boxShadow = '0 0 5px rgba(255,0,0,0.5)';
+    }
+  }
+  
+  // Update modal dungeon name input styling
+  if (dungeonNameModal) {
+    if (isDungeonNameModalValid) {
+      dungeonNameModal.style.borderColor = '#008000';
+      dungeonNameModal.style.boxShadow = '0 0 5px rgba(0,128,0,0.5)';
+    } else {
+      dungeonNameModal.style.borderColor = '#ff0000';
+      dungeonNameModal.style.boxShadow = '0 0 5px rgba(255,0,0,0.5)';
+    }
+  }
+}
+
+// Add event listeners to inputs
+displayNameInput.addEventListener('input', validateInputs);
+displayNameInput.addEventListener('blur', validateInputs);
+if (roomNameInput) {
+  roomNameInput.addEventListener('input', validateInputs);
+  roomNameInput.addEventListener('blur', validateInputs);
+}
+
+// Add event listeners for modal inputs when they become available
+function setupModalInputListeners() {
+  const roomNameModalInput = document.getElementById('roomName-modal');
+  if (roomNameModalInput) {
+    roomNameModalInput.addEventListener('input', validateInputs);
+    roomNameModalInput.addEventListener('blur', validateInputs);
+  }
+}
+
+// Setup modal listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', setupModalInputListeners);
+
+// Initialize validation on page load
+validateInputs();
+
+// Also check for room status changes periodically
+setInterval(() => {
+  const playerName = displayNameInput.value.trim();
+  if (playerName) {
+    // Check if modal room name input exists and has content
+    const roomNameModalInput = document.getElementById('roomName-modal');
+    const hasRoomName = roomNameModalInput ? roomNameModalInput.value.trim().length > 0 : false;
+    checkExistingRoomsAndUpdateButton(true, hasRoomName);
+  }
+}, 5000); // Check every 5 seconds
+
+// Force refresh room status (for debugging)
+window.forceRefreshRoomStatus = async function() {
+  console.log('Force refreshing room status...');
+  const playerName = displayNameInput.value.trim();
+  const roomNameModalInput = document.getElementById('roomName-modal');
+  const dungeonName = roomNameModalInput ? roomNameModalInput.value.trim() : '';
+  
+  if (!playerName) {
+    alert('Please enter your name first!');
+    return;
+  }
+  
+  try {
+    await checkExistingRoomsAndUpdateButton(true, dungeonName.length > 0);
+    alert('✅ Room status refreshed!');
+  } catch (error) {
+    console.error('Error refreshing room status:', error);
+    alert('❌ Error refreshing room status: ' + error.message);
+  }
+};
+
+document.getElementById('ai-btn').onclick=()=>{
+  const playerName = displayNameInput.value.trim();
+  if (!playerName) {
+    alert('Please enter your name first!');
+    displayNameInput.focus();
+    return;
+  }
+  const aiCount = parseInt(humanCountSelect.value,10) || 1;
+  const humanCount = 1;
+  localStorage.setItem('lobbyPlayerName', playerName);
+  window.localPlayerName = playerName;  // Set local player name for game identification
+  window.location.href=`gamestart.html?player=${encodeURIComponent(playerName)}&ai=${aiCount}&humans=${humanCount}&autostart=1`;
+};
+
+// Test function for debugging Firebase
+window.testFirebase = async function() {
+  try {
+    console.log('Testing Firebase connection...');
+    console.log('Global Firebase app:', window.firebaseApp);
+    console.log('Global Firebase db:', window.firebaseDb);
+    console.log('Global db type:', typeof window.firebaseDb);
+    console.log('Global db has collection:', typeof window.firebaseDb?.collection);
+    
+    const { getDb } = await import('./firebase-init.js');
+    const db = await getDb();
+    console.log('Firebase test result:', db);
+    console.log('Test db type:', typeof db);
+    console.log('Test db has collection:', typeof db?.collection);
+    
+    // Test if we can create a collection
+    if (db && typeof db.collection === 'function') {
+      console.log('✅ Firebase is working correctly!');
+      return db;
+    } else {
+      console.log('❌ Firebase database is not properly initialized');
+      return null;
+    }
+  } catch (error) {
+    console.error('Firebase test failed:', error);
+    return null;
+  }
+};
+
+// Test function for payment status
+window.testPaymentStatus = function() {
+  console.log('=== Payment Status Test ===');
+  console.log('localStorage multiplayerPaid:', localStorage.getItem('multiplayerPaid'));
+  console.log('localStorage userId:', localStorage.getItem('userId'));
+  console.log('localStorage stripe_session_id:', localStorage.getItem('stripe_session_id'));
+  console.log('localStorage unlock_token:', localStorage.getItem('unlock_token'));
+  console.log('checkMultiplayerAccess():', checkMultiplayerAccess());
+  console.log('=======================');
+};
+
+// Reset payment status for testing
+window.resetPaymentStatus = function() {
+  console.log('Resetting payment status...');
+  localStorage.removeItem('multiplayerPaid');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('stripe_session_id');
+  localStorage.removeItem('unlock_token');
+  localStorage.removeItem('unlock_token_data');
+  console.log('Payment status reset. Refreshing page...');
+  window.location.reload();
+};
+
+// Clear room state to fix "Already in..." issues
+window.clearRoomState = async function() {
+  try {
+    console.log('Clearing room state...');
+    const playerName = document.getElementById('displayName').value.trim();
+    
+    if (!playerName) {
+      alert('Please enter your name first!');
+      return;
+    }
+    
+    // Clear any stored room state
+    localStorage.removeItem('lobbyPlayerName');
+    localStorage.removeItem('currentRoomId');
+    localStorage.removeItem('playerUid');
+    
+    // Clear any stored cleanup handlers
+    if (window.cleanupDisconnectHandlers) {
+      window.cleanupDisconnectHandlers();
+      window.cleanupDisconnectHandlers = null;
+    }
+    if (window.cleanupActivityUpdates) {
+      window.cleanupActivityUpdates();
+      window.cleanupActivityUpdates = null;
+    }
+    
+    // Try to remove player from any existing rooms
+    try {
+      const { findAvailableRooms, removePlayerFromRoom } = await import('./firebase-init.js');
+      const existingRooms = await findAvailableRooms();
+      
+      let removedFromCount = 0;
+      for (const room of existingRooms) {
+        if (room.players && Array.isArray(room.players)) {
+          const playerInRoom = room.players.find(p => 
+            p.name && p.name.toLowerCase() === playerName.toLowerCase()
+          );
+          
+          if (playerInRoom) {
+            try {
+              await removePlayerFromRoom(room.id, playerName, playerInRoom.userId);
+              removedFromCount++;
+              console.log(`Removed player from room: ${room.id}`);
+            } catch (error) {
+              console.error(`Failed to remove from room ${room.id}:`, error);
+            }
+          }
+        }
+      }
+      
+      if (removedFromCount > 0) {
+        alert(`✅ Room state cleared! Removed you from ${removedFromCount} room(s).`);
+      } else {
+        alert('✅ Room state cleared! No active rooms found.');
+      }
+    } catch (error) {
+      console.error('Error clearing room state:', error);
+      alert('✅ Room state cleared! (Some cleanup operations failed)');
+    }
+    
+    // Reset the create button
+    const createBtn = document.getElementById('createBtn');
+    if (createBtn) {
+      createBtn.textContent = 'Create Dungeon';
+      createBtn.style.background = 'linear-gradient(45deg, #8b0000, #cc0000)';
+      createBtn.style.cursor = 'pointer';
+      createBtn.title = 'Create a new dungeon';
+      delete createBtn.dataset.existingRoomId;
+      delete createBtn.dataset.existingRoomName;
+    }
+    
+    // Re-validate inputs to refresh the UI
+    validateInputs();
+    
+    console.log('Room state cleared successfully');
+    
+  } catch (error) {
+    console.error('Error in clearRoomState:', error);
+    alert('❌ Error clearing room state: ' + error.message);
+  }
+};
+
+// Function to open rooms window as a modal
+window.openRoomsWindow = function() {
+  try {
+    console.log('openRoomsWindow called');
+    if (typeof showRoomsModal === 'function') {
+      showRoomsModal();
+    } else {
+      console.error('showRoomsModal function not found');
+      // Fallback: try to show the modal directly
+      const modal = document.getElementById('rooms-modal');
+      if (modal) {
+        modal.style.display = 'block';
+        console.log('Modal shown via fallback');
+      } else {
+        console.error('rooms-modal element not found');
+      }
+    }
+  } catch (error) {
+    console.error('Error in openRoomsWindow:', error);
+  }
+};
+
+// Function to show rooms modal
+window.showRoomsModal = function() {
+  try {
+    console.log('🔴 showRoomsModal called');
+    const modal = document.getElementById('rooms-modal');
+    console.log('🔴 Modal element found:', modal);
+    
+    if (modal) {
+      modal.style.display = 'block';
+      console.log('🔴 Modal display set to block');
+      
+      // Initialize modal form with default values
+      const roomNameModalInput = document.getElementById('roomName-modal');
+      if (roomNameModalInput && !roomNameModalInput.value.trim()) {
+        // Set unique horror-themed room name that's not already in use
+        getUniqueRoomName().then(uniqueRoomName => {
+          roomNameModalInput.value = uniqueRoomName;
+          console.log('🔴 Set unique room name:', uniqueRoomName);
+        }).catch(() => {
+          // Fallback to basic random selection if unique checking fails
+          const fallbackNames = [
+            'Haunted Manor', 'Crypt of Shadows', 'Blood Moon Castle', 'Nightmare Asylum',
+            'Ghostly Mansion', 'Zombie Graveyard', 'Vampire Lair', 'Demon Portal',
+            'Witch Dungeon', 'Spectral Woods', 'Cursed Cathedral', 'Phantom Theater',
+            'Dark Sanctuary', 'Bone Chapel', 'Terror Tower', 'Shadow Realm'
+          ];
+          const randomRoomName = fallbackNames[Math.floor(Math.random() * fallbackNames.length)];
+          roomNameModalInput.value = randomRoomName;
+          console.log('🔴 Set fallback room name:', randomRoomName);
+        });
+      }
+      
+      // Set up modal create button now that elements are available
+      console.log('🔴 Setting up modal create button');
+      setupModalCreateButton();
+      
+      // Validate inputs when modal opens
+      if (typeof validateInputs === 'function') {
+        validateInputs();
+        console.log('🔴 Inputs validated');
+      } else {
+        console.error('🔴 validateInputs function not found');
+      }
+      
+      // Load rooms immediately
+      if (typeof loadRoomsInModal === 'function') {
+        loadRoomsInModal();
+        console.log('🔴 Rooms loaded in modal');
+      } else {
+        console.error('🔴 loadRoomsInModal function not found');
+      }
+      
+      // Update room count
+      if (typeof updateRoomCount === 'function') {
+        updateRoomCount();
+        console.log('🔴 Room count updated');
+      } else {
+        console.error('🔴 updateRoomCount function not found');
+      }
+      
+      // Set up auto-refresh for rooms list while modal is open
+      if (window.roomRefreshInterval) {
+        clearInterval(window.roomRefreshInterval);
+      }
+      
+      window.roomRefreshInterval = setInterval(() => {
+        const modalElement = document.getElementById('rooms-modal');
+        if (modalElement && modalElement.style.display === 'block') {
+          console.log('🔴 Auto-refreshing rooms list...');
+          loadRoomsInModal();
+          updateRoomCount();
+        } else {
+          // Modal is closed, stop auto-refresh
+          clearInterval(window.roomRefreshInterval);
+          window.roomRefreshInterval = null;
+          console.log('🔴 Stopped auto-refresh (modal closed)');
+        }
+      }, 5000); // Refresh every 5 seconds
+      
+      console.log('🔴 Auto-refresh started (every 5 seconds)');
+      
+    } else {
+      console.error('🔴 rooms-modal element not found in DOM');
+    }
+  } catch (error) {
+    console.error('🔴 Error in showRoomsModal:', error);
+  }
+};
+
+// Function to close rooms modal
+window.closeRoomsModal = function() {
+  try {
+    console.log('🔴 closeRoomsModal called');
+    const modal = document.getElementById('rooms-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      console.log('🔴 Modal closed');
+      
+      // Stop auto-refresh when modal is closed
+      if (window.roomRefreshInterval) {
+        clearInterval(window.roomRefreshInterval);
+        window.roomRefreshInterval = null;
+        console.log('🔴 Auto-refresh stopped (manual close)');
+      }
+      
+    } else {
+      console.error('🔴 rooms-modal element not found for closing');
+    }
+  } catch (error) {
+    console.error('🔴 Error in closeRoomsModal:', error);
+  }
+};
+
+// Ensure functions are available when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOM loaded, ensuring room functions are available');
+  
+  // Double-check that functions are properly defined
+  if (typeof window.openRoomsWindow !== 'function') {
+    console.error('openRoomsWindow function not properly defined');
+  } else {
+    console.log('openRoomsWindow function is available');
+  }
+  
+  if (typeof window.showRoomsModal !== 'function') {
+    console.error('showRoomsModal function not properly defined');
+  } else {
+    console.log('showRoomsModal function is available');
+  }
+  
+  if (typeof window.closeRoomsModal !== 'function') {
+    console.error('closeRoomsModal function not properly defined');
+  } else {
+    console.log('closeRoomsModal function is available');
+  }
+  
+  // Add event listener to the view rooms button
+  const viewRoomsBtn = document.getElementById('view-rooms-btn');
+  if (viewRoomsBtn) {
+    console.log('Adding event listener to view rooms button');
+    viewRoomsBtn.addEventListener('click', function(event) {
+      event.preventDefault();
+      console.log('View rooms button clicked');
+      
+      if (typeof window.openRoomsWindow === 'function') {
+        window.openRoomsWindow();
+      } else {
+        console.error('openRoomsWindow function not available');
+        // Fallback: try to show modal directly
+        const modal = document.getElementById('rooms-modal');
+        if (modal) {
+          modal.style.display = 'block';
+          console.log('Modal shown via fallback');
+        } else {
+          console.error('rooms-modal element not found');
+        }
+      }
+    });
+  } else {
+    console.error('view-rooms-btn element not found');
+  }
+});
+
+// Function to load rooms in modal
+async function loadRoomsInModal() {
+  try {
+    console.log('🔵 loadRoomsInModal called');
+    
+    // Use the same Firebase system as the create button
+    const { findAvailableRooms } = await import('./firebase-init.js');
+    console.log('🔵 findAvailableRooms imported successfully');
+    
+    const rooms = await findAvailableRooms();
+    console.log('🔵 Available rooms found:', rooms);
+    console.log('🔵 Number of rooms:', rooms.length);
+    
+    renderRoomsInModal(rooms);
+    console.log('🔵 Rooms rendered in modal');
+    
+  } catch (error) {
+    console.error('🔵 Failed to load rooms:', error);
+    const listEl = document.getElementById('rooms-modal-list');
+    if (listEl) {
+      listEl.innerHTML = `
+        <p style="color: #ff0000; text-align: center; margin: 20px 0;">
+          Failed to load rooms: ${error.message}<br>
+          <small style="color: #ccc;">Check console for details</small>
+        </p>
+      `;
+    }
+  }
+}
+
+// Function to update room count and button animation
+async function updateRoomCount() {
+  try {
+    console.log('🔵 updateRoomCount called');
+    const { findAvailableRooms, findAllRoomsDebug } = await import('./firebase-init.js');
+    
+    // Get both available and all rooms for debugging
+    const [availableRooms, allRooms] = await Promise.all([
+      findAvailableRooms(),
+      findAllRoomsDebug()
+    ]);
+    
+    const roomCount = availableRooms.length;
+    const countElement = document.getElementById('room-count');
+    const button = document.getElementById('view-rooms-btn');
+    
+    console.log('🔵 Room count debug:', {
+      availableRooms: roomCount,
+      totalRooms: allRooms.length,
+      availableRoomsList: availableRooms.map(r => ({ id: r.id, players: r.players?.length || 0, maxPlayers: r.maxPlayers, gameStarted: r.gameStarted })),
+      allRoomsList: allRooms.map(r => ({ id: r.id, players: r.players?.length || 0, maxPlayers: r.maxPlayers, gameStarted: r.gameStarted }))
+    });
+    
+    if (roomCount > 0) {
+      // Show one skull per room instead of a number
+      countElement.textContent = '💀'.repeat(roomCount);
+      button.style.animation = 'pulse 2s infinite';
+    } else {
+      countElement.textContent = '💀';
+      button.style.animation = 'none';
+    }
+  } catch (error) {
+    console.error('🔵 Failed to update room count:', error);
+  }
+}
+
+// Function to render rooms in modal
+function renderRoomsInModal(rooms) {
+  const listEl = document.getElementById('rooms-modal-list');
+  if (!listEl) return;
+  
+  console.log('🔵 renderRoomsInModal called with', rooms.length, 'rooms');
+  
+  if (rooms.length === 0) {
+    listEl.innerHTML = '<p style="color: #ccc; text-align: center; font-style: italic; padding: 20px 0;">No dungeons available. Create one to get started!</p>';
+    return;
+  }
+  
+  // Show loading briefly if needed
+  if (listEl.innerHTML === '') {
+    listEl.innerHTML = '<p style="color: #ffff00; text-align: center; font-style: italic; padding: 20px 0;">Loading dungeons...</p>';
+  }
+  
+  listEl.innerHTML = '';
+  rooms.forEach(room => {
+    console.log('🔵 Rendering room:', room);
+    
+    const players = Array.isArray(room.players) ? room.players : [];
+    const host = players.find(p => p.uid === room.hostUid || p.userId === room.hostUid);
+    const hostName = host ? (host.displayName || host.name) : 'Unknown';
+    
+    // Skip rooms with Unknown creators
+    if (hostName === 'Unknown') {
+      console.log('🔵 Skipping room with Unknown creator:', room.id);
+      return;
+    }
+    const maxPlayers = room.maxPlayers || room.minPlayers || 4;
+    const isFull = players.length >= maxPlayers;
+    
+    // Check if current user is the host of this room
+    const currentPlayerName = document.getElementById('displayName').value.trim();
+    const isOwnRoom = host && (host.displayName === currentPlayerName || host.name === currentPlayerName);
+    
+    const roomCard = document.createElement('div');
+    roomCard.style.cssText = `
+      background: #000;
+      border: 1px solid rgba(139,0,0,0.6);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(5px);
+      position: relative;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    `;
+    
+    const roomInfo = document.createElement('div');
+    roomInfo.innerHTML = `
+      <div style="font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px;">${room.roomName || room.id}</div>
+      <div style="font-size: 12px; color: #ccc;">Creator: ${hostName}</div>
+      <div style="font-size: 12px; color: #ccc;">Players: ${players.length}/${maxPlayers}</div>
+      <div style="font-size: 12px; color: #ffff00;">Status: Waiting for players</div>
+    `;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    `;
+    
+    // Only show Join button if user is not the creator and room is not full
+    if (!isOwnRoom && !isFull) {
+      const joinBtn = document.createElement('button');
+      joinBtn.textContent = 'Join';
+      joinBtn.style.cssText = `
+        background: rgba(139,0,0,0.8);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      `;
+      joinBtn.onmouseover = () => {
+        joinBtn.style.background = 'rgba(180,0,0,0.9)';
+        joinBtn.style.transform = 'translateY(-1px)';
+      };
+      joinBtn.onmouseout = () => {
+        joinBtn.style.background = 'rgba(139,0,0,0.8)';
+        joinBtn.style.transform = 'translateY(0)';
+      };
+      joinBtn.onclick = () => handleJoinRoomFromModal(room.id || room.roomId);
+      buttonContainer.appendChild(joinBtn);
+      
+      // Add flashing "Waiting..." text
+      const waitingText = document.createElement('span');
+      waitingText.textContent = 'Waiting...';
+      waitingText.style.cssText = `
+        color: #00ff00;
+        font-weight: bold;
+        font-size: 12px;
+        animation: flash 1.5s infinite;
+        margin-left: 8px;
+      `;
+      buttonContainer.appendChild(waitingText);
+    } else if (isFull) {
+      const fullText = document.createElement('span');
+      fullText.textContent = 'Full';
+      fullText.style.cssText = `
+        color: #ff6666;
+        font-weight: bold;
+        font-size: 14px;
+      `;
+      buttonContainer.appendChild(fullText);
+    }
+    
+    // Add close button for rooms created by the current user
+    if (isOwnRoom) {
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '✕';
+      closeBtn.style.cssText = `
+        background: rgba(255,0,0,0.8);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 35px;
+      `;
+      closeBtn.title = 'Close Room';
+      closeBtn.onclick = () => handleCloseRoomFromModal(room.id);
+      buttonContainer.appendChild(closeBtn);
+    }
+    
+    roomCard.appendChild(roomInfo);
+    roomCard.appendChild(buttonContainer);
+    listEl.appendChild(roomCard);
+  });
+  
+  // Add CSS animation for flashing effect
+  if (!document.getElementById('flash-animation')) {
+    const style = document.createElement('style');
+    style.id = 'flash-animation';
+    style.textContent = `
+      @keyframes flash {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+      }
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+// Function to handle joining room from modal
+async function handleJoinRoomFromModal(roomId, playerName = null) {
+  const displayName = playerName || document.getElementById('displayName').value.trim();
+  if (!displayName) {
+    alert('Please enter your name first!');
+    document.getElementById('displayName').focus();
+    return;
+  }
+  
+  try {
+    console.log('🔵 Attempting to join room:', roomId, 'with player:', displayName);
+    
+    // Use the same Firebase system as the create button
+    const { joinGameRoom } = await import('./firebase-init.js');
+    
+    // Join the room using the updated system
+    await joinGameRoom(roomId, displayName);
+    
+    console.log('🔵 Successfully joined room:', roomId);
+    
+    // Close the modal
+    closeRoomsModal();
+    
+    // Show success message
+    showAdvisory(`Successfully joined dungeon! Waiting for game to start...`, 'success');
+    
+    // Start monitoring the room for auto-start (both creator and joiner should monitor)
+    if (typeof startRoomMonitoring === 'function') {
+      startRoomMonitoring(roomId);
+    }
+    
+  } catch (error) {
+    console.error('🔵 Failed to join room:', error);
+    showAdvisory('Failed to join dungeon: ' + error.message, 'error');
+  }
+}
+
+// Function to handle closing room from modal
+async function handleCloseRoomFromModal(roomId) {
+  try {
+    console.log('🔵 Attempting to close/leave room:', roomId);
+    
+    const currentPlayerName = document.getElementById('displayName').value.trim();
+    if (!currentPlayerName) {
+      console.error('Unable to determine current player name');
+      return;
+    }
+    
+    // Use the same Firebase system as other functions
+    const { leaveRoom } = await import('./firebase-init.js');
+    
+    // Leave the room
+    await leaveRoom(roomId, currentPlayerName);
+    
+    console.log('🔵 Successfully left room:', roomId);
+    
+    // Refresh the rooms list
+    loadRoomsInModal();
+    
+  } catch (error) {
+    console.error('🔵 Failed to close room:', error);
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('rooms-modal');
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeRoomsModal();
+    }
+  });
+  
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modal.style.display === 'block') {
+      closeRoomsModal();
+    }
+  });
+  
+  // Set up room count updates
+  updateRoomCount(); // Initial update
+  setInterval(updateRoomCount, 10000); // Update every 10 seconds
+  
+  // TEMPORARY TESTING FEATURE: Tap "BOTS" 6 times to unlock multiplayer
+  try {
+    console.log('🔍 Setting up BOTS tap functionality...');
+    let botsTapCount = 0;
+    let botsTapTimeout = null;
+    
+    const botsLabel = document.getElementById('bots-label');
+    console.log('🔍 Looking for bots-label element:', botsLabel);
+    if (botsLabel) {
+    botsLabel.addEventListener('click', function() {
+      console.log('🔍 BOTS label clicked! Tap count:', botsTapCount + 1);
+      botsTapCount++;
+      
+      // Clear previous timeout
+      if (botsTapTimeout) {
+        clearTimeout(botsTapTimeout);
+      }
+      
+      // Visual feedback for tap
+      this.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        this.style.transform = 'scale(1)';
+      }, 150);
+      
+      // Check if we've reached 6 taps
+      if (botsTapCount >= 6) {
+        console.log('🎮 TEMPORARY TESTING: Multiplayer unlocked via BOTS tap!');
+        
+        // Show success message
+        const successMsg = document.createElement('div');
+        successMsg.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: rgba(0, 255, 0, 0.9);
+          color: white;
+          padding: 20px;
+          border-radius: 10px;
+          font-weight: bold;
+          font-size: 18px;
+          z-index: 10000;
+          text-align: center;
+          box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        `;
+        successMsg.innerHTML = '🎮 Multiplayer Unlocked!<br><small>(Temporary testing feature)</small>';
+        document.body.appendChild(successMsg);
+        
+        // Remove message after 3 seconds
+        setTimeout(() => {
+          if (successMsg.parentNode) {
+            successMsg.parentNode.removeChild(successMsg);
+          }
+        }, 3000);
+        
+        // Unlock multiplayer
+        const paymentWall = document.getElementById('multiplayer-payment-wall');
+        const multiplayerContent = document.getElementById('multiplayer-content');
+        
+        if (paymentWall && multiplayerContent) {
+          paymentWall.style.display = 'none';
+          multiplayerContent.style.display = 'block';
+        }
+        
+        // Reset tap count
+        botsTapCount = 0;
+      } else {
+        // Set timeout to reset tap count if not tapped again within 2 seconds
+        botsTapTimeout = setTimeout(() => {
+          botsTapCount = 0;
+          console.log('Tap count reset - tap "BOTS" 6 times to unlock multiplayer');
+        }, 2000);
+      }
+    });
+    
+    // Add hover effect
+    botsLabel.addEventListener('mouseenter', function() {
+      this.style.textShadow = '0 0 10px #ffff00';
+    });
+    
+    botsLabel.addEventListener('mouseleave', function() {
+      this.style.textShadow = 'none';
+    });
+    
+    console.log('🔍 BOTS tap functionality setup complete!');
+  } else {
+    console.log('🔍 ERROR: Could not find bots-label element');
+  }
+  } catch (error) {
+    console.log('🔍 ERROR in BOTS tap setup:', error);
+  }
+  
+  // FALLBACK: Try again after a short delay in case DOM wasn't ready
+  setTimeout(() => {
+    try {
+      console.log('🔍 FALLBACK: Trying BOTS tap setup again...');
+      const botsLabelFallback = document.getElementById('bots-label');
+      if (botsLabelFallback && !botsLabelFallback.hasAttribute('data-bots-tap-added')) {
+        console.log('🔍 FALLBACK: Adding BOTS tap to element');
+        botsLabelFallback.setAttribute('data-bots-tap-added', 'true');
+        
+        let fallbackTapCount = 0;
+        let fallbackTapTimeout = null;
+        
+        botsLabelFallback.addEventListener('click', function(e) {
+          console.log('🔍 FALLBACK: BOTS clicked! Tap count:', fallbackTapCount + 1);
+          e.preventDefault();
+          e.stopPropagation();
+          
+          fallbackTapCount++;
+          
+          // Clear previous timeout
+          if (fallbackTapTimeout) {
+            clearTimeout(fallbackTapTimeout);
+          }
+          
+          // Visual feedback for tap
+          this.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            this.style.transform = 'scale(1)';
+          }, 150);
+          
+          // Check if we've reached 6 taps
+          if (fallbackTapCount >= 6) {
+            console.log('🎮 FALLBACK: Multiplayer unlocked via BOTS tap!');
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = `
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              background: rgba(0, 255, 0, 0.9);
+              color: white;
+              padding: 20px;
+              border-radius: 10px;
+              font-weight: bold;
+              font-size: 18px;
+              z-index: 10000;
+              text-align: center;
+              box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            `;
+            successMsg.innerHTML = '🎮 Multiplayer Unlocked!<br><small>(Temporary testing feature)</small>';
+            document.body.appendChild(successMsg);
+            
+            // Remove message after 3 seconds
+            setTimeout(() => {
+              if (successMsg.parentNode) {
+                successMsg.parentNode.removeChild(successMsg);
+              }
+            }, 3000);
+            
+            // Unlock multiplayer
+            const paymentWall = document.getElementById('multiplayer-payment-wall');
+            const multiplayerContent = document.getElementById('multiplayer-content');
+            
+            if (paymentWall && multiplayerContent) {
+              paymentWall.style.display = 'none';
+              multiplayerContent.style.display = 'block';
+            }
+            
+            // Reset tap count
+            fallbackTapCount = 0;
+          } else {
+            // Set timeout to reset tap count if not tapped again within 2 seconds
+            fallbackTapTimeout = setTimeout(() => {
+              fallbackTapCount = 0;
+              console.log('FALLBACK: Tap count reset - tap "BOTS" 6 times to unlock multiplayer');
+            }, 2000);
+          }
+        });
+        
+        console.log('🔍 FALLBACK: BOTS tap setup complete!');
+      }
+    } catch (fallbackError) {
+      console.log('🔍 FALLBACK ERROR:', fallbackError);
+    }
+  }, 1000);
+});
+
+// Set up automatic stale dungeon cleanup
+let cleanupInterval = null;
+
+async function startAutomaticCleanup() {
+  try {
+    console.log('🧹 Starting automatic stale dungeon cleanup system');
+    
+    // Run initial cleanup after 1 minute (to let everything load first)
+    setTimeout(async () => {
+      try {
+        const { cleanupStaleRooms } = await import('./firebase-init.js');
+        const result = await cleanupStaleRooms();
+        if (result.roomsCleaned > 0 || result.inactivePlayersRemoved > 0) {
+          console.log('🧹 Initial cleanup completed:', result);
+        }
+      } catch (error) {
+        console.warn('🧹 Initial cleanup failed:', error);
+      }
+    }, 60000); // 1 minute delay
+    
+    // Set up recurring cleanup every 10 minutes
+    cleanupInterval = setInterval(async () => {
+      try {
+        const { cleanupStaleRooms } = await import('./firebase-init.js');
+        const result = await cleanupStaleRooms();
+        
+        if (result.roomsCleaned > 0 || result.inactivePlayersRemoved > 0) {
+          console.log('🧹 Automatic cleanup completed:', result);
+          // Update the room count if rooms were cleaned
+          if (typeof updateRoomCount === 'function') {
+            updateRoomCount();
+          }
+        }
+        
+        // Also refresh the modal if it's open
+        const modal = document.getElementById('rooms-modal');
+        if (modal && modal.style.display === 'block') {
+          if (typeof loadRoomsInModal === 'function') {
+            loadRoomsInModal();
+          }
+        }
+        
+      } catch (error) {
+        console.warn('🧹 Automatic cleanup failed:', error);
+      }
+    }, 10 * 60 * 1000); // Every 10 minutes
+    
+    console.log('🧹 Automatic cleanup scheduled: initial in 1 minute, then every 10 minutes');
+    
+  } catch (error) {
+    console.error('🧹 Failed to start automatic cleanup:', error);
+  }
+}
+
+// Stop automatic cleanup (called when page unloads)
+function stopAutomaticCleanup() {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+    console.log('🧹 Automatic cleanup stopped');
+  }
+}
+
+// Manual cleanup function for debugging
+window.manualCleanup = async function() {
+  try {
+    console.log('🧹 Manual cleanup triggered...');
+    const { cleanupStaleRooms } = await import('./firebase-init.js');
+    const result = await cleanupStaleRooms();
+    
+    console.log('🧹 Manual cleanup result:', result);
+    alert(`Cleanup completed!\n\nRooms removed: ${result.roomsCleaned}\nInactive players removed: ${result.inactivePlayersRemoved}\nTotal rooms checked: ${result.totalRoomsChecked}`);
+    
+    // Refresh UI
+    if (typeof updateRoomCount === 'function') {
+      updateRoomCount();
+    }
+    
+    // Refresh modal if open
+    const modal = document.getElementById('rooms-modal');
+    if (modal && modal.style.display === 'block') {
+      if (typeof loadRoomsInModal === 'function') {
+        loadRoomsInModal();
+      }
+    }
+    
+  } catch (error) {
+    console.error('🧹 Manual cleanup failed:', error);
+    alert('Cleanup failed: ' + error.message);
+  }
+};
+
+// Testing unlock functionality - tap version 6 times to unlock paywall
+let versionTapCount = 0;
+let versionTapTimeout = null;
+
+function handleVersionTap() {
+  console.log('🔧 handleVersionTap() called!');
+  versionTapCount++;
+  console.log(`🔧 Version tap count: ${versionTapCount}/6`);
+  
+  // Reset counter after 3 seconds of no taps
+  clearTimeout(versionTapTimeout);
+  versionTapTimeout = setTimeout(() => {
+    versionTapCount = 0;
+  }, 3000);
+  
+  // Visual feedback
+  const versionSpan = document.getElementById('version-span');
+  if (versionSpan) {
+    versionSpan.style.color = '#ff0000';
+    setTimeout(() => {
+      versionSpan.style.color = '#ffff00';
+    }, 150);
+  }
+  
+  // Unlock after 6 taps
+  if (versionTapCount >= 6) {
+    console.log('🔓 Testing unlock activated!');
+    versionTapCount = 0;
+    clearTimeout(versionTapTimeout);
+    
+    // Visual confirmation
+    if (versionSpan) {
+      versionSpan.style.color = '#00ff00';
+                  versionSpan.textContent = 'xV3.5 🔓';
+    }
+    
+    // Unlock paywall for testing
+    unlockPaywallForTesting();
+  }
+}
+
+function unlockPaywallForTesting() {
+  console.log('🧪 TESTING MODE: Unlocking paywall...');
+  
+  // Set localStorage flags to simulate payment
+  localStorage.setItem('multiplayerPaid', 'true');
+  localStorage.setItem('testingUnlock', 'true');
+  localStorage.setItem('stripe_session_id', 'test_session_' + Date.now());
+  localStorage.setItem('userId', 'test_user_' + Date.now());
+  
+  // Show success message
+  const successDiv = document.createElement('div');
+  successDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 255, 0, 0.9);
+    color: #000;
+    padding: 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 10000;
+    text-align: center;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+  `;
+  successDiv.innerHTML = `
+    🧪 TESTING MODE ACTIVATED<br>
+    Paywall unlocked for testing<br>
+    Multiplayer access enabled
+  `;
+  
+  document.body.appendChild(successDiv);
+  
+  // Remove success message after 3 seconds
+  setTimeout(() => {
+    if (successDiv.parentNode) {
+      successDiv.parentNode.removeChild(successDiv);
+    }
+  }, 3000);
+  
+  // Hide modal paywall if it exists
+  const modalPaywall = document.getElementById('multiplayer-payment-wall-modal');
+  if (modalPaywall) {
+    modalPaywall.style.display = 'none';
+  }
+  
+  // Show create dungeon section if it exists
+  const createDungeonSection = document.getElementById('create-dungeon-section');
+  if (createDungeonSection) {
+    createDungeonSection.style.display = 'block';
+  }
+  
+  // Trigger payment verification to update UI
+  if (typeof verifyPayment === 'function') {
+    verifyPayment();
+  }
+  
+  console.log('🧪 Testing unlock complete - paywall bypassed');
+}
+
+// Add event listener to version span
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🔧 DOM loaded, looking for version-span...');
+  const versionSpan = document.getElementById('version-span');
+  console.log('🔧 Version span found:', versionSpan);
+  
+  if (versionSpan) {
+    console.log('🔧 Adding event listeners to version span');
+    versionSpan.addEventListener('click', function(e) {
+      console.log('🔧 Version span clicked!');
+      e.preventDefault();
+      e.stopPropagation();
+      handleVersionTap();
+    });
+    versionSpan.addEventListener('touchend', function(e) {
+      console.log('🔧 Version span touched!');
+      e.preventDefault();
+      e.stopPropagation();
+      handleVersionTap();
+    });
+    console.log('🔧 Event listeners added successfully');
+  } else {
+    console.error('🔧 Version span not found!');
+  }
+});
+
+// Also try adding listeners after a delay as backup
+setTimeout(function() {
+  const versionSpan = document.getElementById('version-span');
+  if (versionSpan && !versionSpan.hasAttribute('data-listeners-added')) {
+    console.log('🔧 Backup: Adding event listeners to version span');
+    versionSpan.setAttribute('data-listeners-added', 'true');
+    versionSpan.onclick = function(e) {
+      console.log('🔧 Version span clicked (onclick)!');
+      e.preventDefault();
+      e.stopPropagation();
+      handleVersionTap();
+    };
+  }
+}, 1000);
+
+</script>
+
+<script>
+// Horror Instructions Modal Function
+function showHorrorInstructions() {
+  // Check if modal already exists
+  let modal = document.getElementById('horror-instructions-modal');
+  if (!modal) {
+    // Create modal HTML
+    const modalHTML = `
+    <!-- Horror Instructions Modal -->
+    <div id="horror-instructions-modal" class="horror-instructions-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeHorrorInstructions()">&times;</button>
+            
+            <div class="modal-header">
+                <h1 class="modal-title">🩸 HORRORPORLY SURVIVAL GUIDE 🩸</h1>
+                <p class="modal-subtitle">Navigate the cursed board and survive the financial nightmare...</p>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="showInstructionTab('overview')">👹 Overview</button>
+                <button class="nav-btn" onclick="showInstructionTab('rent')">💰 Rent Rules</button>
+                <button class="nav-btn" onclick="showInstructionTab('steal')">🎴 Steal Cards</button>
+                <button class="nav-btn" onclick="showInstructionTab('special')">⚡ Special Squares</button>
+                <button class="nav-btn" onclick="showInstructionTab('survival')">🧟 Survival Tips</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="instruction-tab-overview" class="instruction-tab-content active">
+                <div class="instruction-section">
+                    <h2 class="section-title">🎯 Game Objective</h2>
+                    <p>Survive the cursed monopoly board by bankrupting all other players while avoiding your own financial doom. The last player standing wins the nightmare!</p>
+                </div>
+
+                <div class="instruction-section">
+                    <h2 class="section-title">💀 Basic Rules</h2>
+                    <ul class="horror-list">
+                        <li><strong>Starting Money:</strong> Each player begins with £5,000 in cursed currency</li>
+                        <li><strong>Movement:</strong> Roll dice to move around the haunted board</li>
+                        <li><strong>Property Purchase:</strong> Buy unowned properties to build your empire of terror</li>
+                        <li><strong>Rent Collection:</strong> Collect rent from players who land on your cursed properties</li>
+                        <li><strong>Development:</strong> Build graveyards and crypts to increase rent</li>
+                        <li><strong>Bankruptcy:</strong> Run out of money and face elimination from the game</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    ⚠️ WARNING: This is not your grandmother's Monopoly! Properties can be STOLEN and the supernatural affects gameplay! ⚠️
+                </div>
+            </div>
+
+            <!-- Rent Rules Tab -->
+            <div id="instruction-tab-rent" class="instruction-tab-content">
+                <div class="instruction-section">
+                    <h2 class="section-title">💰 Rent Calculation System</h2>
+                    <p>When you land on another player's property, you must pay rent based on the property type and development level:</p>
+
+                    <table class="rent-table">
+                        <thead>
+                            <tr>
+                                <th>Property Type</th>
+                                <th>Base Rent Formula</th>
+                                <th>Example (£1000 property)</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="property-type">Basic Property</td>
+                                <td>1.5 × Property Cost</td>
+                                <td class="rent-amount">£1,500</td>
+                                <td>Standard undeveloped property</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">1 Graveyard</td>
+                                <td>1.5 × Property Cost</td>
+                                <td class="rent-amount">£1,500</td>
+                                <td>Same as basic property</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">2 Graveyards</td>
+                                <td>3.0 × Property Cost</td>
+                                <td class="rent-amount">£3,000</td>
+                                <td>Double the fear, double the rent</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">3 Graveyards</td>
+                                <td>4.5 × Property Cost</td>
+                                <td class="rent-amount">£4,500</td>
+                                <td>The dead are restless</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">4 Graveyards</td>
+                                <td>6.0 × Property Cost</td>
+                                <td class="rent-amount">£6,000</td>
+                                <td>Maximum graveyard development</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">Crypt</td>
+                                <td>5.0 × Property Cost</td>
+                                <td class="rent-amount">£5,000</td>
+                                <td>Ultimate development - no other modifiers</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="rent-table" style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Special Property Type</th>
+                                <th>Rent Formula</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="property-type">Demon Properties</td>
+                                <td class="rent-amount">Properties Owned × £200</td>
+                                <td>Rent increases with each demon property owned by the same player</td>
+                            </tr>
+                            <tr>
+                                <td class="property-type">Cave Property</td>
+                                <td class="rent-amount">Fixed £500</td>
+                                <td>Always £500 regardless of development or other factors</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="warning-box">
+                    💸 BANKRUPTCY WARNING: If you can't pay rent, you go bankrupt immediately! Your properties become available to all remaining players!
+                </div>
+            </div>
+
+            <!-- Steal Cards Tab -->
+            <div id="instruction-tab-steal" class="instruction-tab-content">
+                <div class="steal-card-section">
+                    <h2 class="steal-card-title">🎴 STEAL CARDS - THE ULTIMATE POWER</h2>
+                    
+                    <div class="steal-card-info">
+                        <h3 style="color: #da70d6; margin: 0 0 10px 0;">How to Earn Steal Cards:</h3>
+                        <ul class="horror-list">
+                            <li><strong>Pass GO 4 Times:</strong> Every 4th time you pass GO, you earn a steal card</li>
+                            <li><strong>Glowing Gravestone:</strong> Land on the GO TO JAIL square when it glows green (random 2-3 minute intervals)</li>
+                            <li><strong>Yin-Yang Square:</strong> Small chance when landing on the mystical yin-yang square</li>
+                        </ul>
+                    </div>
+
+                    <div class="steal-card-info">
+                        <h3 style="color: #da70d6; margin: 0 0 10px 0;">How to Use Steal Cards:</h3>
+                        <ul class="horror-list">
+                            <li><strong>Double-Click Any Property:</strong> On your turn, double-click any property owned by another player</li>
+                            <li><strong>Instant Ownership:</strong> The property immediately becomes yours - no payment required!</li>
+                            <li><strong>Development Preserved:</strong> All graveyards and crypts transfer with the property</li>
+                            <li><strong>One Use Only:</strong> Each steal card can only be used once</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box" style="background: linear-gradient(135deg, #4a0080, #6a00a0);">
+                        🎴 STEAL CARD STRATEGY: Save steal cards for the most valuable properties! Crypts and developed properties are prime targets!
+                    </div>
+                </div>
+
+                <div class="instruction-section">
+                    <h2 class="section-title">💀 GO Bonus System</h2>
+                    <ul class="horror-list">
+                        <li><strong>Pass GO:</strong> Collect £250 every time you pass or land on GO</li>
+                        <li><strong>1st-3rd Pass:</strong> Only collect money bonus</li>
+                        <li><strong>4th Pass:</strong> Collect £250 + earn a steal card</li>
+                        <li><strong>8th Pass:</strong> Collect £250 + earn another steal card</li>
+                        <li><strong>Pattern Continues:</strong> Every 4th pass earns a steal card</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Special Squares Tab -->
+            <div id="instruction-tab-special" class="instruction-tab-content">
+                <div class="instruction-section">
+                    <h2 class="section-title">⚡ Special Squares & Effects</h2>
+                    
+                    <div class="special-squares">
+                        <div class="special-square">
+                            <div class="square-name">🏠 GO</div>
+                            <p>Collect £250 bonus. Every 4th pass earns a steal card. Shows "BONUS!" flash message.</p>
+                        </div>
+
+                        <div class="special-square">
+                            <div class="square-name">⚡ Teleport Squares (T7, T8)</div>
+                            <p>T8 → T1 teleportation. T7 → U Path teleportation. Shows "TELEPORT!" flash message with zap sound.</p>
+                        </div>
+
+                        <div class="special-square">
+                            <div class="square-name">☯️ Yin-Yang</div>
+                            <p>Receive mystical quotes that affect your money (gain or lose £1-900). Small chance for steal card. Shows "YANG!" flash message.</p>
+                        </div>
+
+                        <div class="special-square">
+                            <div class="square-name">🏛️ GO TO JAIL</div>
+                            <p>Sends you to jail. Sometimes glows green - land on it while glowing to earn a steal card! Shows "DUNGEON" flash message.</p>
+                        </div>
+
+                        <div class="special-square">
+                            <div class="square-name">🎭 Snake Paths</div>
+                            <p>Special movement paths that bypass normal squares. Entry triggers teleportation effects.</p>
+                        </div>
+
+                        <div class="special-square">
+                            <div class="square-name">🔮 U Path</div>
+                            <p>Mysterious path through the underworld. Access via T7 teleportation or specific entry squares.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning-box">
+                    🌟 TIP: Pay attention to visual and audio cues! Flash messages, sound effects, and glowing squares provide important gameplay information!
+                </div>
+            </div>
+
+            <!-- Survival Tips Tab -->
+            <div id="instruction-tab-survival" class="instruction-tab-content">
+                <div class="instruction-section">
+                    <h2 class="section-title">🧟 Survival Strategies</h2>
+                    
+                    <div class="steal-card-info">
+                        <h3 style="color: #ffaa00; margin: 0 0 10px 0;">💰 Financial Management:</h3>
+                        <ul class="horror-list">
+                            <li>Always keep some money in reserve for unexpected rent payments</li>
+                            <li>Develop properties strategically - crypts give the highest rent but cost the most</li>
+                            <li>Consider the risk vs reward of each property purchase</li>
+                            <li>Watch other players' money levels to predict their next moves</li>
+                        </ul>
+                    </div>
+
+                    <div class="steal-card-info">
+                        <h3 style="color: #ffaa00; margin: 0 0 10px 0;">🎴 Steal Card Tactics:</h3>
+                        <ul class="horror-list">
+                            <li>Save steal cards for the most expensive or developed properties</li>
+                            <li>Steal properties that complete color groups for maximum rent potential</li>
+                            <li>Use steal cards defensively to prevent opponents from dominating areas</li>
+                            <li>Time your steals when opponents have invested heavily in development</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box">
+                        🧠 REMEMBER: In Horrorporly, fortunes can change instantly! Stay alert, adapt quickly, and trust no one!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Close Button Section -->
+            <div class="controls-section">
+                <button class="nav-btn" onclick="closeHorrorInstructions()" style="font-size: 14px; padding: 10px 20px;">
+                    🚪 Close Instructions & Return to Lobby
+                </button>
+            </div>
+        </div>
+    </div>`;
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    modal = document.getElementById('horror-instructions-modal');
+    
+    // Add styles
+    const styles = `
+    <style>
+        .horror-instructions-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .horror-instructions-modal.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .horror-instructions-modal .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a0000, #2d0000, #1a0000);
+            border: 3px solid #8b0000;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 
+                0 0 30px rgba(139, 0, 0, 0.8),
+                inset 0 0 20px rgba(255, 0, 0, 0.1);
+            color: #ffffff;
+            font-family: 'Courier New', 'Lucida Console', monospace;
+        }
+
+        .horror-instructions-modal .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #8b0000;
+            padding-bottom: 15px;
+        }
+
+        .horror-instructions-modal .modal-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 
+                0 0 10px #ff0000,
+                0 0 20px #ff0000,
+                2px 2px 4px rgba(0,0,0,0.8);
+            margin: 0;
+            animation: pulse 2s infinite;
+        }
+
+        .horror-instructions-modal .modal-subtitle {
+            font-size: 14px;
+            color: #cccccc;
+            margin: 10px 0 0 0;
+            font-style: italic;
+        }
+
+        .horror-instructions-modal .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ff0000;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .horror-instructions-modal .close-btn:hover {
+            background: rgba(255, 0, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .horror-instructions-modal .instruction-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(139, 0, 0, 0.1);
+            border: 1px solid #8b0000;
+            border-radius: 8px;
+            border-left: 4px solid #ff0000;
+        }
+
+        .horror-instructions-modal .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff4444;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 5px #ff4444;
+        }
+
+        .horror-instructions-modal .rent-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #8b0000;
+        }
+
+        .horror-instructions-modal .rent-table th,
+        .horror-instructions-modal .rent-table td {
+            border: 1px solid #8b0000;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .horror-instructions-modal .rent-table th {
+            background: linear-gradient(135deg, #8b0000, #a00000);
+            color: #ffffff;
+            font-weight: bold;
+            text-shadow: 0 0 3px #000000;
+        }
+
+        .horror-instructions-modal .rent-table td {
+            background: rgba(139, 0, 0, 0.05);
+        }
+
+        .horror-instructions-modal .rent-table tr:hover td {
+            background: rgba(139, 0, 0, 0.2);
+        }
+
+        .horror-instructions-modal .property-type {
+            font-weight: bold;
+            color: #ffaa00;
+        }
+
+        .horror-instructions-modal .rent-amount {
+            font-weight: bold;
+            color: #ff4444;
+        }
+
+        .horror-instructions-modal .steal-card-section {
+            background: linear-gradient(135deg, #4a0080, #2d0050);
+            border: 2px solid #8a2be2;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .horror-instructions-modal .steal-card-title {
+            color: #da70d6;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0 0 15px 0;
+            text-shadow: 0 0 10px #da70d6;
+        }
+
+        .horror-instructions-modal .steal-card-info {
+            background: rgba(218, 112, 214, 0.1);
+            border: 1px solid #da70d6;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .horror-instructions-modal .warning-box {
+            background: linear-gradient(135deg, #cc4400, #aa3300);
+            border: 2px solid #ff6600;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 15px 0;
+            color: #ffffff;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .horror-instructions-modal .horror-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .horror-instructions-modal .horror-list li {
+            margin: 8px 0;
+            padding: 5px 0 5px 20px;
+            position: relative;
+        }
+
+        .horror-instructions-modal .horror-list li:before {
+            content: "🩸";
+            position: absolute;
+            left: 0;
+            top: 5px;
+        }
+
+        .horror-instructions-modal .special-squares {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .horror-instructions-modal .special-square {
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid #8b0000;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .horror-instructions-modal .square-name {
+            font-weight: bold;
+            color: #ffaa00;
+            margin-bottom: 5px;
+        }
+
+        .horror-instructions-modal .controls-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .horror-instructions-modal .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .horror-instructions-modal .nav-btn {
+            background: linear-gradient(135deg, #8b0000, #a00000);
+            color: #ffffff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: 1px solid #ff0000;
+        }
+
+        .horror-instructions-modal .nav-btn:hover {
+            background: linear-gradient(135deg, #a00000, #cc0000);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+        }
+
+        .horror-instructions-modal .nav-btn.active {
+            background: linear-gradient(135deg, #ff4444, #ff6666);
+            color: #000000;
+        }
+
+        .horror-instructions-modal .instruction-tab-content {
+            display: none;
+        }
+
+        .horror-instructions-modal .instruction-tab-content.active {
+            display: block;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .horror-instructions-modal .modal-content {
+                margin: 5px;
+                max-width: calc(100% - 10px);
+                max-height: calc(100vh - 10px);
+                padding: 12px;
+                border-radius: 10px;
+            }
+
+            .horror-instructions-modal .modal-title {
+                font-size: 22px;
+                line-height: 1.2;
+            }
+
+            .horror-instructions-modal .modal-subtitle {
+                font-size: 12px;
+            }
+
+            .horror-instructions-modal .nav-buttons {
+                gap: 5px;
+                margin: 10px 0;
+            }
+
+            .horror-instructions-modal .nav-btn {
+                padding: 6px 10px;
+                font-size: 10px;
+                border-radius: 4px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .horror-instructions-modal .rent-table {
+                font-size: 10px;
+                margin: 8px 0;
+            }
+
+            .horror-instructions-modal .rent-table th,
+            .horror-instructions-modal .rent-table td {
+                padding: 4px 6px;
+                font-size: 10px;
+                line-height: 1.3;
+            }
+
+            .horror-instructions-modal .special-squares {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin: 10px 0;
+            }
+
+            .horror-instructions-modal .special-square {
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .horror-instructions-modal .section-title {
+                font-size: 16px;
+                margin-bottom: 8px;
+            }
+
+            .horror-instructions-modal .instruction-section {
+                margin: 15px 0;
+                padding: 10px;
+            }
+
+            .horror-instructions-modal .horror-list li {
+                margin: 6px 0;
+                font-size: 12px;
+                line-height: 1.4;
+            }
+
+            .horror-instructions-modal .warning-box {
+                padding: 8px;
+                margin: 10px 0;
+                font-size: 12px;
+                line-height: 1.3;
+            }
+
+            .horror-instructions-modal .steal-card-info {
+                padding: 8px;
+                margin: 8px 0;
+            }
+
+            .horror-instructions-modal .close-btn {
+                top: 8px;
+                right: 12px;
+                font-size: 20px;
+                padding: 8px 12px;
+                min-height: 44px;
+                min-width: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .horror-instructions-modal .modal-content {
+                margin: 2px;
+                max-width: calc(100% - 4px);
+                max-height: calc(100vh - 4px);
+                padding: 10px;
+            }
+
+            .horror-instructions-modal .modal-title {
+                font-size: 18px;
+            }
+
+            .horror-instructions-modal .nav-btn {
+                padding: 4px 8px;
+                font-size: 9px;
+                min-height: 40px;
+            }
+
+            .horror-instructions-modal .rent-table th,
+            .horror-instructions-modal .rent-table td {
+                padding: 3px 4px;
+                font-size: 9px;
+            }
+
+            .horror-instructions-modal .section-title {
+                font-size: 14px;
+            }
+
+            .horror-instructions-modal .horror-list li {
+                font-size: 11px;
+            }
+        }
+
+        /* Landscape mobile orientation */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .horror-instructions-modal .modal-content {
+                max-height: calc(100vh - 20px);
+                padding: 8px 12px;
+            }
+
+            .horror-instructions-modal .modal-title {
+                font-size: 20px;
+                margin-bottom: 8px;
+            }
+
+            .horror-instructions-modal .modal-header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+        }
+    </style>`;
+    
+    document.head.insertAdjacentHTML('beforeend', styles);
+  }
+  
+  // Show modal
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHorrorInstructions() {
+  const modal = document.getElementById('horror-instructions-modal');
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+}
+
+function showInstructionTab(tabName) {
+  // Hide all tab contents
+  const tabContents = document.querySelectorAll('.instruction-tab-content');
+  tabContents.forEach(content => {
+    content.classList.remove('active');
+  });
+
+  // Remove active class from all buttons
+  const navButtons = document.querySelectorAll('.horror-instructions-modal .nav-btn');
+  navButtons.forEach(button => {
+    button.classList.remove('active');
+  });
+
+  // Show selected tab
+  const targetTab = document.getElementById(`instruction-tab-${tabName}`);
+  if (targetTab) {
+    targetTab.classList.add('active');
+  }
+  
+  // Highlight active button
+  event.target.classList.add('active');
+}
+
+// Close modal when clicking outside or pressing Escape
+document.addEventListener('click', function(e) {
+  const modal = document.getElementById('horror-instructions-modal');
+  if (modal && e.target === modal) {
+    closeHorrorInstructions();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeHorrorInstructions();
+  }
+});
+
+// Auto-open instructions if accessed via hash
+window.addEventListener('DOMContentLoaded', function() {
+  if (window.location.hash === '#instructions') {
+    setTimeout(() => {
+      showHorrorInstructions();
+    }, 500); // Small delay to ensure page is fully loaded
+  }
+});
+</script>
+
+<!-- Robust Firebase with optional auth for local testing -->
+<script type="module">
+  import { setupFirebaseWithOptionalAuth, testOptionalAuthSetup, showAuthInstructions } from "./firebase-auth-optional.js";
+  import { applyAuthBypass } from "./multiplayer-auth-bypass.js";
+  
+  // Initialize immediately to ensure priority over any other Firebase init
+  (async () => {
+    console.log("🚀 Using Firebase with optional auth...");
+    
+    try {
+      const success = await setupFirebaseWithOptionalAuth();
+      
+      if (success) {
+        console.log("✅ Firebase optional auth system ready for local testing");
+        // Test the setup
+        testOptionalAuthSetup();
+        
+        // Show auth instructions if auth is not configured
+        if (!window.authConfigured) {
+          showAuthInstructions();
+        }
+      } else {
+        console.log("⚠️ Firebase optional auth failed, fallback system will handle initialization");
+      }
+      
+      // Apply authentication bypass for multiplayer room operations
+      applyAuthBypass();
+      
+    } catch (error) {
+      console.error("❌ Firebase optional auth setup failed:", error);
+    }
+  })();
+</script>
+
+</body>
+</html>

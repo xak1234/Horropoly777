@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Development Deadlock Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2d2d2d;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6600;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #1a4d1a;
+            border: 1px solid #4d994d;
+        }
+        .error {
+            background-color: #4d1a1a;
+            border: 1px solid #994d4d;
+        }
+        .warning {
+            background-color: #4d4d1a;
+            border: 1px solid #999944;
+        }
+        .button {
+            background-color: #ff6600;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #e55a00;
+        }
+        .emergency-button {
+            background-color: #cc0000;
+            font-weight: bold;
+        }
+        .emergency-button:hover {
+            background-color: #aa0000;
+        }
+        .log {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏗️ Development Deadlock Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>🚨 Emergency Functions</h2>
+        <p>If your game is currently stuck, use these emergency functions:</p>
+        
+        <button class="button emergency-button" onclick="testEmergencyUnstick()">
+            🚨 Emergency Unstick Game
+        </button>
+        
+        <button class="button emergency-button" onclick="testManualUnstick()">
+            🏗️ Manual Development Unstick
+        </button>
+        
+        <div id="emergency-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔍 Current Game State Analysis</h2>
+        <button class="button" onclick="analyzeGameState()">Analyze Current State</button>
+        <div id="analysis-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🏗️ Development System Test</h2>
+        <button class="button" onclick="testDevelopmentSystem()">Test Development Logic</button>
+        <div id="development-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎮 Turn Progression Test</h2>
+        <button class="button" onclick="testTurnProgression()">Test Turn System</button>
+        <div id="turn-result" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Implementation Instructions</h2>
+        <div class="test-result">
+            <h3>To fix the development deadlock issue:</h3>
+            <ol>
+                <li><strong>Emergency Fix (Immediate):</strong> Add this to your game HTML:
+                    <pre>&lt;script src="emergency-development-deadlock-fix.js"&gt;&lt;/script&gt;</pre>
+                </li>
+                <li><strong>Comprehensive Fix:</strong> Add this for complete solution:
+                    <pre>&lt;script src="fix-development-button-deadlock.js"&gt;&lt;/script&gt;</pre>
+                </li>
+                <li><strong>If Game is Stuck:</strong> Open browser console and type:
+                    <pre>window.emergencyUnstick()</pre>
+                </li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function log(message, elementId = 'emergency-log') {
+            const logElement = document.getElementById(elementId);
+            if (logElement) {
+                logElement.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            console.log(message);
+        }
+
+        function testEmergencyUnstick() {
+            log('🚨 Testing emergency unstick function...');
+            
+            if (typeof window.emergencyUnstick === 'function') {
+                try {
+                    window.emergencyUnstick();
+                    log('✅ Emergency unstick function executed successfully');
+                } catch (error) {
+                    log('❌ Error executing emergency unstick: ' + error.message);
+                }
+            } else {
+                log('⚠️ Emergency unstick function not found - load emergency-development-deadlock-fix.js first');
+            }
+        }
+
+        function testManualUnstick() {
+            log('🏗️ Testing manual development unstick...');
+            
+            if (typeof window.unstickDevelopmentDeadlock === 'function') {
+                try {
+                    window.unstickDevelopmentDeadlock();
+                    log('✅ Manual development unstick executed successfully');
+                } catch (error) {
+                    log('❌ Error executing manual unstick: ' + error.message);
+                }
+            } else {
+                log('⚠️ Manual unstick function not found - load fix-development-button-deadlock.js first');
+            }
+        }
+
+        function analyzeGameState() {
+            const result = document.getElementById('analysis-result');
+            let html = '<h3>🔍 Game State Analysis</h3>';
+            
+            try {
+                // Check if game variables exist
+                const checks = [
+                    { name: 'window.players', value: window.players, type: 'array' },
+                    { name: 'window.currentPlayerIndex', value: window.currentPlayerIndex, type: 'number' },
+                    { name: 'window.currentPlayerName', value: window.currentPlayerName, type: 'string' },
+                    { name: 'window.isMultiplayerGame', value: window.isMultiplayerGame, type: 'boolean' },
+                    { name: 'window.properties', value: window.properties, type: 'object' },
+                    { name: 'window.autoActionTimer', value: window.autoActionTimer, type: 'any' }
+                ];
+                
+                checks.forEach(check => {
+                    const exists = typeof window[check.name.split('.')[1]] !== 'undefined';
+                    const value = check.value;
+                    const typeMatch = check.type === 'any' || typeof value === check.type || (check.type === 'array' && Array.isArray(value));
+                    
+                    html += `<div class="${exists && typeMatch ? 'success' : 'error'}">`;
+                    html += `<strong>${check.name}:</strong> `;
+                    html += exists ? `✅ Found (${typeof value})` : '❌ Not found';
+                    if (exists && value !== undefined) {
+                        if (check.type === 'array' && Array.isArray(value)) {
+                            html += ` - Length: ${value.length}`;
+                        } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                            html += ` - Value: ${value}`;
+                        }
+                    }
+                    html += '</div>';
+                });
+                
+                // Check for our fix functions
+                html += '<h4>🔧 Fix Functions Status:</h4>';
+                const fixFunctions = [
+                    'emergencyUnstick',
+                    'unstickDevelopmentDeadlock',
+                    'canDevelopProperty',
+                    'updateInfoPanel'
+                ];
+                
+                fixFunctions.forEach(func => {
+                    const exists = typeof window[func] === 'function';
+                    html += `<div class="${exists ? 'success' : 'warning'}">`;
+                    html += `<strong>window.${func}:</strong> ${exists ? '✅ Available' : '⚠️ Not loaded'}`;
+                    html += '</div>';
+                });
+                
+            } catch (error) {
+                html += `<div class="error">❌ Error analyzing game state: ${error.message}</div>`;
+            }
+            
+            result.innerHTML = html;
+            result.className = 'test-result';
+        }
+
+        function testDevelopmentSystem() {
+            const result = document.getElementById('development-result');
+            let html = '<h3>🏗️ Development System Test</h3>';
+            
+            try {
+                // Test development function availability
+                const devFunctions = [
+                    'canDevelopProperty',
+                    'getPropertyDevelopmentInfo',
+                    'updateInfoPanel'
+                ];
+                
+                devFunctions.forEach(func => {
+                    const exists = typeof window[func] === 'function';
+                    html += `<div class="${exists ? 'success' : 'error'}">`;
+                    html += `<strong>${func}:</strong> ${exists ? '✅ Available' : '❌ Missing'}`;
+                    html += '</div>';
+                });
+                
+                // Test with sample data if available
+                if (window.players && window.players.length > 0 && window.properties) {
+                    const player = window.players[0];
+                    const propertyIds = Object.keys(window.properties);
+                    
+                    if (propertyIds.length > 0) {
+                        const testProperty = propertyIds[0];
+                        html += `<div class="warning">`;
+                        html += `<strong>Sample Test:</strong> Testing ${player.name || 'Player'} with property ${testProperty}`;
+                        html += '</div>';
+                        
+                        if (typeof window.canDevelopProperty === 'function') {
+                            try {
+                                const canDevelop = window.canDevelopProperty(testProperty, player.name);
+                                html += `<div class="success">✅ Development check returned: ${canDevelop}</div>`;
+                            } catch (error) {
+                                html += `<div class="error">❌ Development check error: ${error.message}</div>`;
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                html += `<div class="error">❌ Error testing development system: ${error.message}</div>`;
+            }
+            
+            result.innerHTML = html;
+            result.className = 'test-result';
+        }
+
+        function testTurnProgression() {
+            const result = document.getElementById('turn-result');
+            let html = '<h3>🎮 Turn Progression Test</h3>';
+            
+            try {
+                // Test turn-related functions
+                const turnFunctions = [
+                    'nextPlayerTurn',
+                    'endTurn',
+                    'enableDiceSection',
+                    'startAutoActionTimer',
+                    'clearAutoActionTimer'
+                ];
+                
+                turnFunctions.forEach(func => {
+                    const exists = typeof window[func] === 'function';
+                    html += `<div class="${exists ? 'success' : 'warning'}">`;
+                    html += `<strong>${func}:</strong> ${exists ? '✅ Available' : '⚠️ Not found'}`;
+                    html += '</div>';
+                });
+                
+                // Check current turn state
+                if (typeof window.currentPlayerIndex !== 'undefined' && window.players) {
+                    html += `<div class="success">`;
+                    html += `<strong>Current Turn:</strong> Player ${window.currentPlayerIndex} of ${window.players.length}`;
+                    if (window.currentPlayerName) {
+                        html += ` (${window.currentPlayerName})`;
+                    }
+                    html += '</div>';
+                }
+                
+            } catch (error) {
+                html += `<div class="error">❌ Error testing turn progression: ${error.message}</div>`;
+            }
+            
+            result.innerHTML = html;
+            result.className = 'test-result';
+        }
+
+        // Auto-analyze on page load
+        window.addEventListener('load', function() {
+            setTimeout(analyzeGameState, 1000);
+        });
+    </script>
+</body>
+</html>

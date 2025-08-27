@@ -1,0 +1,1289 @@
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { currentTurn: 0, roomCreatedAt: "2025-08-22T04:42:21.149Z", consecutiveDoublesCount: 0, diceValues: {…}, maxPlayers: 2, gameStarted: true, snakePathMoney: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", lastPlayerLeft: {…}, lastActivity: 1755837745089, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { currentTurn: 0, roomCreatedAt: "2025-08-22T04:42:21.149Z", consecutiveDoublesCount: 0, diceValues: {…}, maxPlayers: 2, gameStarted: true, snakePathMoney: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", lastPlayerLeft: {…}, lastActivity: 1755837745089, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { snakePathMoney: {…}, maxPlayers: 2, consecutiveDoublesCount: 0, roomCreatedAt: "2025-08-22T04:42:21.149Z", lastDiceRoll: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", boardState: {…}, roomName: "Monster Lab", lastUpdated: "2025-08-22T04:42:51.297Z", properties: {…}, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { snakePathMoney: {…}, maxPlayers: 2, consecutiveDoublesCount: 0, roomCreatedAt: "2025-08-22T04:42:21.149Z", lastDiceRoll: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", boardState: {…}, roomName: "Monster Lab", lastUpdated: "2025-08-22T04:42:51.297Z", properties: {…}, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { createdAt: "2025-08-22T04:42:21.149Z", roomCreatedAt: "2025-08-22T04:42:21.149Z", lastRollWasDoubles: false, players: (1) […], lastPlayerLeft: {…}, syncType: "complete", gameStartedAt: "2025-08-22T04:42:25.487Z", lastActivity: 1755837745089, lastUpdated: "2025-08-22T04:42:51.507Z", roomName: "Monster Lab", … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { createdAt: "2025-08-22T04:42:21.149Z", roomCreatedAt: "2025-08-22T04:42:21.149Z", lastRollWasDoubles: false, players: (1) […], lastPlayerLeft: {…}, syncType: "complete", gameStartedAt: "2025-08-22T04:42:25.487Z", lastActivity: 1755837745089, lastUpdated: "2025-08-22T04:42:51.507Z", roomName: "Monster Lab", … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { lastActivity: 1755837745089, lastUpdated: "2025-08-22T04:42:51.714Z", roomCreatedBy: "user_1755837741149_ydl7r4", roomCreatedAt: "2025-08-22T04:42:21.149Z", roomName: "Monster Lab", consecutiveDoublesCount: 0, lastDiceRoll: {…}, lastPlayerLeft: {…}, version: "1.0", diceValues: {…}, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { lastActivity: 1755837745089, lastUpdated: "2025-08-22T04:42:51.714Z", roomCreatedBy: "user_1755837741149_ydl7r4", roomCreatedAt: "2025-08-22T04:42:21.149Z", roomName: "Monster Lab", consecutiveDoublesCount: 0, lastDiceRoll: {…}, lastPlayerLeft: {…}, version: "1.0", diceValues: {…}, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { roomCreatedBy: "user_1755837741149_ydl7r4", version: "1.0", snakePathMoney: {…}, lastPlayerLeft: {…}, lastActivity: 1755837745089, maxPlayers: 2, roomCreatedAt: "2025-08-22T04:42:21.149Z", currentTurn: 0, boardState: {…}, lastUpdated: "2025-08-22T04:42:51.925Z", … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { roomCreatedBy: "user_1755837741149_ydl7r4", version: "1.0", snakePathMoney: {…}, lastPlayerLeft: {…}, lastActivity: 1755837745089, maxPlayers: 2, roomCreatedAt: "2025-08-22T04:42:21.149Z", currentTurn: 0, boardState: {…}, lastUpdated: "2025-08-22T04:42:51.925Z", … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Raw players data from Firebase: 
+Object { 0: {…} }
+ Type: object firebase-init.js:798:21
+Converting Firebase object with numeric keys to array: 
+Object { 0: {…} }
+firebase-init.js:723:15
+Processed players data: 
+Object { wasConverted: true, isArray: true, length: 1, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { roomCreatedAt: "2025-08-22T04:42:21.149Z", lastRollWasDoubles: false, properties: {…}, roomName: "Monster Lab", lastPlayerLeft: {…}, consecutiveDoublesCount: 0, lastActivity: 1755837745089, diceValues: {…}, syncType: "complete", lastDiceRoll: {…}, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 1 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 1 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: undefined, userId: undefined, isHost: undefined, hasName: false, hasUserId: false, hasIsHost: false, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 1 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { roomCreatedAt: "2025-08-22T04:42:21.149Z", lastRollWasDoubles: false, properties: {…}, roomName: "Monster Lab", lastPlayerLeft: {…}, consecutiveDoublesCount: 0, lastActivity: 1755837745089, diceValues: {…}, syncType: "complete", lastDiceRoll: {…}, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+Preserving existing good player data instead of using corrupted Firebase data game.js:12771:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=282, y=90, currentSquare=t2 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=277, drawX=246, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t2: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+Raw players data from Firebase: 
+Array [ {…}, {…} ]
+ Type: object firebase-init.js:798:21
+Processed players data: 
+Object { wasConverted: false, isArray: true, length: 2, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { gameStartedAt: "2025-08-22T04:42:25.487Z", syncType: "complete", players: (2) […], properties: {…}, consecutiveDoublesCount: 0, gameStarted: true, boardState: {…}, lastUpdated: "2025-08-22T04:42:53.355Z", diceValues: {…}, snakePathMoney: {…}, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 2 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 0, isMultiplayerGame: true, hasPlayers: true, playersLength: 2 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…}, {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: "Sidney", userId: "user_kkk4t2c4", isHost: false, hasName: true, hasUserId: true, hasIsHost: true, fullPlayerObject: {…} }
+game.js:11685:17
+Player 1: 
+Object { name: "Carrie", userId: "user_1g6ekpb3", isHost: false, hasName: true, hasUserId: true, hasIsHost: true, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 2 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { gameStartedAt: "2025-08-22T04:42:25.487Z", syncType: "complete", players: (2) […], properties: {…}, consecutiveDoublesCount: 0, gameStarted: true, boardState: {…}, lastUpdated: "2025-08-22T04:42:53.355Z", diceValues: {…}, snakePathMoney: {…}, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+🎨 updateGameFromState - player colors after reconstruction: game.js:12904:17
+  Player 0: Sidney - color: #ff0000, colorName: Red game.js:12905:43
+  Player 1: Carrie - color: #0000ff, colorName: Blue game.js:12905:43
+🎯 updateGameFromState - movement flags after full player sync: game.js:12908:17
+  Player 0: Sidney - isMoving: undefined, movementTimestamp: undefined game.js:12910:21
+  Player 1: Carrie - isMoving: undefined, movementTimestamp: undefined game.js:12910:21
+🔍 Firebase player data received: game.js:12914:17
+  Firebase Player 0: name=Sidney, isMoving=undefined, movementTimestamp=undefined game.js:12916:21
+  Firebase Player 1: name=Carrie, isMoving=undefined, movementTimestamp=undefined game.js:12916:21
+🔍 Existing local player data before reconstruction: game.js:12920:17
+  Local Player 0: name=Sidney, isMoving=undefined, movementTimestamp=undefined game.js:12922:21
+  Local Player 1: name=Carrie, isMoving=undefined, movementTimestamp=undefined game.js:12922:21
+Position update for Sidney: currentSquare=r1, target=(882, 200), changed=true, realTimeCoords=true game.js:12956:17
+Animating Sidney from (282, 90) to (882, 200) game.js:12973:29
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Position update for Carrie: currentSquare=t5, target=(501, 90), changed=false, realTimeCoords=true game.js:12956:17
+Position unchanged for Carrie, ensuring correct position (501, 90) game.js:12992:21
+Restoring property state from Firebase: 
+Object { b5: {…}, t3: {…}, t1: {…}, l3: {…}, t2: {…}, r5: {…}, r6: {…}, t6: {…}, l5: {…}, r4: {…}, … }
+game.js:13019:17
+🐞 Current local property state before restore: {"t5":{"hasCrypt":false,"group":"blood","owner":null,"graveyards":0},"b5":{"hasCrypt":false,"graveyards":0,"group":"blood","owner":null},"b6":{"hasCrypt":false,"group":"blood","owner":null,"graveyards":0},"l2":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"blood"},"l4":{"graveyards":0,"owner":null,"group":"blood","hasCrypt":false},"b3":{"hasCrypt":false,"owner":null,"group":"urine","graveyards":0},"b7":{"group":"urine","owner":null,"hasCrypt":false,"graveyards":0},"r4":{"graveyards":0,"owner":null,"hasCrypt":false,"group":"urine"},"t4":{"group":"drowning","graveyards":0,"hasCrypt":false,"owner":null},"t6":{"hasCrypt":false,"group":"drowning","graveyards":0,"owner":null},"b2":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"strangulation"},"b4":{"hasCrypt":false,"group":"strangulation","owner":null,"graveyards":0},"b9":{"owner":null,"graveyards":0,"group":"strangulation","hasCrypt":false},"l7":{"graveyards":0,"group":"strangulation","owner":null,"hasCrypt":false},"r3":{"hasCrypt":false,"owner":null,"group":"cave","graveyards":0},"t3":{"group":"werewolves","graveyards":0,"owner":null,"hasCrypt":false},"t7":{"graveyards":0,"group":"werewolves","owner":null,"hasCrypt":false},"r7":{"graveyards":0,"owner":null,"hasCrypt":false,"group":"werewolves"},"r8":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"werewolves"},"r9":{"graveyards":0,"hasCrypt":false,"group":"poison","owner":null},"r5":{"hasCrypt":false,"owner":null,"graveyards":0,"group":"poison"},"l1":{"hasCrypt":false,"owner":null,"group":"insanity","graveyards":0},"l3":{"group":"insanity","hasCrypt":false,"owner":null,"graveyards":0},"l8":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"insanity"},"t1":{"owner":null,"hasCrypt":false,"group":"waterboarding","graveyards":0},"t2":{"declined":false,"hasCrypt":false,"group":"waterboarding","owner":"Sidney","graveyards":0,"purchaseTimestamp":1755837759357,"ownerColor":"#ff0000"},"t9":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"waterboarding"},"r1":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"swamp"},"r2":{"hasCrypt":false,"group":"swamp","owner":null,"graveyards":0},"r6":{"graveyards":0,"owner":null,"group":"swamp","hasCrypt":false},"l6":{"group":"swamp","owner":null,"hasCrypt":false,"graveyards":0},"l5":{"graveyards":0,"owner":null,"group":"demon","hasCrypt":false},"l9":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"demon"},"b1":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"demon"},"b8":{"owner":null,"graveyards":0,"group":"demon","hasCrypt":false}} game.js:13020:17
+[updateGameFromState] 🐞 MERGE CHECK for b5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t2: Local owner: Sidney, Firebase owner: Sidney game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r2: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l2: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r1: Local owner: null, Firebase owner: Sidney game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b2: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b4: Local owner: null, Firebase owner: null game.js:13025:21
+🐞 Current local property state after restore: {"t5":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"blood"},"b5":{"owner":null,"group":"blood","graveyards":0,"hasCrypt":false},"b6":{"graveyards":0,"group":"blood","owner":null,"hasCrypt":false},"l2":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"blood"},"l4":{"group":"blood","owner":null,"hasCrypt":false,"graveyards":0},"b3":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"urine"},"b7":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"urine"},"r4":{"hasCrypt":false,"owner":null,"group":"urine","graveyards":0},"t4":{"owner":null,"hasCrypt":false,"group":"drowning","graveyards":0},"t6":{"owner":null,"hasCrypt":false,"group":"drowning","graveyards":0},"b2":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"strangulation"},"b4":{"group":"strangulation","owner":null,"hasCrypt":false,"graveyards":0},"b9":{"group":"strangulation","graveyards":0,"hasCrypt":false,"owner":null},"l7":{"owner":null,"group":"strangulation","hasCrypt":false,"graveyards":0},"r3":{"group":"cave","graveyards":0,"hasCrypt":false,"owner":null},"t3":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"werewolves"},"t7":{"hasCrypt":false,"group":"werewolves","owner":null,"graveyards":0},"r7":{"owner":null,"graveyards":0,"group":"werewolves","hasCrypt":false},"r8":{"group":"werewolves","owner":null,"hasCrypt":false,"graveyards":0},"r9":{"graveyards":0,"hasCrypt":false,"owner":null,"group":"poison"},"r5":{"hasCrypt":false,"group":"poison","owner":null,"graveyards":0},"l1":{"owner":null,"group":"insanity","hasCrypt":false,"graveyards":0},"l3":{"owner":null,"group":"insanity","hasCrypt":false,"graveyards":0},"l8":{"group":"insanity","graveyards":0,"hasCrypt":false,"owner":null},"t1":{"graveyards":0,"hasCrypt":false,"group":"waterboarding","owner":null},"t2":{"hasCrypt":false,"ownerColor":"#ff0000","purchaseTimestamp":1755837759357,"declined":false,"group":"waterboarding","graveyards":0,"owner":"Sidney"},"t9":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"waterboarding"},"r1":{"owner":"Sidney","ownerColor":"#ff0000","purchaseTimestamp":1755837773348,"declined":false,"graveyards":0,"hasCrypt":false,"group":"swamp"},"r2":{"group":"swamp","graveyards":0,"owner":null,"hasCrypt":false},"r6":{"owner":null,"hasCrypt":false,"group":"swamp","graveyards":0},"l6":{"owner":null,"group":"swamp","graveyards":0,"hasCrypt":false},"l5":{"group":"demon","hasCrypt":false,"owner":null,"graveyards":0},"l9":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"demon"},"b1":{"owner":null,"group":"demon","hasCrypt":false,"graveyards":0},"b8":{"owner":null,"hasCrypt":false,"group":"demon","graveyards":0}} game.js:13047:17
+Property state after restore: 
+Object { t5: {…}, b5: {…}, b6: {…}, l2: {…}, l4: {…}, b3: {…}, b7: {…}, r4: {…}, t4: {…}, t6: {…}, … }
+game.js:13058:17
+Restoring snake path money from Firebase: 
+Object { s8: {…}, TT18: {…} }
+game.js:13063:17
+Current local snake path money before restore: 
+Object { TT18: {…}, s8: {…} }
+game.js:13064:17
+Updated snake path money s8 from Firebase: 
+Object { collected: false, pulsePhase: 4.3220835993052305, amount: 1000 }
+game.js:13083:29
+Updated snake path money TT18 from Firebase: 
+Object { collected: false, pulsePhase: 4.3220835993052305, amount: 1500 }
+game.js:13083:29
+Snake path money after merge: 
+Object { TT18: {…}, s8: {…} }
+game.js:13091:21
+Updated local state after Firebase sync: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:13134:13
+updateGameFromState: Calling updateGameFrame to refresh visuals game.js:13140:13
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Found property group: swamp for square: r1 (caching for future use) game.js:538:21
+Property data: 
+Object { square: "r1", group: "swamp", cost: 980, graveyardCost: 1020, cryptCost: 4000, color: "#008000", state: {…} }
+game.js:560:21
+Property state for square: r1 : 
+Object { owner: "Sidney", ownerColor: "#ff0000", purchaseTimestamp: 1755837773348, declined: false, graveyards: 0, hasCrypt: false, group: "swamp" }
+game.js:561:21
+✅ Bottom player display ensured visible for multiplayer mode game.js:4340:17
+updateGameFromState completed - UI updated game.js:13202:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+updateGameFromState: Visual update completed game.js:13171:17
+updateGameFromState: Updated player positions: 
+Array [ {…}, {…} ]
+game.js:13173:17
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for r1: Owner is Sidney game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Sidney", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "sidney", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: false, reason: "no match" }
+game.js:3995:21
+[updateInfoPanel] shouldShowPropertyInfo: false shouldShowButtons: false game.js:4051:21
+🚫 Clearing property info panel - shouldShowPropertyInfo=false game.js:4085:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Sidney", Local player "Carrie", Is my turn: false game.js:13587:25
+[enableDiceSection] Current player index: 0, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: Not your turn. Current player is Sidney. Setting player color pulse and disabling dice. game.js:13615:25
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-red game.js:13620:25
+🎲 Forced dice colors and pulse for Sidney: rgba(255, 0, 0, 0.9), animation: dicePulsePlayerRed game.js:13389:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-red Current pointerEvents: none game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+Gojail graves shake deactivated game.js:16138:13
+Next gojail graves shake scheduled in 29 seconds game.js:16121:13
+🎯 Auto-recovery: Refreshing touch handlers due to inactivity... tablet-touch-manager.js:331:25
+🎯 Refreshing all touch handlers... tablet-touch-manager.js:339:17
+🎯 Persistent canvas touch handlers applied tablet-touch-manager.js:216:21
+🎯 Persistent dice touch handlers applied tablet-touch-manager.js:259:21
+🎯 Touch handlers refreshed successfully tablet-touch-manager.js:357:17
+🎯 Touch health check: No recent activity, verifying handlers... tablet-touch-manager.js:274:25
+🔧 Auto-recovery: Dice should be clickable but isn't - fixing... game.js:3414:29
+Raw players data from Firebase: 
+Array [ {…}, {…} ]
+ Type: object firebase-init.js:798:21
+Processed players data: 
+Object { wasConverted: false, isArray: true, length: 2, type: "object", firstPlayer: {…} }
+firebase-init.js:803:21
+🎮 Game state update received: 
+Object { lastPlayerLeft: {…}, gameStartedAt: "2025-08-22T04:42:25.487Z", properties: {…}, diceValues: {…}, roomName: "Monster Lab", maxPlayers: 2, lastDiceRoll: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", version: "1.0", lastActivity: 1755837745089, … }
+game.js:11531:21
+🎮 Current state - isHost: false gameStarted: true players: 2 game.js:11532:21
+Update conditions: 
+Object { gameStarted: true, isHost: false, currentPlayerIndex: 0, gameStateCurrentTurn: 1, isMultiplayerGame: true, hasPlayers: true, playersLength: 2 }
+game.js:11546:17
+updatePlayerList called with: 
+Array [ {…}, {…} ]
+game.js:11674:13
+Player data integrity check: game.js:11683:13
+Player 0: 
+Object { name: "Sidney", userId: "user_kkk4t2c4", isHost: false, hasName: true, hasUserId: true, hasIsHost: true, fullPlayerObject: {…} }
+game.js:11685:17
+Player 1: 
+Object { name: "Carrie", userId: "user_1g6ekpb3", isHost: false, hasName: true, hasUserId: true, hasIsHost: true, fullPlayerObject: {…} }
+game.js:11685:17
+About to call updateUserIDsPanel from updatePlayerList (disabled) game.js:11715:13
+🎮 Auto-start check - isHost: false gameStarted: true playersLength: 2 maxPlayers: 2 game.js:11569:21
+🎮 Guest auto-start check - gameStarted: true isHost: false isGameContainerHidden: false game.js:11603:17
+Applying game state update from Firebase game.js:11613:21
+Updating game state from Firebase: 
+Object { lastPlayerLeft: {…}, gameStartedAt: "2025-08-22T04:42:25.487Z", properties: {…}, diceValues: {…}, roomName: "Monster Lab", maxPlayers: 2, lastDiceRoll: {…}, roomCreatedBy: "user_1755837741149_ydl7r4", version: "1.0", lastActivity: 1755837745089, … }
+game.js:12742:13
+Current local state before update: 
+Object { currentPlayerIndex: 0, localPlayers: (2) […] }
+game.js:12743:13
+🎨 updateGameFromState - player colors after reconstruction: game.js:12904:17
+  Player 0: Sidney - color: #ff0000, colorName: Red game.js:12905:43
+  Player 1: Carrie - color: #0000ff, colorName: Blue game.js:12905:43
+🎯 updateGameFromState - movement flags after full player sync: game.js:12908:17
+  Player 0: Sidney - isMoving: undefined, movementTimestamp: undefined game.js:12910:21
+  Player 1: Carrie - isMoving: undefined, movementTimestamp: undefined game.js:12910:21
+🔍 Firebase player data received: game.js:12914:17
+  Firebase Player 0: name=Sidney, isMoving=undefined, movementTimestamp=undefined game.js:12916:21
+  Firebase Player 1: name=Carrie, isMoving=undefined, movementTimestamp=undefined game.js:12916:21
+🔍 Existing local player data before reconstruction: game.js:12920:17
+  Local Player 0: name=Sidney, isMoving=undefined, movementTimestamp=undefined game.js:12922:21
+  Local Player 1: name=Carrie, isMoving=undefined, movementTimestamp=undefined game.js:12922:21
+Position update for Sidney: currentSquare=r1, target=(882, 200), changed=false, realTimeCoords=true game.js:12956:17
+Position unchanged for Sidney, ensuring correct position (882, 200) game.js:12992:21
+Position update for Carrie: currentSquare=t5, target=(501, 90), changed=false, realTimeCoords=true game.js:12956:17
+Position unchanged for Carrie, ensuring correct position (501, 90) game.js:12992:21
+Restoring property state from Firebase: 
+Object { l8: {…}, l4: {…}, t4: {…}, r3: {…}, l3: {…}, b2: {…}, b6: {…}, t9: {…}, r8: {…}, l1: {…}, … }
+game.js:13019:17
+🐞 Current local property state before restore: {"t5":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"blood"},"b5":{"owner":null,"group":"blood","graveyards":0,"hasCrypt":false},"b6":{"graveyards":0,"group":"blood","owner":null,"hasCrypt":false},"l2":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"blood"},"l4":{"group":"blood","owner":null,"hasCrypt":false,"graveyards":0},"b3":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"urine"},"b7":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"urine"},"r4":{"hasCrypt":false,"owner":null,"group":"urine","graveyards":0},"t4":{"owner":null,"hasCrypt":false,"group":"drowning","graveyards":0},"t6":{"owner":null,"hasCrypt":false,"group":"drowning","graveyards":0},"b2":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"strangulation"},"b4":{"group":"strangulation","owner":null,"hasCrypt":false,"graveyards":0},"b9":{"group":"strangulation","graveyards":0,"hasCrypt":false,"owner":null},"l7":{"owner":null,"group":"strangulation","hasCrypt":false,"graveyards":0},"r3":{"group":"cave","graveyards":0,"hasCrypt":false,"owner":null},"t3":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"werewolves"},"t7":{"hasCrypt":false,"group":"werewolves","owner":null,"graveyards":0},"r7":{"owner":null,"graveyards":0,"group":"werewolves","hasCrypt":false},"r8":{"group":"werewolves","owner":null,"hasCrypt":false,"graveyards":0},"r9":{"graveyards":0,"hasCrypt":false,"owner":null,"group":"poison"},"r5":{"hasCrypt":false,"group":"poison","owner":null,"graveyards":0},"l1":{"owner":null,"group":"insanity","hasCrypt":false,"graveyards":0},"l3":{"owner":null,"group":"insanity","hasCrypt":false,"graveyards":0},"l8":{"group":"insanity","graveyards":0,"hasCrypt":false,"owner":null},"t1":{"graveyards":0,"hasCrypt":false,"group":"waterboarding","owner":null},"t2":{"hasCrypt":false,"ownerColor":"#ff0000","purchaseTimestamp":1755837759357,"declined":false,"group":"waterboarding","graveyards":0,"owner":"Sidney"},"t9":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"waterboarding"},"r1":{"owner":"Sidney","ownerColor":"#ff0000","purchaseTimestamp":1755837773348,"declined":false,"graveyards":0,"hasCrypt":false,"group":"swamp"},"r2":{"group":"swamp","graveyards":0,"owner":null,"hasCrypt":false},"r6":{"owner":null,"hasCrypt":false,"group":"swamp","graveyards":0},"l6":{"owner":null,"group":"swamp","graveyards":0,"hasCrypt":false},"l5":{"group":"demon","hasCrypt":false,"owner":null,"graveyards":0},"l9":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"demon"},"b1":{"owner":null,"group":"demon","hasCrypt":false,"graveyards":0},"b8":{"owner":null,"hasCrypt":false,"group":"demon","graveyards":0}} game.js:13020:17
+[updateGameFromState] 🐞 MERGE CHECK for l8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b2: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l2: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t2: Local owner: Sidney, Firebase owner: Sidney game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b4: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r1: Local owner: Sidney, Firebase owner: Sidney game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l6: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for l9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t7: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b8: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for b5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r5: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r9: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t3: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for t1: Local owner: null, Firebase owner: null game.js:13025:21
+[updateGameFromState] 🐞 MERGE CHECK for r2: Local owner: null, Firebase owner: null game.js:13025:21
+🐞 Current local property state after restore: {"t5":{"group":"blood","owner":null,"graveyards":0,"hasCrypt":false},"b5":{"owner":null,"hasCrypt":false,"group":"blood","graveyards":0},"b6":{"hasCrypt":false,"owner":null,"group":"blood","graveyards":0},"l2":{"group":"blood","graveyards":0,"hasCrypt":false,"owner":null},"l4":{"group":"blood","owner":null,"graveyards":0,"hasCrypt":false},"b3":{"group":"urine","hasCrypt":false,"graveyards":0,"owner":null},"b7":{"graveyards":0,"owner":null,"group":"urine","hasCrypt":false},"r4":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"urine"},"t4":{"group":"drowning","graveyards":0,"owner":null,"hasCrypt":false},"t6":{"hasCrypt":false,"group":"drowning","owner":null,"graveyards":0},"b2":{"group":"strangulation","graveyards":0,"owner":null,"hasCrypt":false},"b4":{"graveyards":0,"hasCrypt":false,"group":"strangulation","owner":null},"b9":{"hasCrypt":false,"group":"strangulation","owner":null,"graveyards":0},"l7":{"hasCrypt":false,"graveyards":0,"owner":null,"group":"strangulation"},"r3":{"group":"cave","graveyards":0,"owner":null,"hasCrypt":false},"t3":{"hasCrypt":false,"owner":null,"group":"werewolves","graveyards":0},"t7":{"group":"werewolves","owner":null,"hasCrypt":false,"graveyards":0},"r7":{"hasCrypt":false,"graveyards":0,"group":"werewolves","owner":null},"r8":{"graveyards":0,"owner":null,"hasCrypt":false,"group":"werewolves"},"r9":{"owner":null,"graveyards":0,"hasCrypt":false,"group":"poison"},"r5":{"owner":null,"group":"poison","graveyards":0,"hasCrypt":false},"l1":{"group":"insanity","owner":null,"hasCrypt":false,"graveyards":0},"l3":{"owner":null,"hasCrypt":false,"group":"insanity","graveyards":0},"l8":{"hasCrypt":false,"owner":null,"group":"insanity","graveyards":0},"t1":{"owner":null,"hasCrypt":false,"graveyards":0,"group":"waterboarding"},"t2":{"group":"waterboarding","hasCrypt":false,"ownerColor":"#ff0000","graveyards":0,"declined":false,"owner":"Sidney","purchaseTimestamp":1755837759357},"t9":{"hasCrypt":false,"owner":null,"graveyards":0,"group":"waterboarding"},"r1":{"owner":"Sidney","purchaseTimestamp":1755837773348,"ownerColor":"#ff0000","graveyards":0,"declined":false,"group":"swamp","hasCrypt":false},"r2":{"group":"swamp","graveyards":0,"owner":null,"hasCrypt":false},"r6":{"owner":null,"group":"swamp","graveyards":0,"hasCrypt":false},"l6":{"graveyards":0,"hasCrypt":false,"owner":null,"group":"swamp"},"l5":{"graveyards":0,"owner":null,"group":"demon","hasCrypt":false},"l9":{"graveyards":0,"hasCrypt":false,"group":"demon","owner":null},"b1":{"graveyards":0,"hasCrypt":false,"group":"demon","owner":null},"b8":{"owner":null,"graveyards":0,"group":"demon","hasCrypt":false}} game.js:13047:17
+Property state after restore: 
+Object { t5: {…}, b5: {…}, b6: {…}, l2: {…}, l4: {…}, b3: {…}, b7: {…}, r4: {…}, t4: {…}, t6: {…}, … }
+game.js:13058:17
+Restoring snake path money from Firebase: 
+Object { TT18: {…}, s8: {…} }
+game.js:13063:17
+Current local snake path money before restore: 
+Object { TT18: {…}, s8: {…} }
+game.js:13064:17
+Updated snake path money TT18 from Firebase: 
+Object { collected: false, amount: 1500, pulsePhase: 2.883898559154453 }
+game.js:13083:29
+Updated snake path money s8 from Firebase: 
+Object { amount: 1000, pulsePhase: 2.883898559154453, collected: false }
+game.js:13083:29
+Snake path money after merge: 
+Object { TT18: {…}, s8: {…} }
+game.js:13091:21
+Updated local state after Firebase sync: 
+Object { currentPlayerIndex: 1, localPlayers: (2) […] }
+game.js:13134:13
+updateGameFromState: Calling updateGameFrame to refresh visuals game.js:13140:13
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+[hasDevelopmentButtonsVisible] Development buttons visible: false 
+Object { developButton: false, innerHTML: "..." }
+game.js:7694:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Carrie", Local player "Carrie", Is my turn: true game.js:13587:25
+[enableDiceSection] Current player index: 1, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: It's your turn (Carrie). Enabling dice. game.js:13595:29
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-blue game.js:13600:29
+🎲 Forced dice colors and pulse for Carrie: rgba(0, 0, 255, 0.9), animation: dicePulsePlayerBlue game.js:13389:13
+[startAutoActionTimer] Starting 20-second timer for roll action (multiplayer) game.js:7419:13
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-blue Current pointerEvents: auto game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+✅ Bottom player display ensured visible for multiplayer mode game.js:4340:17
+updateGameFromState completed - UI updated game.js:13202:13
+Forcing immediate visual update after Firebase sync game.js:11617:21
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Carrie", Local player "Carrie", Is my turn: true game.js:13587:25
+[enableDiceSection] Current player index: 1, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: It's your turn (Carrie). Enabling dice. game.js:13595:29
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-blue game.js:13600:29
+🎲 Forced dice colors and pulse for Carrie: rgba(0, 0, 255, 0.9), animation: dicePulsePlayerBlue game.js:13389:13
+[startAutoActionTimer] Starting 20-second timer for roll action (multiplayer) game.js:7419:13
+[clearAutoActionTimer] Auto-action timer cleared game.js:7409:17
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-blue Current pointerEvents: auto game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+updateGameFromState: Visual update completed game.js:13171:17
+updateGameFromState: Updated player positions: 
+Array [ {…}, {…} ]
+game.js:13173:17
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t5: Owner is null game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Carrie", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "carrie", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: true, reason: "name match" }
+game.js:3995:21
+[updateInfoPanel] Property decline check for Carrie on t5: 
+Object { hasPlayerDeclines: false, declinedProperties: [], hasDeclinedThisProperty: false, isCurrentlyMoving: undefined, recentMovement: undefined, justLanded: undefined }
+game.js:4020:25
+[updateInfoPanel] 🔧 FALLBACK: Forcing property purchase UI for unowned property (player turn, movement flags missing) game.js:4036:33
+[updateInfoPanel] shouldShowPropertyInfo: true shouldShowButtons: true game.js:4051:21
+💰 Showing purchase options for t5 to Carrie (canAfford: true) game.js:4100:21
+updateGameFrame called game.js:8574:13
+Canvas found, dimensions: 1000 x 1000 game.js:8631:13
+Canvas cleared game.js:8636:13
+🎨 Drawing internal background image, dimensions: 1024 x 1536 game.js:8643:17
+🎨 Canvas dimensions for internal background: 1000 x 1000 game.js:8644:17
+✅ Internal background image drawn successfully game.js:8646:17
+Drawing board image with transparency, dimensions: 1024 x 1024 game.js:8658:17
+Board image drawn with 90% opacity game.js:8663:17
+About to render tokens for 2 players game.js:8677:13
+[renderTokens] Rendering 2 players game_utils.js:82:13
+[renderTokens] Processing player Sidney: x=882, y=200, currentSquare=r1 game_utils.js:95:17
+[renderTokens] Drawing Sidney at visualX=882, drawX=851, drawY=169, size=62 game_utils.js:167:17
+[renderTokens] Sidney - using assigned color: #ff0000 game_utils.js:183:25
+[renderTokens] Processing player Carrie: x=501, y=90, currentSquare=t5 game_utils.js:95:17
+[renderTokens] Drawing Carrie at visualX=496, drawX=465, drawY=59, size=62 game_utils.js:167:17
+[renderTokens] Carrie - using assigned color: #0000ff game_utils.js:183:25
+Tokens rendered game.js:8680:13
+🏠 Drawing ownership marker for t2: owner=Sidney, ownerColor=#ff0000, position=(282, 90) game.js:8249:17
+🏠 Drawing ownership marker for r1: owner=Sidney, ownerColor=#ff0000, position=(882, 200) game.js:8249:17
+Eye glow check: 
+Object { eyeAnimationFrame: false, lastRollWasDoubles: false, hasLeftEye: true, hasRightEye: true }
+game.js:8687:13
+[enableDiceSection] Called. game.js:13406:13
+[enableDiceSection] Dice section element found. game.js:13508:17
+[enableDiceSection] All pulse classes removed. game.js:13511:17
+[enableDiceSection] Multiplayer turn check: Current player "Carrie", Local player "Carrie", Is my turn: true game.js:13587:25
+[enableDiceSection] Current player index: 1, Total players: 2 game.js:13588:25
+[enableDiceSection] Multiplayer: It's your turn (Carrie). Enabling dice. game.js:13595:29
+[enableDiceSection] Applied current player color pulse: dice-pulse-player-blue game.js:13600:29
+🎲 Forced dice colors and pulse for Carrie: rgba(0, 0, 255, 0.9), animation: dicePulsePlayerBlue game.js:13389:13
+[startAutoActionTimer] Starting 20-second timer for roll action (multiplayer) game.js:7419:13
+[clearAutoActionTimer] Auto-action timer cleared game.js:7409:17
+[enableDiceSection] Pulse class and pointerEvents set. Current classes: dice-section dice-pulse-player-blue Current pointerEvents: auto game.js:13678:17
+[enableDiceSection] Completed. game.js:13682:13
+Forced visual update completed game.js:11622:29
+[startAutoActionTimer] Starting 15-second timer for purchase action (multiplayer) game.js:7419:13
+[clearAutoActionTimer] Auto-action timer cleared game.js:7409:17
+🎲 DICE CLICKED (main) [ID: 0hp7tdv1j] - Starting validation... game.js:3458:13
+🔒 Dice click handler started by main [ID: 0hp7tdv1j] game.js:3468:13
+Dice click handler (main) - Current state: 
+Object { isAITurn: false, isRecordingEyes: false, currentPlayerIndex: 1, currentPlayer: "Carrie" }
+game.js:3493:13
+✅ DICE CLICK VALIDATED (main) [ID: 0hp7tdv1j] - Proceeding with roll... game.js:3547:13
+🔒 Dice roll flag set by main [ID: 0hp7tdv1j] - ready to call takeTurn() game.js:3557:13
+Dice click check (main) [ID: 0hp7tdv1j]: 
+Object { currentPlayer: "Carrie", currentSquare: "t5", propertyInfo: "t5", isUnownedProperty: true, hasAlreadyDeclined: false, hasUnpurchasedProperty: true, hasDevelopmentOption: false, isAITurn: false }
+game.js:3587:17
+❌ Player clicked dice with unpurchased property - BLOCKING dice roll until purchase decision made (source: main) game.js:3600:21
+🔄 Restored isDiceRollInProgress state (source: main) [ID: 0hp7tdv1j] game.js:3608:21
+🔒 Dice disabled until purchase decision made (source: main) game.js:3616:25
+🏠 Triggering property decision UI for unpurchased property: [object Object] game.js:3620:21
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t5: Owner is null game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Carrie", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "carrie", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: true, reason: "name match" }
+game.js:3995:21
+[updateInfoPanel] Property decline check for Carrie on t5: 
+Object { hasPlayerDeclines: false, declinedProperties: [], hasDeclinedThisProperty: false, isCurrentlyMoving: undefined, recentMovement: undefined, justLanded: undefined }
+game.js:4020:25
+[updateInfoPanel] 🔧 FALLBACK: Forcing property purchase UI for unowned property (player turn, movement flags missing) game.js:4036:33
+[updateInfoPanel] shouldShowPropertyInfo: true shouldShowButtons: true game.js:4051:21
+💰 Showing purchase options for t5 to Carrie (canAfford: true) game.js:4100:21
+🔓 Dice section pointer events restored to 'auto' in finally block (source: main) [ID: 0hp7tdv1j] game.js:3711:21
+🔓 All dice flags reset - completed (source: main) [ID: 0hp7tdv1j] game.js:3713:17
+[startAutoActionTimer] Starting 15-second timer for purchase action (multiplayer) game.js:7419:13
+[clearAutoActionTimer] Auto-action timer cleared game.js:7409:17
+🎲 DICE CLICKED (main) [ID: c42n38lr8] - Starting validation... game.js:3458:13
+🔒 Dice click handler started by main [ID: c42n38lr8] game.js:3468:13
+Dice click handler (main) - Current state: 
+Object { isAITurn: false, isRecordingEyes: false, currentPlayerIndex: 1, currentPlayer: "Carrie" }
+game.js:3493:13
+✅ DICE CLICK VALIDATED (main) [ID: c42n38lr8] - Proceeding with roll... game.js:3547:13
+🔒 Dice roll flag set by main [ID: c42n38lr8] - ready to call takeTurn() game.js:3557:13
+Dice click check (main) [ID: c42n38lr8]: 
+Object { currentPlayer: "Carrie", currentSquare: "t5", propertyInfo: "t5", isUnownedProperty: true, hasAlreadyDeclined: false, hasUnpurchasedProperty: true, hasDevelopmentOption: false, isAITurn: false }
+game.js:3587:17
+❌ Player clicked dice with unpurchased property - BLOCKING dice roll until purchase decision made (source: main) game.js:3600:21
+🔄 Restored isDiceRollInProgress state (source: main) [ID: c42n38lr8] game.js:3608:21
+🔒 Dice disabled until purchase decision made (source: main) game.js:3616:25
+🏠 Triggering property decision UI for unpurchased property: [object Object] game.js:3620:21
+Updated info panel title to: Player Blue game.js:3826:13
+[updateInfoPanelInternal] 🐞 PROPERTY CHECK for t5: Owner is null game.js:3909:17
+[updateInfoPanel] Multiplayer visibility check: 
+Object { currentPlayerName: "Carrie", inputPlayerName: "Carrie", localPlayerName: "Carrie", isHost: false, currentPlayerIsHost: false }
+game.js:3927:21
+[updateInfoPanel] Player identity check: 
+Object { currentPlayerName: "carrie", inputPlayerName: "carrie", localPlayerName: "carrie", isMyTurn: true, reason: "name match" }
+game.js:3995:21
+[updateInfoPanel] Property decline check for Carrie on t5: 
+Object { hasPlayerDeclines: false, declinedProperties: [], hasDeclinedThisProperty: false, isCurrentlyMoving: undefined, recentMovement: undefined, justLanded: undefined }
+game.js:4020:25
+[updateInfoPanel] 🔧 FALLBACK: Forcing property purchase UI for unowned property (player turn, movement flags missing) game.js:4036:33
+[updateInfoPanel] shouldShowPropertyInfo: true shouldShowButtons: true game.js:4051:21
+💰 Showing purchase options for t5 to Carrie (canAfford: true) game.js:4100:21
+🔓 Dice section pointer events restored to 'auto' in finally block (source: main) [ID: c42n38lr8] game.js:3711:21
+🔓 All dice flags reset - completed (source: main) [ID: c42n38lr8] game.js:3713:17
+[startAutoActionTimer] Starting 15-second timer for purchase action (multiplayer) game.js:7419:13
+[clearAutoActionTimer] Auto-action timer cleared game.js:7409:17
+🚫 Player has been sitting on property - not showing emergency purchase UI 2 game.js:3641:29
+🎯 Touch health check: No recent activity, verifying handlers... tablet-touch-manager.js:274:25
+🎯 Orientation change detected, refreshing touch handlers... tablet-touch-manager.js:477:21
+📱 Visual viewport changed - updating bottom player display game.js:168:17
+🎯 Refreshing all touch handlers... tablet-touch-manager.js:339:17
+🎯 Persistent canvas touch handlers applied tablet-touch-manager.js:216:21
+🎯 Persistent dice touch handlers applied tablet-touch-manager.js:259:21
+🎯 Touch handlers refreshed successfully tablet-touch-manager.js:357:17
+[startAutoActionTimer] 15-second timer expired for purchase action. Auto-executing... game.js:7429:17
+🎯 Touch health check: No recent activity, verifying handlers... tablet-touch-manager.js:274:25

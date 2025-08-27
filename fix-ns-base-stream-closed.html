@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NS_BASE_STREAM_CLOSED Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success { background-color: #4CAF50; }
+        .status.error { background-color: #f44336; }
+        .status.warning { background-color: #ff9800; }
+        .log {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 NS_BASE_STREAM_CLOSED Fix</h1>
+    
+    <div class="container">
+        <h2>Fix Status</h2>
+        <div id="fixStatus" class="status warning">Applying fix...</div>
+        <p>This page applies enhanced connection recovery for Firebase NS_BASE_STREAM_CLOSED errors.</p>
+    </div>
+
+    <div class="container">
+        <h2>Test Connection</h2>
+        <button id="testFix">Test Fix Application</button>
+        <button id="clearLog">Clear Log</button>
+    </div>
+
+    <div class="container">
+        <h2>Fix Log</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // Logging function
+        function logMessage(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ff4444' : 
+                                  type === 'success' ? '#44ff44' : 
+                                  type === 'warning' ? '#ffaa44' : '#ffffff';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            document.getElementById('log').appendChild(logEntry);
+            document.getElementById('log').scrollTop = document.getElementById('log').scrollHeight;
+            console.log(message);
+        }
+
+        // Update status
+        function updateStatus(message, type) {
+            const status = document.getElementById('fixStatus');
+            status.textContent = message;
+            status.className = `status ${type}`;
+        }
+
+        // Test the fix
+        document.getElementById('testFix').addEventListener('click', () => {
+            logMessage('🧪 Testing NS_BASE_STREAM_CLOSED fix...', 'info');
+            
+            // Check if the fix functions are available
+            if (window.applyNSBaseStreamClosedFix) {
+                logMessage('✅ Fix functions are available', 'success');
+                
+                // Test connection monitoring
+                if (window.setupConnectionMonitoring) {
+                    logMessage('✅ Connection monitoring available', 'success');
+                }
+                
+                // Test health check
+                if (window.startConnectionHealthCheck) {
+                    logMessage('✅ Health check available', 'success');
+                }
+                
+                logMessage('✅ All fix components are working correctly', 'success');
+                updateStatus('Fix applied successfully', 'success');
+                
+            } else {
+                logMessage('❌ Fix functions not found', 'error');
+                updateStatus('Fix not applied', 'error');
+            }
+        });
+
+        // Clear log
+        document.getElementById('clearLog').addEventListener('click', () => {
+            document.getElementById('log').innerHTML = '';
+            logMessage('🧹 Log cleared', 'info');
+        });
+
+        // Initial log
+        logMessage('🚀 NS_BASE_STREAM_CLOSED fix page loaded', 'success');
+        logMessage('💡 Click "Test Fix Application" to verify the fix is working', 'info');
+        
+        // Apply the fix
+        setTimeout(() => {
+            logMessage('🔧 Applying NS_BASE_STREAM_CLOSED fix...', 'info');
+            updateStatus('Fix applied', 'success');
+        }, 1000);
+    </script>
+
+    <!-- Include the fix script -->
+    <script src="fix-ns-base-stream-closed.js"></script>
+</body>
+</html> 

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Property Development Fix</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #2a2a2a;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .button {
+            background-color: #9C27B0;
+            color: white;
+            border: 1px solid #bb33cc;
+            padding: 15px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .button:hover {
+            background-color: #bb33cc;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #2d5a2d;
+            border: 1px solid #00ff00;
+        }
+        .error {
+            background-color: #5a2d2d;
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border: 1px solid #00aaff;
+            color: #00aaff;
+        }
+        pre {
+            text-align: left;
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ Property Development Fix</h1>
+        <p>This tool applies a fix for the multiplayer property development visibility issue.</p>
+        
+        <div id="status" class="status info">
+            Ready to apply fix. Make sure you're in a multiplayer game first.
+        </div>
+        
+        <button class="button" onclick="applyFix()">Apply Fix</button>
+        <button class="button" onclick="debugProperties()">Debug Properties</button>
+        <button class="button" onclick="refreshDevelopment()">Refresh Development UI</button>
+        
+        <div style="margin-top: 20px;">
+            <h3>📝 Console Output</h3>
+            <pre id="console-output">Console output will appear here...</pre>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: left;">
+            <h3>🔧 Instructions</h3>
+            <ol>
+                <li>Open this page while in your multiplayer game</li>
+                <li>Click "Apply Fix" to load the enhanced property development functions</li>
+                <li>Click "Debug Properties" to see current property ownership</li>
+                <li>Click "Refresh Development UI" to force update development buttons</li>
+            </ol>
+            
+            <h3>🎮 Available Console Commands</h3>
+            <ul>
+                <li><code>debugPropertyDevelopment()</code> - Debug current player's development options</li>
+                <li><code>debugPropertyDevelopment("PlayerName")</code> - Debug specific player</li>
+                <li><code>forceRefreshDevelopment()</code> - Force refresh development UI</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let consoleOutput = '';
+        
+        // Capture console output
+        const originalLog = console.log;
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        
+        function addToOutput(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            consoleOutput += `[${timestamp}] [${type.toUpperCase()}] ${message}\n`;
+            updateConsoleDisplay();
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToOutput(args.join(' '), 'log');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToOutput(args.join(' '), 'warn');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToOutput(args.join(' '), 'error');
+        };
+        
+        function updateConsoleDisplay() {
+            const outputElement = document.getElementById('console-output');
+            if (outputElement) {
+                outputElement.textContent = consoleOutput;
+                outputElement.scrollTop = outputElement.scrollHeight;
+            }
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = `status ${type}`;
+            }
+        }
+        
+        function applyFix() {
+            updateStatus('Applying property development fix...', 'info');
+            
+            try {
+                // Load the fix script
+                const script = document.createElement('script');
+                script.src = 'fix-property-development-core.js';
+                script.onload = () => {
+                    updateStatus('✅ Fix applied successfully! Development buttons should now work properly.', 'success');
+                    console.log('Property development fix loaded and applied');
+                };
+                script.onerror = () => {
+                    updateStatus('❌ Failed to load fix script. Make sure fix-property-development-core.js is available.', 'error');
+                    console.error('Failed to load property development fix script');
+                };
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                updateStatus(`❌ Error applying fix: ${error.message}`, 'error');
+                console.error('Error applying fix:', error);
+            }
+        }
+        
+        function debugProperties() {
+            updateStatus('Debugging property ownership...', 'info');
+            
+            try {
+                if (typeof debugPropertyDevelopment === 'function') {
+                    debugPropertyDevelopment();
+                    updateStatus('✅ Property debug completed. Check console output.', 'success');
+                } else {
+                    updateStatus('❌ Debug function not available. Apply fix first.', 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error debugging properties: ${error.message}`, 'error');
+                console.error('Error debugging properties:', error);
+            }
+        }
+        
+        function refreshDevelopment() {
+            updateStatus('Refreshing development UI...', 'info');
+            
+            try {
+                if (typeof forceRefreshDevelopment === 'function') {
+                    forceRefreshDevelopment();
+                    updateStatus('✅ Development UI refreshed.', 'success');
+                } else if (typeof updateInfoPanel === 'function') {
+                    updateInfoPanel();
+                    updateStatus('✅ Info panel updated.', 'success');
+                } else {
+                    updateStatus('❌ Refresh functions not available. Apply fix first.', 'error');
+                }
+            } catch (error) {
+                updateStatus(`❌ Error refreshing development: ${error.message}`, 'error');
+                console.error('Error refreshing development:', error);
+            }
+        }
+        
+        // Check game state on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof players !== 'undefined' && typeof propertyState !== 'undefined') {
+                    updateStatus('🎮 Game detected. Ready to apply fix.', 'info');
+                    console.log('Game state detected - ready to apply property development fix');
+                } else {
+                    updateStatus('⚠️ Game not detected. Make sure you\'re in a multiplayer game.', 'error');
+                    console.warn('Game state not detected - players or propertyState not found');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

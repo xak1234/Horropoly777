@@ -1,0 +1,78 @@
+Subject: URGENT: Security Vulnerability - Directory Listing Exposure at escaladeschool.ma
+
+Dear Escalade School IT Security Team,
+
+My name is Grant Wilson, and I am an independent security researcher. I am writing to inform you of a security vulnerability I have discovered affecting your domain www.escaladeschool.ma.
+
+VULNERABILITY SUMMARY:
+- Affected Domain: www.escaladeschool.ma
+- Vulnerability Type: Directory Listing & Information Disclosure
+- Severity: MEDIUM (CVSS 5.3-6.1)
+- Discovery Method: Google dorking and reconnaissance techniques
+- Status: Currently exploitable
+
+TECHNICAL DETAILS:
+I have discovered that your backup directory structure is publicly accessible and indexed by search engines:
+
+Affected URL: https://www.escaladeschool.ma/backup/homedir/public_html/
+
+This misconfiguration allows anyone to:
+- View your WordPress backup file structure
+- Access directory listings showing file organization
+- Gather reconnaissance information about your server setup
+- Potentially discover additional attack vectors
+
+DISCOVERY METHOD:
+This vulnerability was found through standard security reconnaissance techniques (Google dorking) that are commonly used by both security researchers and malicious actors. The exposed directories are likely indexed by search engines, making them discoverable through simple search queries.
+
+ETHICAL DISCLOSURE:
+I want to emphasize that:
+- NO sensitive data was accessed or downloaded
+- NO unauthorized actions were performed
+- This disclosure follows responsible security research practices
+- Only publicly visible directory listings were observed
+
+IMMEDIATE RISK:
+While the most sensitive files (wp-config.php) appear to be protected, the exposed directory structure provides valuable information that could be used by malicious actors for:
+- Server reconnaissance and attack planning
+- Identifying potential security weaknesses
+- Understanding your backup and file organization procedures
+
+RECOMMENDED IMMEDIATE ACTIONS:
+1. Disable directory listing on all backup directories
+2. Add "Options -Indexes" to .htaccess files in affected directories
+3. Move backup files outside web-accessible directories
+4. Review and audit server directory permissions
+5. Check for other exposed directories using similar techniques
+
+EVIDENCE:
+I have prepared a detailed technical report with screenshots and proof-of-concept documentation. I can provide this report upon request to help your team understand and remediate the issue.
+
+CONTACT INFORMATION:
+Researcher: Grant Wilson
+Email: s8curityzen@gmail.com
+Research Type: Independent Security Research
+Disclosure Policy: 90-day responsible disclosure
+
+NEXT STEPS:
+I would appreciate acknowledgment of this report and would be happy to provide additional technical details or assistance with remediation. I am committed to working with you to resolve this issue responsibly.
+
+Please let me know:
+1. If you need additional technical details or evidence
+2. Your preferred timeline for remediation
+3. If you would like me to retest after fixes are implemented
+
+Thank you for your time and attention to this security matter. I look forward to your response.
+
+Best regards,
+
+Grant Wilson
+Independent Security Researcher
+s8curityzen@gmail.com
+
+---
+CONFIDENTIAL: This communication contains security-sensitive information and should be handled according to your organization's security incident response procedures.
+
+
+
+

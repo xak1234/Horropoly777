@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Multiplayer Turn Timeout Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background-color: #2d5a2d; }
+        .error { background-color: #5a2d2d; }
+        .info { background-color: #2d4a5a; }
+        .warning { background-color: #5a5a2d; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.danger {
+            background-color: #f44336;
+        }
+        button.danger:hover {
+            background-color: #da190b;
+        }
+        button.warning {
+            background-color: #ff9800;
+        }
+        button.warning:hover {
+            background-color: #e68900;
+        }
+        pre {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .debug-info {
+            font-family: monospace;
+            font-size: 12px;
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Multiplayer Turn Timeout Fix</h1>
+        <p>This fix addresses the issue where multiplayer turns get stuck when a player doesn't take their turn.</p>
+        
+        <div id="status" class="status info">
+            Ready to apply fix...
+        </div>
+        
+        <div>
+            <button onclick="applyFix()">Apply Turn Timeout Fix</button>
+            <button onclick="checkStatus()" class="warning">Check Turn Status</button>
+            <button onclick="forceNextTurn()" class="danger">Force Next Turn</button>
+            <button onclick="testAutoTimer()">Test Auto Timer</button>
+        </div>
+        
+        <div class="container">
+            <h3>Debug Information</h3>
+            <div id="debugInfo" class="debug-info">
+                Click "Check Turn Status" to see current game state...
+            </div>
+        </div>
+        
+        <div class="container">
+            <h3>Console Output</h3>
+            <pre id="consoleOutput">Console output will appear here...</pre>
+        </div>
+    </div>
+
+    <script>
+        let originalConsoleLog = console.log;
+        let consoleOutput = document.getElementById('consoleOutput');
+        
+        // Capture console output
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleOutput.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+        
+        function updateDebugInfo(info) {
+            const debugDiv = document.getElementById('debugInfo');
+            debugDiv.textContent = JSON.stringify(info, null, 2);
+        }
+        
+        async function applyFix() {
+            try {
+                updateStatus('Applying multiplayer turn timeout fix...', 'info');
+                
+                // Load the fix script
+                const script = document.createElement('script');
+                script.src = 'fix-multiplayer-turn-timeout.js';
+                script.onload = function() {
+                    updateStatus('✅ Multiplayer turn timeout fix applied successfully!', 'success');
+                    console.log('✅ Fix applied successfully');
+                };
+                script.onerror = function() {
+                    updateStatus('❌ Failed to load fix script', 'error');
+                    console.error('❌ Failed to load fix script');
+                };
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                updateStatus('❌ Error applying fix: ' + error.message, 'error');
+                console.error('Error applying fix:', error);
+            }
+        }
+        
+        function checkStatus() {
+            try {
+                console.log('🔍 Checking turn status...');
+                
+                if (typeof window.checkTurnStatus === 'function') {
+                    const status = window.checkTurnStatus();
+                    updateDebugInfo(status);
+                    updateStatus('Turn status checked - see debug info below', 'info');
+                } else {
+                    // Manual check
+                    const status = {
+                        currentPlayerIndex: window.currentPlayerIndex,
+                        currentPlayerName: window.players?.[window.currentPlayerIndex]?.name,
+                        localPlayerName: document.getElementById('player1-name')?.value?.trim() || window.localPlayerName || 'Unknown',
+                        isMultiplayerGame: window.isMultiplayerGame,
+                        playersCount: window.players?.length || 0,
+                        players: window.players?.map(p => p.name) || []
+                    };
+                    updateDebugInfo(status);
+                    updateStatus('Turn status checked (manual) - see debug info below', 'warning');
+                }
+            } catch (error) {
+                updateStatus('❌ Error checking status: ' + error.message, 'error');
+                console.error('Error checking status:', error);
+            }
+        }
+        
+        function forceNextTurn() {
+            try {
+                console.log('🔧 Forcing next turn...');
+                
+                if (typeof window.forceNextTurn === 'function') {
+                    window.forceNextTurn();
+                    updateStatus('✅ Turn forced to advance', 'success');
+                } else if (typeof window.nextTurn === 'function') {
+                    window.nextTurn();
+                    updateStatus('✅ Turn advanced using nextTurn()', 'success');
+                } else {
+                    updateStatus('❌ nextTurn function not available', 'error');
+                }
+                
+                // Update status after a short delay
+                setTimeout(checkStatus, 1000);
+                
+            } catch (error) {
+                updateStatus('❌ Error forcing turn: ' + error.message, 'error');
+                console.error('Error forcing turn:', error);
+            }
+        }
+        
+        function testAutoTimer() {
+            try {
+                console.log('🧪 Testing auto timer...');
+                
+                if (typeof window.startAutoActionTimer === 'function') {
+                    window.startAutoActionTimer('roll');
+                    updateStatus('✅ Auto timer started for testing', 'success');
+                } else {
+                    updateStatus('❌ startAutoActionTimer function not available', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus('❌ Error testing auto timer: ' + error.message, 'error');
+                console.error('Error testing auto timer:', error);
+            }
+        }
+        
+        // Auto-apply fix when page loads
+        window.addEventListener('load', function() {
+            console.log('🔧 Multiplayer Turn Timeout Fix page loaded');
+            
+            // Check if we're in the game context
+            if (typeof window.players !== 'undefined' && typeof window.currentPlayerIndex !== 'undefined') {
+                console.log('✅ Game context detected');
+                applyFix();
+            } else {
+                console.log('⚠️ Game context not detected - fix available but not auto-applied');
+                updateStatus('⚠️ Game context not detected - click "Apply Fix" when in game', 'warning');
+            }
+        });
+    </script>
+</body>
+</html>

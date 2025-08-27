@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Game Reset</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .emergency-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #2a2a2a;
+            border-radius: 10px;
+        }
+        .emergency-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #f44336;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover { background-color: #da190b; }
+        button.safe { background-color: #4CAF50; }
+        button.safe:hover { background-color: #45a049; }
+        
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .status.error { background-color: #f44336; }
+        .status.success { background-color: #4CAF50; }
+        .status.warning { background-color: #ff9800; }
+        
+        .code-block {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 2px solid #f44336;
+            margin: 10px 0;
+            white-space: pre-line;
+        }
+        
+        .log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-line;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="emergency-container">
+        <h1>🚨 EMERGENCY GAME RESET</h1>
+        <div class="status error">
+            CRITICAL: Your game is in a cascading failure state with multiple AI timeouts and missing dice elements.
+        </div>
+
+        <div class="emergency-section">
+            <h2>🛑 IMMEDIATE ACTION REQUIRED</h2>
+            <p><strong>Your game is stuck in an infinite timeout loop. Use these emergency fixes:</strong></p>
+            
+            <button onclick="emergencyStopAll()">🛑 STOP ALL TIMEOUTS</button>
+            <button onclick="emergencyResetGame()">🔄 RESET GAME STATE</button>
+            <button onclick="emergencyRecreateDice()">🎲 RECREATE DICE ELEMENT</button>
+            
+            <div id="emergency-status" class="status warning">Ready for emergency action</div>
+        </div>
+
+        <div class="emergency-section">
+            <h2>📋 MANUAL CONSOLE COMMANDS</h2>
+            <p><strong>If buttons don't work, copy this entire block into your browser console:</strong></p>
+            
+            <div class="code-block">// EMERGENCY GAME RESET - PASTE ALL OF THIS
+console.log('🚨 EMERGENCY RESET STARTING...');
+
+// 1. Stop all timeouts and intervals
+try {
+    // Clear all timeouts (brute force method)
+    for (let i = 1; i < 99999; i++) {
+        window.clearTimeout(i);
+        window.clearInterval(i);
+    }
+    console.log('✅ All timeouts cleared');
+} catch (e) {
+    console.log('⚠️ Error clearing timeouts:', e.message);
+}
+
+// 2. Reset all flags
+isDiceRollInProgress = false;
+isDiceClickHandlerRunning = false;
+isPlayerMoving = false;
+isAITurnInProgress = false;
+if (typeof isRecordingEyes !== 'undefined') isRecordingEyes = false;
+if (typeof isAITurn !== 'undefined') isAITurn = false;
+console.log('✅ All flags reset');
+
+// 3. Fix player turn state
+if (typeof players !== 'undefined' && Array.isArray(players)) {
+    const currentPlayer = players[currentPlayerIndex];
+    if (currentPlayer) {
+        isAITurn = currentPlayer.isAI;
+        console.log(`✅ Turn state fixed: ${currentPlayer.name} (AI: ${currentPlayer.isAI})`);
+    }
+}
+
+// 4. Recreate dice element
+const existingDice = document.getElementById('dice-section');
+if (existingDice) {
+    existingDice.remove();
+    console.log('✅ Old dice element removed');
+}
+
+const infoPanel = document.getElementById('info-panel-content') || document.body;
+const newDiceSection = document.createElement('div');
+newDiceSection.id = 'dice-section';
+newDiceSection.className = 'dice-section dice-pulse';
+newDiceSection.style.pointerEvents = 'auto';
+newDiceSection.innerHTML = `
+    <div id="die1" class="die" onclick="handleDiceClick('main')">1</div>
+    <div id="die2" class="die" onclick="handleDiceClick('main')">2</div>
+`;
+infoPanel.appendChild(newDiceSection);
+console.log('✅ New dice element created');
+
+// 5. Call enableDiceSection if it exists
+if (typeof enableDiceSection === 'function') {
+    try {
+        enableDiceSection();
+        console.log('✅ enableDiceSection called');
+    } catch (e) {
+        console.log('⚠️ Error calling enableDiceSection:', e.message);
+    }
+}
+
+// 6. Force next turn if needed
+if (typeof nextTurn === 'function') {
+    try {
+        console.log('🔄 Forcing turn advance...');
+        nextTurn();
+        console.log('✅ Turn advanced');
+    } catch (e) {
+        console.log('⚠️ Error advancing turn:', e.message);
+    }
+}
+
+console.log('🎉 EMERGENCY RESET COMPLETED!');
+console.log('💡 Try clicking the dice now. If issues persist, refresh the page.');</div>
+        </div>
+
+        <div class="emergency-section">
+            <h2>🔄 SAFE RESTART OPTIONS</h2>
+            <p>If the emergency reset doesn't work:</p>
+            
+            <button class="safe" onclick="window.location.reload()">🔄 Refresh Page</button>
+            <button class="safe" onclick="localStorage.clear(); window.location.reload()">🗑️ Clear Storage & Refresh</button>
+        </div>
+
+        <div class="emergency-section">
+            <h2>📝 Emergency Log</h2>
+            <div id="emergency-log" class="log">Emergency reset tool initialized...\n</div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('emergency-log');
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(message, type = 'warning') {
+            const statusElement = document.getElementById('emergency-status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        function emergencyStopAll() {
+            log('🛑 STOPPING ALL TIMEOUTS AND INTERVALS...');
+            updateStatus('Stopping all timeouts...', 'warning');
+
+            try {
+                // Brute force clear all timeouts and intervals
+                for (let i = 1; i < 99999; i++) {
+                    window.clearTimeout(i);
+                    window.clearInterval(i);
+                }
+                
+                // Clear specific timeout variables if they exist
+                const timeoutVars = [
+                    'aiTurnTimeout', 'moveTimeout', 'takeTurnTimeout', 
+                    'diceAutoRecoveryInterval', 'autoActionTimer', 'autoRollTimer'
+                ];
+                
+                timeoutVars.forEach(varName => {
+                    if (typeof window[varName] !== 'undefined') {
+                        clearTimeout(window[varName]);
+                        clearInterval(window[varName]);
+                        window[varName] = null;
+                        log(`✅ Cleared ${varName}`);
+                    }
+                });
+                
+                log('✅ All timeouts and intervals stopped');
+                updateStatus('All timeouts stopped successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Error stopping timeouts: ${error.message}`);
+                updateStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function emergencyResetGame() {
+            log('🔄 RESETTING GAME STATE...');
+            updateStatus('Resetting game state...', 'warning');
+
+            try {
+                // Stop all timeouts first
+                emergencyStopAll();
+                
+                // Reset all flags
+                const flags = [
+                    'isDiceRollInProgress', 'isDiceClickHandlerRunning', 
+                    'isPlayerMoving', 'isAITurnInProgress', 'isRecordingEyes'
+                ];
+                
+                flags.forEach(flag => {
+                    if (typeof window[flag] !== 'undefined') {
+                        window[flag] = false;
+                        log(`✅ ${flag} = false`);
+                    }
+                });
+                
+                // Fix turn state
+                if (typeof window.players !== 'undefined' && Array.isArray(window.players) && typeof window.currentPlayerIndex !== 'undefined') {
+                    const currentPlayer = window.players[window.currentPlayerIndex];
+                    if (currentPlayer) {
+                        window.isAITurn = currentPlayer.isAI;
+                        log(`✅ Turn state fixed: ${currentPlayer.name} (AI: ${currentPlayer.isAI})`);
+                    }
+                }
+                
+                log('✅ Game state reset completed');
+                updateStatus('Game state reset successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Error resetting game: ${error.message}`);
+                updateStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function emergencyRecreateDice() {
+            log('🎲 RECREATING DICE ELEMENT...');
+            updateStatus('Recreating dice element...', 'warning');
+
+            try {
+                // Remove existing dice
+                const existingDice = document.getElementById('dice-section');
+                if (existingDice) {
+                    existingDice.remove();
+                    log('✅ Old dice element removed');
+                }
+                
+                // Find a good parent element
+                let parentElement = document.getElementById('info-panel-content') || 
+                                  document.getElementById('info-panel') ||
+                                  document.querySelector('.minimized-content') ||
+                                  document.body;
+                
+                // Create new dice section
+                const newDiceSection = document.createElement('div');
+                newDiceSection.id = 'dice-section';
+                newDiceSection.className = 'dice-section dice-pulse';
+                newDiceSection.style.cssText = `
+                    display: flex;
+                    gap: 10px;
+                    justify-content: center;
+                    margin: 10px 0;
+                    pointer-events: auto;
+                `;
+                
+                // Create dice
+                for (let i = 1; i <= 2; i++) {
+                    const die = document.createElement('div');
+                    die.id = `die${i}`;
+                    die.className = 'die';
+                    die.textContent = i;
+                    die.style.cssText = `
+                        width: 50px;
+                        height: 50px;
+                        background: #333;
+                        color: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 20px;
+                        font-weight: bold;
+                        border: 2px solid #00ff00;
+                        transition: all 0.3s ease;
+                    `;
+                    
+                    die.onclick = function() {
+                        log(`🎲 Die ${i} clicked`);
+                        if (typeof window.handleDiceClick === 'function') {
+                            window.handleDiceClick('emergency');
+                        }
+                    };
+                    
+                    newDiceSection.appendChild(die);
+                }
+                
+                parentElement.appendChild(newDiceSection);
+                log(`✅ New dice element created in ${parentElement.id || parentElement.tagName}`);
+                
+                // Try to call enableDiceSection
+                if (typeof window.enableDiceSection === 'function') {
+                    setTimeout(() => {
+                        try {
+                            window.enableDiceSection();
+                            log('✅ enableDiceSection called');
+                        } catch (e) {
+                            log(`⚠️ Error calling enableDiceSection: ${e.message}`);
+                        }
+                    }, 500);
+                }
+                
+                updateStatus('Dice element recreated successfully', 'success');
+                
+            } catch (error) {
+                log(`❌ Error recreating dice: ${error.message}`);
+                updateStatus(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize
+        log('🚨 Emergency reset tool loaded');
+        log('💡 Use the buttons above or copy the console commands');
+    </script>
+</body>
+</html>

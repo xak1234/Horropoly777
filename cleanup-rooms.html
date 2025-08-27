@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Cleanup Utility</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.danger {
+            background-color: #f44336;
+        }
+        .button.danger:hover {
+            background-color: #da190b;
+        }
+        .button.warning {
+            background-color: #ff9800;
+        }
+        .button.warning:hover {
+            background-color: #e68900;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            margin-right: 10px;
+        }
+        .output {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧹 Room Cleanup Utility</h1>
+    
+    <p>Use this utility to clean up stale room data that might be causing multiplayer issues.</p>
+    
+    <div class="input-group">
+        <input type="text" id="roomId" placeholder="Enter Room ID (e.g., ELM_STREET)" value="ELM_STREET">
+        <button class="button" onclick="checkRoom()">Check Room Status</button>
+        <button class="button warning" onclick="cleanRoom()">Clean Room</button>
+        <button class="button danger" onclick="resetRoom()">Reset Room</button>
+    </div>
+    
+    <div>
+        <button class="button" onclick="cleanAllRooms()">Clean All Rooms</button>
+        <button class="button" onclick="clearOutput()">Clear Output</button>
+    </div>
+    
+    <div id="output" class="output">
+        <div>🔧 Room Cleanup Utility Ready</div>
+        <div>📋 Use the buttons above or open browser console for advanced commands</div>
+    </div>
+
+    <script src="cleanup-stale-rooms.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            const div = document.createElement('div');
+            div.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearOutput() {
+            output.innerHTML = '<div>🔧 Output cleared</div>';
+        }
+        
+        async function checkRoom() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID');
+                return;
+            }
+            
+            log(`📊 Checking room: ${roomId}`);
+            try {
+                const status = await getRoomStatus(roomId);
+                if (status) {
+                    log(`✅ Room found: ${status.playerCount}/${status.maxPlayers} players`);
+                    log(`   Valid players: ${status.validPlayerCount}`);
+                    log(`   Game started: ${status.gameStarted}`);
+                } else {
+                    log('❌ Room not found');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function cleanRoom() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID');
+                return;
+            }
+            
+            log(`🧹 Cleaning room: ${roomId}`);
+            try {
+                const result = await cleanupRoom(roomId);
+                if (result) {
+                    log('✅ Room cleaned successfully');
+                } else {
+                    log('ℹ️ Room was already clean');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function resetRoom() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to reset room ${roomId}? This will remove all players.`)) {
+                return;
+            }
+            
+            log(`🔄 Resetting room: ${roomId}`);
+            try {
+                await window.resetRoom(roomId);
+                log('✅ Room reset successfully');
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function cleanAllRooms() {
+            if (!confirm('Are you sure you want to clean ALL rooms? This will remove invalid players from all rooms.')) {
+                return;
+            }
+            
+            log('🧹 Cleaning all rooms...');
+            try {
+                const result = await cleanupAllRooms();
+                log(`✅ Cleanup completed: ${result.cleanedCount} cleaned, ${result.deletedCount} deleted`);
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        // Override console.log to also show in UI
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args.length > 0 && typeof args[0] === 'string') {
+                // Only show Firebase/cleanup related logs in UI
+                const message = args[0];
+                if (message.includes('🧹') || message.includes('📊') || message.includes('✅') || 
+                    message.includes('❌') || message.includes('🗑️') || message.includes('🔄')) {
+                    const div = document.createElement('div');
+                    div.textContent = message;
+                    output.appendChild(div);
+                    output.scrollTop = output.scrollHeight;
+                }
+            }
+        };
+        
+        log('🔧 Room Cleanup Utility Loaded');
+        log('💡 Enter a room ID and use the buttons to manage rooms');
+    </script>
+</body>
+</html>

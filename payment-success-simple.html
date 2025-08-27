@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Success</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
+        .success {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="success">
+        <div class="icon">✅</div>
+        <h2>Payment Successful!</h2>
+        <p>Your multiplayer access has been unlocked.</p>
+        <p>This window will close automatically...</p>
+    </div>
+
+    <script>
+        console.log('Payment success page loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('URL search params:', window.location.search);
+        
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        console.log('Session ID from URL:', sessionId);
+        console.log('All URL parameters:', Object.fromEntries(urlParams.entries()));
+        
+        if (sessionId) {
+            console.log('Storing session ID in localStorage');
+            // Store session ID
+            localStorage.setItem('stripe_session_id', sessionId);
+            
+            // Signal success to parent window
+            if (window.opener) {
+                console.log('Sending success message to parent window');
+                window.opener.postMessage({
+                    type: 'payment_success',
+                    sessionId: sessionId
+                }, '*');
+            } else {
+                console.log('No parent window found');
+            }
+        } else {
+            console.log('No session ID found in URL - checking for session ID in localStorage');
+            // Try to get session ID from localStorage (fallback)
+            const storedSessionId = localStorage.getItem('currentSessionId');
+            if (storedSessionId) {
+                console.log('Found session ID in localStorage:', storedSessionId);
+                localStorage.setItem('stripe_session_id', storedSessionId);
+                
+                // Signal success to parent window
+                if (window.opener) {
+                    console.log('Sending success message to parent window with stored session ID');
+                    window.opener.postMessage({
+                        type: 'payment_success',
+                        sessionId: storedSessionId
+                    }, '*');
+                }
+            } else {
+                console.log('No session ID found anywhere - payment may have failed');
+            }
+        }
+        
+        // Close window after 2 seconds
+        setTimeout(() => {
+            console.log('Closing window');
+            window.close();
+        }, 2000);
+    </script>
+</body>
+</html> 

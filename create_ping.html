@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Ping Sound</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ping Sound Generator</h1>
+    <button onclick="playPing()">Test Ping Sound</button>
+    <button onclick="downloadPing()">Download Ping Sound</button>
+
+    <script>
+        let audioContext;
+        let pingBuffer;
+
+        async function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                await createPingBuffer();
+            }
+        }
+
+        async function createPingBuffer() {
+            const duration = 0.1; // 100ms
+            const sampleRate = audioContext.sampleRate;
+            const bufferSize = duration * sampleRate;
+            pingBuffer = audioContext.createBuffer(1, bufferSize, sampleRate);
+            const data = pingBuffer.getChannelData(0);
+
+            // Create a simple sine wave ping with exponential decay
+            const frequency = 1000; // 1kHz ping
+            for (let i = 0; i < bufferSize; i++) {
+                const t = i / sampleRate;
+                // Sine wave with exponential amplitude decay
+                data[i] = Math.sin(2 * Math.PI * frequency * t) * Math.exp(-15 * t);
+            }
+        }
+
+        async function playPing() {
+            await initAudio();
+            const source = audioContext.createBufferSource();
+            source.buffer = pingBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+        }
+
+        async function downloadPing() {
+            await initAudio();
+            
+            // Convert buffer to wave file
+            const wavData = audioBufferToWav(pingBuffer);
+            const blob = new Blob([wavData], { type: 'audio/wav' });
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ping.mp3';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Convert AudioBuffer to WAV format
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+            
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            
+            const data = new DataView(new ArrayBuffer(44 + buffer.length * bytesPerSample));
+            
+            // WAV header
+            writeString(data, 0, 'RIFF');
+            data.setUint32(4, 36 + buffer.length * bytesPerSample, true);
+            writeString(data, 8, 'WAVE');
+            writeString(data, 12, 'fmt ');
+            data.setUint32(16, 16, true);
+            data.setUint16(20, format, true);
+            data.setUint16(22, numChannels, true);
+            data.setUint32(24, sampleRate, true);
+            data.setUint32(28, sampleRate * blockAlign, true);
+            data.setUint16(32, blockAlign, true);
+            data.setUint16(34, bitDepth, true);
+            writeString(data, 36, 'data');
+            data.setUint32(40, buffer.length * bytesPerSample, true);
+            
+            // Write audio data
+            const samples = buffer.getChannelData(0);
+            let offset = 44;
+            for (let i = 0; i < samples.length; i++) {
+                const sample = Math.max(-1, Math.min(1, samples[i]));
+                data.setInt16(offset, sample * 0x7FFF, true);
+                offset += 2;
+            }
+            
+            return data.buffer;
+        }
+
+        function writeString(data, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                data.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+    </script>
+</body>
+</html> 

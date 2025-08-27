@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Horropoly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .success-container {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+        }
+        .success-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #00ff00;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .loading {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #00ff00;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase!</p>
+        <p>Your multiplayer access has been unlocked.</p>
+        <div class="spinner"></div>
+        <p class="loading">Closing window and unlocking features...</p>
+    </div>
+
+    <script>
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (sessionId) {
+            // Store session ID for parent window
+            localStorage.setItem('stripe_session_id', sessionId);
+            
+            // Signal success to parent window
+            if (window.opener) {
+                // Send message to parent window
+                window.opener.postMessage({
+                    type: 'payment_success',
+                    sessionId: sessionId
+                }, '*');
+                
+                // Close this window after a short delay
+                setTimeout(() => {
+                    window.close();
+                }, 2000);
+            } else {
+                // If no opener, redirect to main page
+                setTimeout(() => {
+                    window.location.href = window.location.origin;
+                }, 2000);
+            }
+        } else {
+            // No session ID, show error
+            document.querySelector('.success-container').innerHTML = `
+                <div style="color: #ff0000; font-size: 60px; margin-bottom: 20px;">❌</div>
+                <h1 style="color: #ff0000;">Payment Error</h1>
+                <p>No session ID found. Please contact support.</p>
+                <button onclick="window.close()" style="
+                    background: #333;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    margin-top: 20px;
+                ">Close Window</button>
+            `;
+        }
+    </script>
+</body>
+</html> 

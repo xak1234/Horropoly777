@@ -1,0 +1,10 @@
+# Stripe Configuration
+STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key_here
+STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Firebase Configuration (JSON string)
+FIREBASE_SERVICE_ACCOUNT={"type":"service_account","project_id":"horropoly",...}
+
+# Server Configuration
+NODE_ENV=production
+PORT=3001 

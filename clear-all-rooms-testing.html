@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Testing Utility - HorropolyDungeons</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a, #2c1810);
+            color: white;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #ff4444;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+        .section {
+            background: rgba(51, 51, 51, 0.9);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .section h3 {
+            color: #ff4444;
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 68, 68, 0.3);
+            padding-bottom: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #ff4444, #cc1111);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background: linear-gradient(135deg, #ff6666, #ff2222);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button.secondary {
+            background: linear-gradient(135deg, #444, #666);
+        }
+        button.secondary:hover {
+            background: linear-gradient(135deg, #555, #777);
+        }
+        button.success {
+            background: linear-gradient(135deg, #22cc22, #118811);
+        }
+        button.success:hover {
+            background: linear-gradient(135deg, #44dd44, #22aa22);
+        }
+        input[type="number"] {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #666;
+            background: #444;
+            color: white;
+            width: 80px;
+        }
+        .result {
+            background: #222;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #ff4444;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.ready { background: #22aa22; }
+        .status.loading { background: #ff8800; }
+        .status.error { background: #cc2222; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-box {
+            background: rgba(255, 68, 68, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4444;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏰 Room Testing Utility</h1>
+        
+        <div class="section">
+            <h3>🔌 Firebase Connection</h3>
+            <button onclick="initFirebase()" class="secondary">Initialize Firebase</button>
+            <span id="firebase-status" class="status">Not Connected</span>
+            <div id="init-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>📊 Room Statistics</h3>
+            <button onclick="refreshStats()" class="secondary">Refresh Stats</button>
+            <div class="stats" id="room-stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="lobby-count">-</div>
+                    <div class="stat-label">Lobby Rooms</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="game-count">-</div>
+                    <div class="stat-label">Game Rooms</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="total-count">-</div>
+                    <div class="stat-label">Total Rooms</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🧹 Clear Rooms</h3>
+            <div class="button-group">
+                <button onclick="clearLobbyRooms()">Clear Lobby Rooms</button>
+                <button onclick="clearGameRooms()">Clear Game Rooms</button>
+                <button onclick="clearAllRooms()">Clear ALL Rooms</button>
+            </div>
+            <div id="clear-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>🏗️ Create Test Data</h3>
+            <div class="button-group">
+                <input type="number" id="test-room-count" value="3" min="1" max="10">
+                <button onclick="createTestRooms()" class="success">Create Test Rooms</button>
+                <button onclick="createRealisticTest()" class="success">Create Realistic Test</button>
+                <button onclick="testDuplicateNames()" class="success">Test Duplicate Names</button>
+            </div>
+            <div id="create-result" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h3>📋 Room Details</h3>
+            <button onclick="listAllRooms()" class="secondary">List All Rooms</button>
+            <div id="list-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            getDocs, 
+            doc, 
+            deleteDoc, 
+            addDoc 
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+            authDomain: "horropoly.firebaseapp.com",
+            projectId: "horropoly",
+            storageBucket: "horropoly.firebasestorage.app",
+            messagingSenderId: "582020770053",
+            appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+        };
+
+        let app, db;
+
+        window.initFirebase = async () => {
+            try {
+                const statusEl = document.getElementById('firebase-status');
+                const resultEl = document.getElementById('init-result');
+                
+                statusEl.textContent = 'Connecting...';
+                statusEl.className = 'status loading';
+                
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                
+                statusEl.textContent = 'Connected';
+                statusEl.className = 'status ready';
+                
+                resultEl.style.display = 'block';
+                resultEl.textContent = '✅ Firebase initialized successfully!\n\nYou can now use all testing functions.';
+                
+                // Auto-refresh stats
+                refreshStats();
+                
+                console.log('🔥 Firebase connected successfully');
+            } catch (error) {
+                const statusEl = document.getElementById('firebase-status');
+                const resultEl = document.getElementById('init-result');
+                
+                statusEl.textContent = 'Error';
+                statusEl.className = 'status error';
+                
+                resultEl.style.display = 'block';
+                resultEl.textContent = '❌ Firebase connection failed:\n' + error.message;
+                
+                console.error('Firebase init error:', error);
+            }
+        };
+
+        window.refreshStats = async () => {
+            if (!db) {
+                alert('Please initialize Firebase first');
+                return;
+            }
+
+            try {
+                const lobbySnapshot = await getDocs(collection(db, 'rooms'));
+                const gameSnapshot = await getDocs(collection(db, 'gameRooms'));
+                
+                const lobbyCounts = lobbySnapshot.docs.length;
+                const gameCounts = gameSnapshot.docs.length;
+                const totalCounts = lobbyCounts + gameCounts;
+
+                document.getElementById('lobby-count').textContent = lobbyCounts;
+                document.getElementById('game-count').textContent = gameCounts;
+                document.getElementById('total-count').textContent = totalCounts;
+
+                console.log(`📊 Stats: ${lobbyCounts} lobby rooms, ${gameCounts} game rooms, ${totalCounts} total`);
+            } catch (error) {
+                console.error('Error refreshing stats:', error);
+                alert('Error refreshing stats: ' + error.message);
+            }
+        };
+
+        window.clearLobbyRooms = async () => {
+            if (!db || !confirm('Are you sure you want to clear ALL lobby rooms? This cannot be undone!')) return;
+
+            try {
+                const resultEl = document.getElementById('clear-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '🧹 Clearing lobby rooms...\n';
+
+                const roomsSnapshot = await getDocs(collection(db, 'rooms'));
+                let deletedCount = 0;
+
+                for (const roomDoc of roomsSnapshot.docs) {
+                    const roomData = roomDoc.data();
+                    await deleteDoc(roomDoc.ref);
+                    deletedCount++;
+                    resultEl.textContent += `Deleted: ${roomDoc.id} (${roomData.roomName || 'Unnamed'})\n`;
+                }
+
+                resultEl.textContent += `\n✅ Successfully deleted ${deletedCount} lobby rooms`;
+                refreshStats();
+                console.log(`🧹 Cleared ${deletedCount} lobby rooms`);
+            } catch (error) {
+                document.getElementById('clear-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error clearing lobby rooms:', error);
+            }
+        };
+
+        window.clearGameRooms = async () => {
+            if (!db || !confirm('Are you sure you want to clear ALL game rooms? This cannot be undone!')) return;
+
+            try {
+                const resultEl = document.getElementById('clear-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '🧹 Clearing game rooms...\n';
+
+                const gameRoomsSnapshot = await getDocs(collection(db, 'gameRooms'));
+                let deletedCount = 0;
+
+                for (const roomDoc of gameRoomsSnapshot.docs) {
+                    await deleteDoc(roomDoc.ref);
+                    deletedCount++;
+                    resultEl.textContent += `Deleted game room: ${roomDoc.id}\n`;
+                }
+
+                resultEl.textContent += `\n✅ Successfully deleted ${deletedCount} game rooms`;
+                refreshStats();
+                console.log(`🧹 Cleared ${deletedCount} game rooms`);
+            } catch (error) {
+                document.getElementById('clear-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error clearing game rooms:', error);
+            }
+        };
+
+        window.clearAllRooms = async () => {
+            if (!db || !confirm('⚠️ DANGER: Clear ALL rooms (lobby + game)?\n\nThis will delete everything and cannot be undone!')) return;
+
+            try {
+                const resultEl = document.getElementById('clear-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '🧹 Clearing ALL rooms...\n\n';
+
+                // Clear lobby rooms
+                const lobbySnapshot = await getDocs(collection(db, 'rooms'));
+                let lobbyDeleted = 0;
+                for (const roomDoc of lobbySnapshot.docs) {
+                    const roomData = roomDoc.data();
+                    await deleteDoc(roomDoc.ref);
+                    lobbyDeleted++;
+                    resultEl.textContent += `Lobby: ${roomDoc.id} (${roomData.roomName || 'Unnamed'})\n`;
+                }
+
+                // Clear game rooms
+                const gameSnapshot = await getDocs(collection(db, 'gameRooms'));
+                let gameDeleted = 0;
+                for (const roomDoc of gameSnapshot.docs) {
+                    await deleteDoc(roomDoc.ref);
+                    gameDeleted++;
+                    resultEl.textContent += `Game: ${roomDoc.id}\n`;
+                }
+
+                const total = lobbyDeleted + gameDeleted;
+                resultEl.textContent += `\n✅ COMPLETE: Deleted ${lobbyDeleted} lobby + ${gameDeleted} game = ${total} total rooms`;
+                
+                refreshStats();
+                console.log(`🧹 Cleared ALL rooms: ${total} total`);
+            } catch (error) {
+                document.getElementById('clear-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error clearing all rooms:', error);
+            }
+        };
+
+        window.createTestRooms = async () => {
+            if (!db) {
+                alert('Please initialize Firebase first');
+                return;
+            }
+
+            try {
+                const count = parseInt(document.getElementById('test-room-count').value) || 3;
+                const resultEl = document.getElementById('create-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = `🏗️ Creating ${count} test rooms...\n\n`;
+
+                const testNames = [
+                    'TestCastle', 'DebugDungeon', 'SampleSwamp', 'MockMansion', 'TestTomb',
+                    'DevCrypt', 'BetaBattleground', 'AlphaCatacombs', 'GammaCave', 'DeltaDungeon'
+                ];
+
+                const createdRooms = [];
+                for (let i = 0; i < count; i++) {
+                    const roomName = testNames[i % testNames.length] + (i >= testNames.length ? (i - testNames.length + 1) : '');
+                    const roomData = {
+                        roomName: roomName,
+                        players: [{
+                            name: `TestHost${i + 1}`,
+                            displayName: `TestHost${i + 1}`,
+                            userId: `test-user-${Date.now()}-${i}`,
+                            isHost: true
+                        }],
+                        maxPlayers: 2 + (i % 3), // 2-4 players
+                        hostUid: `test-user-${Date.now()}-${i}`,
+                        status: 'waiting_for_players',
+                        createdAt: new Date(),
+                        lastActivity: new Date()
+                    };
+
+                    const docRef = await addDoc(collection(db, 'rooms'), roomData);
+                    createdRooms.push({ id: docRef.id, name: roomName });
+                    resultEl.textContent += `Created: ${docRef.id} (${roomName})\n`;
+                }
+
+                resultEl.textContent += `\n✅ Successfully created ${createdRooms.length} test rooms`;
+                refreshStats();
+                console.log(`🏗️ Created ${createdRooms.length} test rooms`);
+            } catch (error) {
+                document.getElementById('create-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error creating test rooms:', error);
+            }
+        };
+
+        window.createRealisticTest = async () => {
+            if (!db) {
+                alert('Please initialize Firebase first');
+                return;
+            }
+
+            try {
+                const resultEl = document.getElementById('create-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '🏗️ Creating realistic test scenario...\n\n';
+
+                const scenarios = [
+                    { name: 'Haunted Mansion', host: 'GhostMaster', players: 1, max: 4 },
+                    { name: 'Zombie Apocalypse', host: 'SurvivorKing', players: 2, max: 3 },
+                    { name: 'Vampire Castle', host: 'BloodLord', players: 1, max: 2 },
+                    { name: 'Demon Realm', host: 'DarkSorcerer', players: 3, max: 4 },
+                    { name: 'Witch Coven', host: 'HexMistress', players: 1, max: 3 }
+                ];
+
+                const createdCount = 0;
+                for (const scenario of scenarios) {
+                    const players = [{
+                        name: scenario.host,
+                        displayName: scenario.host,
+                        userId: `realistic-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+                        isHost: true
+                    }];
+
+                    // Add additional players if specified
+                    for (let i = 1; i < scenario.players; i++) {
+                        players.push({
+                            name: `Player${i + 1}`,
+                            displayName: `Player${i + 1}`,
+                            userId: `realistic-player-${Date.now()}-${i}`,
+                            isHost: false
+                        });
+                    }
+
+                    const roomData = {
+                        roomName: scenario.name,
+                        players: players,
+                        maxPlayers: scenario.max,
+                        hostUid: players[0].userId,
+                        status: 'waiting_for_players',
+                        createdAt: new Date(),
+                        lastActivity: new Date()
+                    };
+
+                    const docRef = await addDoc(collection(db, 'rooms'), roomData);
+                    resultEl.textContent += `Created: ${scenario.name} (${players.length}/${scenario.max} players)\n`;
+                }
+
+                resultEl.textContent += `\n✅ Realistic test scenario created with ${scenarios.length} rooms`;
+                refreshStats();
+                console.log(`🏗️ Created realistic test scenario`);
+            } catch (error) {
+                document.getElementById('create-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error creating realistic test:', error);
+            }
+        };
+
+        window.testDuplicateNames = async () => {
+            if (!db) {
+                alert('Please initialize Firebase first');
+                return;
+            }
+
+            try {
+                const resultEl = document.getElementById('create-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '🧪 Testing duplicate name prevention...\n\n';
+
+                // Create rooms with the same base names to test duplicate prevention
+                const testRoomNames = [
+                    'Haunted Manor', 'Haunted Manor', 'Haunted Manor', // Should become: Haunted Manor, Haunted Manor 2, Haunted Manor 3
+                    'Dracula Castle', 'Dracula Castle',               // Should become: Dracula Castle, Dracula Castle 2
+                    'Blood Moon Castle'                                // Should remain: Blood Moon Castle
+                ];
+
+                let createdCount = 0;
+                for (const baseName of testRoomNames) {
+                    // Check existing rooms to see what names are already taken
+                    const existingRooms = await getDocs(collection(db, 'rooms'));
+                    const usedNames = [];
+                    existingRooms.docs.forEach(doc => {
+                        const data = doc.data();
+                        if (data.roomName) usedNames.push(data.roomName);
+                    });
+
+                    // Generate unique name
+                    let finalName = baseName;
+                    let counter = 1;
+                    while (usedNames.some(name => name.toLowerCase() === finalName.toLowerCase())) {
+                        counter++;
+                        finalName = `${baseName} ${counter}`;
+                    }
+
+                    const roomData = {
+                        roomName: finalName,
+                        players: [{
+                            name: `TestHost${createdCount + 1}`,
+                            displayName: `TestHost${createdCount + 1}`,
+                            userId: `test-duplicate-${Date.now()}-${createdCount}`,
+                            isHost: true
+                        }],
+                        maxPlayers: 2,
+                        hostUid: `test-duplicate-${Date.now()}-${createdCount}`,
+                        status: 'waiting_for_players',
+                        createdAt: new Date(),
+                        lastActivity: new Date()
+                    };
+
+                    const docRef = await addDoc(collection(db, 'rooms'), roomData);
+                    createdCount++;
+                    resultEl.textContent += `Created: "${finalName}" (ID: ${docRef.id})\n`;
+                    
+                    // Small delay to ensure different timestamps
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                resultEl.textContent += `\n✅ Duplicate name test completed with ${createdCount} rooms`;
+                resultEl.textContent += `\n\n🔍 Check available_rooms.html to verify unique names!`;
+                refreshStats();
+                console.log(`🧪 Duplicate name test completed with ${createdCount} rooms`);
+            } catch (error) {
+                document.getElementById('create-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error testing duplicate names:', error);
+            }
+        };
+
+        window.listAllRooms = async () => {
+            if (!db) {
+                alert('Please initialize Firebase first');
+                return;
+            }
+
+            try {
+                const resultEl = document.getElementById('list-result');
+                resultEl.style.display = 'block';
+                resultEl.textContent = '📋 Loading room details...\n\n';
+
+                // List lobby rooms
+                const lobbySnapshot = await getDocs(collection(db, 'rooms'));
+                resultEl.textContent += `🏰 LOBBY ROOMS (${lobbySnapshot.docs.length}):\n`;
+                resultEl.textContent += '=' .repeat(50) + '\n';
+                
+                lobbySnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const playerCount = data.players?.length || 0;
+                    const maxPlayers = data.maxPlayers || 0;
+                    const status = data.status || 'unknown';
+                    resultEl.textContent += `${doc.id}: "${data.roomName || 'Unnamed'}"\n`;
+                    resultEl.textContent += `  Players: ${playerCount}/${maxPlayers} | Status: ${status}\n`;
+                    if (data.players && data.players.length > 0) {
+                        resultEl.textContent += `  Host: ${data.players.find(p => p.isHost)?.name || 'Unknown'}\n`;
+                    }
+                    resultEl.textContent += '\n';
+                });
+
+                // List game rooms
+                const gameSnapshot = await getDocs(collection(db, 'gameRooms'));
+                resultEl.textContent += `\n🎮 GAME ROOMS (${gameSnapshot.docs.length}):\n`;
+                resultEl.textContent += '=' .repeat(50) + '\n';
+                
+                gameSnapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const playerCount = data.players?.length || 0;
+                    const maxPlayers = data.maxPlayers || 0;
+                    const gameStarted = data.gameStarted || false;
+                    resultEl.textContent += `${doc.id}: ${playerCount}/${maxPlayers} players\n`;
+                    resultEl.textContent += `  Game Started: ${gameStarted}\n`;
+                    resultEl.textContent += `  Current Turn: ${data.currentTurn || 0}\n\n`;
+                });
+
+                console.log(`📋 Listed ${lobbySnapshot.docs.length} lobby rooms and ${gameSnapshot.docs.length} game rooms`);
+            } catch (error) {
+                document.getElementById('list-result').textContent = '❌ Error: ' + error.message;
+                console.error('Error listing rooms:', error);
+            }
+        };
+
+        // Auto-initialize Firebase on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🏰 Room Testing Utility loaded');
+            console.log('Click "Initialize Firebase" to connect to the database');
+        });
+
+    </script>
+</body>
+</html> 

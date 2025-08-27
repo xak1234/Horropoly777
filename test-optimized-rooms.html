@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Optimized Room Queries</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .test-section {
+      background: #2a2a2a;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border-left: 4px solid #4CAF50;
+    }
+    .error {
+      border-left-color: #f44336;
+    }
+    .warning {
+      border-left-color: #ff9800;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .stat-item {
+      background: #333;
+      padding: 10px;
+      border-radius: 3px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    pre {
+      background: #000;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Optimized Room Query Test</h1>
+  
+  <div class="test-section">
+    <h3>Test Controls</h3>
+    <button onclick="testOptimizedQueries()">Test Optimized Queries</button>
+    <button onclick="testBasicQueries()">Test Basic Queries (Old Way)</button>
+    <button onclick="migrateRooms()">Migrate Rooms for Optimization</button>
+    <button onclick="getRoomStats()">Get Room Statistics</button>
+    <button onclick="cleanupStaleRooms()">Cleanup Stale Rooms</button>
+  </div>
+
+  <div class="test-section">
+    <h3>Performance Comparison</h3>
+    <div class="stats" id="performanceStats">
+      <div class="stat-item">
+        <div class="stat-number" id="optimizedTime">-</div>
+        <div>Optimized Query (ms)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="basicTime">-</div>
+        <div>Basic Query (ms)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="optimizedCount">-</div>
+        <div>Optimized Results</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" id="basicCount">-</div>
+        <div>Basic Results</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Room Statistics</h3>
+    <div class="stats" id="roomStats">
+      <!-- Stats will be populated here -->
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test Results</h3>
+    <pre id="testResults">Click a test button to see results...</pre>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, query, where, orderBy, limit, getDocs, getCountFromServer } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { fetchJoinableRooms } from './rooms-query.js';
+    import { migrateRoomsForOptimization, cleanupStaleRooms as cleanupStale, getRoomStats as getStats } from './room-optimization-utils.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+      authDomain: "horropoly.firebaseapp.com",
+      projectId: "horropoly",
+      storageBucket: "horropoly.firebasestorage.app",
+      messagingSenderId: "582020770053",
+      appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    function log(message, type = 'info') {
+      const resultsEl = document.getElementById('testResults');
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
+      resultsEl.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      resultsEl.scrollTop = resultsEl.scrollHeight;
+      console.log(message);
+    }
+
+    window.testOptimizedQueries = async function() {
+      log('Testing optimized room queries...');
+      const startTime = performance.now();
+      
+      try {
+        const result = await fetchJoinableRooms(app);
+        const endTime = performance.now();
+        const duration = Math.round(endTime - startTime);
+        
+        document.getElementById('optimizedTime').textContent = duration;
+        document.getElementById('optimizedCount').textContent = result.rooms.length;
+        
+        log(`Optimized query completed in ${duration}ms`);
+        log(`Found ${result.rooms.length} joinable rooms out of ${result.totalRecent} recent rooms`);
+        log(`Sample rooms: ${result.rooms.slice(0, 3).map(r => r.id).join(', ')}`);
+        
+      } catch (error) {
+        log(`Optimized query failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.testBasicQueries = async function() {
+      log('Testing basic room queries (old way)...');
+      const startTime = performance.now();
+      
+      try {
+        const roomsCol = collection(db, "rooms");
+        const q = query(roomsCol, where("gameStarted", "==", false));
+        const snapshot = await getDocs(q);
+        
+        const rooms = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const players = Array.isArray(data.players) ? data.players : [];
+          if (players.length < (data.maxPlayers || 2)) {
+            rooms.push({ id: doc.id, ...data });
+          }
+        });
+        
+        const endTime = performance.now();
+        const duration = Math.round(endTime - startTime);
+        
+        document.getElementById('basicTime').textContent = duration;
+        document.getElementById('basicCount').textContent = rooms.length;
+        
+        log(`Basic query completed in ${duration}ms`);
+        log(`Found ${rooms.length} available rooms out of ${snapshot.size} total rooms`);
+        log(`Sample rooms: ${rooms.slice(0, 3).map(r => r.id).join(', ')}`);
+        
+      } catch (error) {
+        log(`Basic query failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.migrateRooms = async function() {
+      log('Starting room migration...');
+      try {
+        const result = await migrateRoomsForOptimization(app);
+        if (result.success) {
+          log(`Migration successful: ${result.migratedCount} rooms updated out of ${result.totalRooms} total`);
+        } else {
+          log(`Migration failed: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        log(`Migration error: ${error.message}`, 'error');
+      }
+    };
+
+    window.getRoomStats = async function() {
+      log('Getting room statistics...');
+      try {
+        const stats = await getStats(app);
+        if (stats) {
+          const statsEl = document.getElementById('roomStats');
+          statsEl.innerHTML = `
+            <div class="stat-item">
+              <div class="stat-number">${stats.total}</div>
+              <div>Total Rooms</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${stats.waiting}</div>
+              <div>Waiting for Players</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${stats.withCapacity}</div>
+              <div>With Capacity</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${stats.recent}</div>
+              <div>Recent (30min)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${stats.stale}</div>
+              <div>Stale (1hr+)</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${stats.inProgress}</div>
+              <div>In Progress</div>
+            </div>
+          `;
+          log(`Stats retrieved: ${stats.total} total, ${stats.withCapacity} joinable, ${stats.recent} recent`);
+        } else {
+          log('Failed to get room statistics', 'error');
+        }
+      } catch (error) {
+        log(`Stats error: ${error.message}`, 'error');
+      }
+    };
+
+    window.cleanupStaleRooms = async function() {
+      log('Cleaning up stale rooms...');
+      try {
+        const result = await cleanupStale(app, 60); // 60 minutes
+        if (result.success) {
+          log(`Cleanup successful: ${result.deletedCount} stale rooms deleted`);
+        } else {
+          log(`Cleanup failed: ${result.error}`, 'error');
+        }
+      } catch (error) {
+        log(`Cleanup error: ${error.message}`, 'error');
+      }
+    };
+
+    // Auto-load stats on page load
+    window.addEventListener('load', () => {
+      setTimeout(getRoomStats, 1000);
+    });
+  </script>
+</body>
+</html>

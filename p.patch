@@ -1,0 +1,1100 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -1310,55 +1310,55 @@ async function initGame() {
+                 console.log('Cannot roll - recording eyes', { isRecordingEyes });
+                 return;
+             }
+             
+             // In multiplayer, check if it's the current player's turn
+             if (isMultiplayerGame) {
+                 let playerName = document.getElementById('player1-name').value.trim();
+                 
+                 // If player name is empty, try to get it from the stored local player name
+                 if (!playerName && window.localPlayerName) {
+                     playerName = window.localPlayerName;
+                     document.getElementById('player1-name').value = playerName;
+                 }
+                 
+                 // Debug: Log all players and their names
+                 console.log('Multiplayer turn validation debug:', {
+                     allPlayers: Array.isArray(players) ? players.map(p => ({ name: p.name, isHost: p.isHost })) : 'players is not array',
+                     currentPlayerIndex: currentPlayerIndex,
+                     currentPlayerName: activePlayer?.name,
+                     localPlayerName: playerName,
+                     storedLocalPlayerName: window.localPlayerName,
+                     isHost: isHost
+                 });
+                 
+                 // Check if this browser belongs to the current player by comparing names
+-                const isMyTurn = activePlayer && activePlayer.name === playerName;
++                const isMyTurn = activePlayer && activePlayer.name.toLowerCase() === playerName.toLowerCase();
+                 
+                 // Additional check: if the local player name doesn't match any player in the game,
+                 // try to find them by host status
+-                if (!isMyTurn && !players.find(p => p.name === playerName)) {
++                if (!isMyTurn && !players.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
+                     console.warn('Local player name not found in game state. Attempting to match by host status.');
+                     
+                     // Try to match by host status instead of showing confusing dialogs
+                     let matchedPlayer = null;
+                     if (isHost) {
+                         matchedPlayer = players.find(p => p.isHost);
+                     } else {
+                         matchedPlayer = players.find(p => !p.isHost);
+                     }
+                     
+                     if (matchedPlayer) {
+                         console.log(`Auto-correcting name from "${playerName}" to "${matchedPlayer.name}" based on host status`);
+                         document.getElementById('player1-name').value = matchedPlayer.name;
+                         window.localPlayerName = matchedPlayer.name;
+                         
+                         // Re-check if it's now their turn
+                         if (activePlayer && activePlayer.name === matchedPlayer.name) {
+                             console.log('After name correction, it is now your turn');
+                         } else {
+                             console.log('After name correction, still not your turn. Current player:', activePlayer?.name);
+                         }
+                     }
+                 }
+                 
+                 if (!isMyTurn) {
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -2428,79 +2428,79 @@ function updateInfoPanel(die1 = null, die2 = null, propertyInfo = null) {
+             propertyInfoContent: !!propertyInfoContent,
+             playerInfoContent: !!playerInfoContent
+         });
+         return;
+     }
+ 
+     // Get current game state safely
+     if (!Array.isArray(players) || players.length === 0 || !players[currentPlayerIndex]) {
+         console.warn('[updateInfoPanel] Current player not available', {
+             playersLength: Array.isArray(players) ? players.length : 'n/a',
+             currentPlayerIndex
+         });
+         return;
+     }
+ 
+     const currentPlayer = players[currentPlayerIndex];
+     
+     // If no property info provided, get it from current player's square
+     if (!propertyInfo) {
+         propertyInfo = getPropertyInfo(currentPlayer.currentSquare);
+     }
+     
+     // Update property info section if there's property info
+     if (propertyInfo) {
+         const state = propertyInfo.state;
+-        const owner = players.find(p => p.name === state.owner);
++        const owner = players.find(p => p.name.toLowerCase() === (state.owner || '').toLowerCase());
+         const rentInfo = calculateRent(propertyInfo);
+         const canAffordProperty = currentPlayer.money >= propertyInfo.cost;
+         
+         // Create purchase button HTML if property is unowned and player can afford it
+         let purchaseButton = '';
+         let declineButton = '';
+         let developButton = '';
+         
+         // In multiplayer mode, only show property info and action buttons to the player whose turn it is
+         let shouldShowPropertyInfo = true;
+         let shouldShowButtons = true;
+         
+         if (isMultiplayerGame) {
+             const playerName = document.getElementById('player1-name').value.trim();
+             const localPlayerName = window.localPlayerName;
+             
+             console.log('[updateInfoPanel] Multiplayer visibility check:', {
+                 currentPlayerName: currentPlayer.name,
+                 inputPlayerName: playerName,
+                 localPlayerName: localPlayerName,
+                 isHost: isHost,
+                 currentPlayerIsHost: currentPlayer.isHost
+             });
+             
+             // Try multiple ways to match the player
+             const isMyTurn = (
+-                currentPlayer.name === playerName ||
+-                currentPlayer.name === localPlayerName ||
++                currentPlayer.name.toLowerCase() === (playerName || '').toLowerCase() ||
++                currentPlayer.name.toLowerCase() === (localPlayerName || '').toLowerCase() ||
+                 (currentPlayer.isHost === isHost && (playerName || localPlayerName))
+             );
+             
+             // Only show property info to the player whose turn it is
+             shouldShowPropertyInfo = isMyTurn;
+             shouldShowButtons = isMyTurn;
+             
+             console.log('[updateInfoPanel] shouldShowPropertyInfo:', shouldShowPropertyInfo, 'shouldShowButtons:', shouldShowButtons);
+         }
+         
+         // Don't show buttons if current player is bankrupt or if player is currently moving
+         if (currentPlayer.bankrupt || isPlayerMoving) {
+             shouldShowButtons = false;
+         }
+         
+         // Only display property info if it should be shown to this player
+         if (!shouldShowPropertyInfo) {
+             propertyInfoContent.innerHTML = '';
+             // Skip the rest of property info processing
+         } else {
+         
+         // Check if player has already declined this property purchase
+         const hasDeclinedPurchase = playerDeclinedProperties.has(currentPlayer.name) && 
+                                    playerDeclinedProperties.get(currentPlayer.name).has(propertyInfo.square);
+ 
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -2900,51 +2900,51 @@ function showAdvisory(message, type = 'info') {
+             }
+             advisoryTimer = null;
+             
+             // Clear yingyang protection flag when timer expires
+             if (isYingyangDisplaying) {
+                 isYingyangDisplaying = false;
+                 console.log('[showAdvisory] Yingyang quote display completed, protection cleared');
+             }
+         }, displayDuration);
+     }
+ }
+ 
+ // Function to calculate rent
+ function calculateRent(propertyInfo) {
+     const state = propertyInfo.state;
+     let baseRent;
+     let rentMultiplier = 1;
+     let rentBreakdown = [];
+ 
+     if (propertyInfo.group === 'cave') {
+         // Special fixed rent for cave property
+         baseRent = 500;
+         rentBreakdown.push(`Cave rent: Fixed £500`);
+     } else if (propertyInfo.group === 'demon') {
+         // Special rent: number of demon properties owned by the owner × £200
+-        const owner = players.find(p => p.name === state.owner);
++        const owner = players.find(p => p.name.toLowerCase() === (state.owner || '').toLowerCase());
+         const numOwned = owner ? owner.properties.filter(sq => propertyGroups.demon.positions.includes(sq)).length : 0;
+         baseRent = numOwned * 200;
+         rentBreakdown.push(`Demon properties owned: ${numOwned} × £200 = £${baseRent}`);
+     } else if (state.hasCrypt) {
+         // Crypt rent is 5x the property cost (no other modifiers apply)
+         baseRent = propertyInfo.cost * 5;
+         rentBreakdown.push(`Crypt rent: 5 × property cost (£${propertyInfo.cost}) = £${baseRent}`);
+         rentMultiplier = 1; // No additional multipliers for crypts
+     } else if (state.graveyards > 0) {
+         // New graveyard rent system: 1.5x property cost per graveyard
+         // 1 graveyard = 1.5x, 2 graveyards = 3x, 3 graveyards = 4.5x, 4 graveyards = 6x
+         const graveyardMultiplier = 1.5 * state.graveyards;
+         baseRent = propertyInfo.cost * graveyardMultiplier;
+         rentBreakdown.push(`Graveyard rent: ${state.graveyards} graveyard${state.graveyards > 1 ? 's' : ''} × 1.5 × property cost (£${propertyInfo.cost}) = ${graveyardMultiplier}x = £${baseRent}`);
+         rentMultiplier = 1; // No additional multipliers for graveyards
+     } else {
+         // Base property rent is 1.5x the property cost
+         baseRent = propertyInfo.cost * 1.5;
+         rentBreakdown.push(`Base rent: 1.5 × property cost (£${propertyInfo.cost}) = £${baseRent}`);
+         rentMultiplier = 1; // No additional multipliers needed
+     }
+     const finalRent = Math.round(baseRent * rentMultiplier);
+     return {
+         amount: finalRent,
+         breakdown: rentBreakdown,
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -3026,51 +3026,51 @@ async function moveToken(player, spaces, isReverse = false) {
+             
+             // If there are remaining steps, continue movement on main path
+             if (remainingSteps > 0) {
+                 console.log(`[moveToken] Continuing movement on main path for ${remainingSteps} more steps`);
+                 
+                 // Update currentPath to main game path for remaining movement
+                 currentPath = paths.gamePath.array;
+                 
+                 // Continue the loop with remaining steps
+                 // The loop will continue with the current step count and process remaining steps
+                 spaces = step + 1 + remainingSteps; // Adjust total spaces to account for remaining movement
+                 
+                 // Brief pause to show the path exit before continuing
+                 await new Promise(resolve => setTimeout(resolve, 500));
+             } else {
+                 // No remaining steps, exit the movement loop
+                 break;
+             }
+         }
+ 
+         // Update game frame for each step
+         await updateGameFrame();
+         
+         // Sync position to Firebase after each movement step in multiplayer mode
+         if (isMultiplayerGame) {
+-            const playerIndex = players.findIndex(p => p.name === player.name);
++            const playerIndex = players.findIndex(p => p.name.toLowerCase() === player.name.toLowerCase());
+             if (playerIndex !== -1) {
+                 updatePlayerData(playerIndex, {
+                     currentSquare: player.currentSquare,
+                     currentPathKey: player.currentPathKey,
+                     currentIndexOnPath: player.currentIndexOnPath,
+                     x: player.x,
+                     y: player.y
+                 }).catch(error => console.error('Error updating player position during movement:', error));
+             }
+         }
+         
+         await new Promise(resolve => setTimeout(resolve, moveInterval));
+     }
+ 
+     // Handle passing GO
+     if (passedGo) {
+         player.money += 250;
+         player.goPassCount = (player.goPassCount || 0) + 1;
+         
+         await playGongSound();
+         showHandEffect(); // Show hand image at Go position
+         
+         // Check if player gets a steal card (every 4th pass)
+         if (player.goPassCount % 4 === 0) {
+             player.stealCards = (player.stealCards || 0) + 1;
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -3136,51 +3136,51 @@ async function moveToken(player, spaces, isReverse = false) {
+     // Trigger yingyang quote if landed on the yingyang square
+     if (player.currentSquare === 'yingyang') {
+         console.log(`[moveToken] ${player.name} landed on yingyang - triggering quote`);
+         await handleYingyangLanding(player);
+     }
+ 
+     // Trigger scream sound if landed on L7
+     if (player.currentSquare === 'l7') {
+         console.log(`[moveToken] ${player.name} landed on L7 - playing scream sound`);
+         await playScreamSound();
+         showAdvisory(`${player.name} landed on the cursed L7 position!`, 'turn');
+     }
+ 
+     // Trigger boy sound if landed on R8
+     if (player.currentSquare === 'r8') {
+         console.log(`[moveToken] ${player.name} landed on R8 - playing boy sound`);
+         await playBoySound();
+         showAdvisory(`${player.name} landed on R8!`, 'turn');
+     }
+ 
+     // Final update
+     await updateGameFrame();
+     
+     // Sync position to Firebase if in multiplayer mode
+     if (isMultiplayerGame) {
+-        const playerIndex = players.findIndex(p => p.name === player.name);
++        const playerIndex = players.findIndex(p => p.name.toLowerCase() === player.name.toLowerCase());
+         if (playerIndex !== -1) {
+             updatePlayerData(playerIndex, {
+                 currentSquare: player.currentSquare,
+                 currentPathKey: player.currentPathKey,
+                 currentIndexOnPath: player.currentIndexOnPath,
+                 x: player.x,
+                 y: player.y,
+                 money: player.money // Include money in case they passed GO
+             }).catch(error => console.error('Error updating player position:', error));
+         }
+     }
+     
+     // Clear movement flag - movement is complete
+     isPlayerMoving = false;
+     return false; // Indicates normal movement completion
+ }
+ 
+ // Function to check and handle path transitions and teleportations
+ async function checkForTeleportation(player) {
+     const currentSquare = player.currentSquare;
+     
+     // Check for direct teleportation (t8 → t1)
+     if (currentSquare === 't8') {
+         console.log(`[checkForTeleportation] Player ${player.name} landed on t8, teleporting to t1`);
+         
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -4046,51 +4046,51 @@ function drawStar(ctx, x, y, size, color) {
+     ctx.fillStyle = color;
+     ctx.strokeStyle = '#000000';
+     ctx.lineWidth = 2; // Thicker border for visibility
+     
+     ctx.beginPath();
+     for (let i = 0; i < spikes * 2; i++) {
+         const radius = i % 2 === 0 ? outerRadius : innerRadius;
+         const angle = (i * Math.PI) / spikes - Math.PI / 2; // Start from top
+         const x = Math.cos(angle) * radius;
+         const y = Math.sin(angle) * radius;
+         
+         if (i === 0) {
+             ctx.moveTo(x, y);
+         } else {
+             ctx.lineTo(x, y);
+         }
+     }
+     ctx.closePath();
+     ctx.fill();
+     ctx.stroke();
+     ctx.restore();
+ }
+ 
+ // Function to find player by name and get their color
+ function getPlayerColor(playerName) {
+-    const player = players.find(p => p.name === playerName);
++    const player = players.find(p => p.name.toLowerCase() === (playerName || '').toLowerCase());
+     
+     if (!player) {
+         console.warn(`getPlayerColor: Player "${playerName}" not found in players array`);
+         return '#ff0000'; // Default to red if player not found
+     }
+     
+     if (!player.color) {
+         console.warn(`getPlayerColor: Player "${playerName}" has no color assigned, assigning colors now`);
+         // Try to assign colors if they're missing
+         assignPlayerColors(players);
+         // Return the color after assignment
+         return player.color || '#ff0000';
+     }
+     
+     console.log(`getPlayerColor: Player "${playerName}" has color ${player.color}`);
+     return player.color;
+ }
+ 
+ function ensurePropertyColors() {
+     console.log('ensurePropertyColors: Checking all properties for missing colors');
+     
+     // First ensure all players have colors
+     if (players.some(p => !p.color)) {
+         console.log('ensurePropertyColors: Some players missing colors, assigning now');
+         assignPlayerColors(players);
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -4484,51 +4484,51 @@ async function loadDevelopmentImages() {
+         console.error('Error loading development images:', error);
+     }
+ }
+ 
+ // After movement is complete, handle property landing
+ async function handlePropertyLanding(player, propertyInfo) {
+     console.log(`[handlePropertyLanding] *** CALLED *** for player: ${player.name} on square: ${propertyInfo.square}. Player is AI: ${player.isAI}.`);
+     
+     if (!propertyInfo) {
+         console.error('[handlePropertyLanding] CRITICAL: propertyInfo is undefined. Aborting.');
+         return;
+     }
+     if (!player) {
+         console.error('[handlePropertyLanding] CRITICAL: player object is undefined. Aborting.');
+         return;
+     }
+ 
+     const state = propertyInfo.state;
+     const displayName = getPropertyDisplayName(propertyInfo);
+     console.log(`[handlePropertyLanding] Property: ${displayName}, Owner: ${state.owner || 'None'}.`);
+ 
+     if (state.owner && state.owner !== player.name) {
+         console.log(`[handlePropertyLanding] Property owned by ${state.owner}. ${player.name} needs to pay rent.`);
+         const rentInfo = calculateRent(propertyInfo);
+         console.log(`[handlePropertyLanding] Calculated rent: £${rentInfo.amount}`);
+-        const owner = players.find(p => p.name === state.owner);
++        const owner = players.find(p => p.name.toLowerCase() === (state.owner || '').toLowerCase());
+         
+         if (owner) {
+             console.log(`[handlePropertyLanding] BEFORE rent payment - ${player.name}: £${player.money}, ${owner.name}: £${owner.money}`);
+             // Always deduct rent, even if it makes player go negative (bankruptcy)
+             player.money -= rentInfo.amount;
+             owner.money += rentInfo.amount;
+             console.log(`[handlePropertyLanding] AFTER rent payment - ${player.name}: £${player.money}, ${owner.name}: £${owner.money}`);
+             console.log(`[handlePropertyLanding] ✅ RENT SUCCESSFULLY DEDUCTED: £${rentInfo.amount}`);
+             
+             // Check for bankruptcy after payment
+             if (player.money < 0) {
+                 player.money = 0;
+                 player.bankrupt = true;
+                 console.log(`[handlePropertyLanding] ${player.name} went bankrupt paying £${rentInfo.amount} rent to ${owner.name}.`);
+                 showAdvisory(`${player.name} went bankrupt paying £${rentInfo.amount} rent for ${displayName}! Game Over for ${player.name}!`, 'payment');
+                 await playScreamSound();
+             } else {
+                 checkBankruptcy(player);
+             }
+             console.log(`[handlePropertyLanding] ${player.name} paid £${rentInfo.amount} to ${owner.name}. ${player.name} money: ${player.money}, ${owner.name} money: ${owner.money}.`);
+             
+             // Sync to Firebase immediately after rent payment in multiplayer mode
+             if (isMultiplayerGame) {
+                 console.log('[handlePropertyLanding] Syncing rent payment to Firebase...');
+                 await syncGameStateToFirebase();
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -6953,51 +6953,51 @@ function updateGameFromState(gameState) {
+     if (!gameState.players || !Array.isArray(gameState.players)) {
+         console.error('Invalid players data from Firebase:', gameState.players);
+         return; // Don't update if data is invalid
+     }
+     
+     // Check if incoming data has corrupted player information
+     const hasCorruptedData = gameState.players.some(p => 
+         !p || 
+         (p.name === undefined && p.userId === undefined && p.isHost === undefined)
+     );
+     
+     if (hasCorruptedData) {
+         console.warn('Detected corrupted player data from Firebase, preserving local data:', {
+             incomingPlayers: gameState.players,
+             existingPlayers: existingPlayers
+         });
+         
+         // If we have good existing data, don't overwrite it with corrupted data
+         if (existingPlayers.length > 0 && existingPlayers.some(p => p.name && p.name !== 'undefined')) {
+             console.log('Preserving existing good player data instead of using corrupted Firebase data');
+             // Still update other game state but skip player updates
+             if (gameState.properties) {
+                 Object.assign(propertyState, gameState.properties);
+                 Object.values(propertyState).forEach(prop => {
+                     if (prop.owner && !prop.ownerColor) {
+-                        const p = players.find(pl => pl.name === prop.owner);
++                        const p = players.find(pl => pl.name.toLowerCase() === (prop.owner || '').toLowerCase());
+                         if (p && p.color) {
+                             prop.ownerColor = p.color;
+                         }
+                     }
+                 });
+             }
+             currentPlayerIndex = gameState.currentTurn || currentPlayerIndex;
+             lastRollWasDoubles = gameState.lastRollWasDoubles || false;
+             consecutiveDoublesCount = gameState.consecutiveDoublesCount || 0;
+             
+             // Update UI with existing data
+             updateGameFrame();
+             updateInfoPanel();
+             updateTurnInfo();
+             enableDiceSection();
+             return;
+         }
+     }
+     
+     // Check if we lost a player in multiplayer (should have 2 players)
+     if (isMultiplayerGame && gameState.players.length === 1 && existingPlayers.length === 2) {
+         console.warn('Detected missing player in multiplayer game. Attempting auto-recovery.');
+         
+         // Find which player is missing
+         const remainingPlayer = gameState.players[0];
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -7085,51 +7085,51 @@ function updateGameFromState(gameState) {
+             const img = new Image();
+             img.onload = () => {
+                 player.image = img;
+                 console.log(`Token image loaded for ${player.name}`);
+                 updateGameFrame(); // Redraw when image loads
+                 
+                 // Force sync to Firebase to make this player's token visible to others
+                 if (isMultiplayerGame) {
+                     console.log(`Syncing ${player.name}'s token visibility to Firebase...`);
+                     syncGameStateToFirebase();
+                 }
+             };
+             img.onerror = () => {
+                 console.error(`Failed to load token image for ${player.name}: ${player.tokenImage}`);
+             };
+             img.src = player.tokenImage;
+         }
+     });
+ 
+     // Update property states if they exist in the game state
+     if (gameState.properties) {
+         Object.assign(propertyState, gameState.properties);
+         // Ensure ownerColor is set based on player colors
+         Object.values(propertyState).forEach(prop => {
+             if (prop.owner && !prop.ownerColor) {
+-                const p = players.find(pl => pl.name === prop.owner);
++                const p = players.find(pl => pl.name.toLowerCase() === (prop.owner || '').toLowerCase());
+                 if (p && p.color) {
+                     prop.ownerColor = p.color;
+                 }
+             }
+         });
+     }
+ 
+     // Update game variables
+     currentPlayerIndex = gameState.currentTurn || 0;
+     lastRollWasDoubles = gameState.lastRollWasDoubles || false;
+     consecutiveDoublesCount = gameState.consecutiveDoublesCount || 0;
+     
+     const currentPlayer = players[currentPlayerIndex];
+     if (currentPlayer) {
+         isAITurn = currentPlayer.isAI;
+     }
+     
+     // Update dice display if available
+     if (gameState.lastDiceRoll && die1Element && die2Element) {
+         die1Element.textContent = gameState.lastDiceRoll.die1 || '?';
+         die2Element.textContent = gameState.lastDiceRoll.die2 || '?';
+     }
+     
+     // Update game_utils with player state
+     setPlayers(players);
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -7254,51 +7254,51 @@ function enableDiceSection() {
+         if (currentPlayer && currentPlayer.bankrupt) {
+             console.log('[enableDiceSection] Current player is bankrupt. Disabling dice.');
+             diceSection.classList.add('dice-pulse-red');
+             diceSection.style.pointerEvents = 'none';
+             return;
+         }
+ 
+         if (isAITurn) { 
+             console.log('[enableDiceSection] Current turn is AI. Setting dice-pulse-blue and pointerEvents to none.');
+             diceSection.classList.add('dice-pulse-blue');
+             diceSection.style.pointerEvents = 'none';
+         } else if (isMultiplayerGame) {
+             // In multiplayer, each player controls dice on their own turn
+             let playerName = document.getElementById('player1-name').value.trim();
+             
+             // If player name is missing or still the default placeholder,
+             // fall back to the stored local name and update the input field.
+             if ((!playerName || playerName === 'Player1') && window.localPlayerName) {
+                 playerName = window.localPlayerName;
+                 document.getElementById('player1-name').value = playerName; // Update input field
+             }
+             
+             // Check if it's this player's turn
+             let isMyTurn = false;
+             if (currentPlayer && playerName) {
+-                isMyTurn = currentPlayer.name === playerName;
++                isMyTurn = currentPlayer.name.toLowerCase() === playerName.toLowerCase();
+                 console.log(`[enableDiceSection] Multiplayer turn check: Current player "${currentPlayer.name}", Local player "${playerName}", Is my turn: ${isMyTurn}`);
+             }
+             
+             if (isMyTurn) {
+                 if (currentPlayer && !currentPlayer.bankrupt) {
+                     console.log(`[enableDiceSection] Multiplayer: It's your turn (${playerName}). Enabling dice.`);
+                     diceSection.classList.add('dice-pulse');    
+                     diceSection.style.pointerEvents = 'auto';
+                 } else {
+                     console.log(`[enableDiceSection] Multiplayer: It's your turn but you're bankrupt. Disabling dice.`);
+                     diceSection.classList.add('dice-pulse-red');
+                     diceSection.style.pointerEvents = 'none';
+                 }
+             } else {
+                 console.log(`[enableDiceSection] Multiplayer: Not your turn. Current player is ${currentPlayer?.name}. Disabling dice.`);
+                 diceSection.style.pointerEvents = 'none';
+             }
+         } else {
+             console.log('[enableDiceSection] Current turn is Human. Setting dice-pulse and pointerEvents to auto.');
+             diceSection.classList.add('dice-pulse');    
+             diceSection.style.pointerEvents = 'auto';   
+         }
+         console.log('[enableDiceSection] Pulse class and pointerEvents set. Current classes:', diceSection.className, 'Current pointerEvents:', diceSection.style.pointerEvents);
+     } else {
+         console.error('[enableDiceSection] CRITICAL: Dice section element NOT FOUND.');
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -7394,51 +7394,51 @@ window.fixPlayerIdentity = function() {
+     console.log('- currentPlayerIndex:', currentPlayerIndex);
+     console.log('- currentPlayer:', players[currentPlayerIndex]?.name);
+     console.log('- localPlayerName:', window.localPlayerName);
+     console.log('- input field name:', document.getElementById('player1-name')?.value);
+     console.log('- isHost:', isHost);
+     
+     if (players && Array.isArray(players)) {
+         console.log('All players:');
+         players.forEach((p, i) => {
+             console.log(`  Player ${i}: ${p.name} (host: ${p.isHost})`);
+         });
+         
+         // Try to match by host status
+         const myPlayer = players.find(p => p.isHost === isHost);
+         if (myPlayer) {
+             console.log(`Matching by host status: You should be "${myPlayer.name}"`);
+             
+             // Update local identity
+             window.localPlayerName = myPlayer.name;
+             document.getElementById('player1-name').value = myPlayer.name;
+             
+             console.log(`Identity fixed: You are now "${myPlayer.name}" (host: ${isHost})`);
+             
+             // Check if it's now your turn
+             const currentPlayer = players[currentPlayerIndex];
+-            if (currentPlayer && currentPlayer.name === myPlayer.name) {
++            if (currentPlayer && currentPlayer.name.toLowerCase() === myPlayer.name.toLowerCase()) {
+                 console.log('After identity fix, it IS your turn!');
+                 showAdvisory(`Identity fixed! It's your turn, ${myPlayer.name}`, 'success');
+             } else {
+                 console.log(`After identity fix, it's ${currentPlayer?.name}'s turn, not yours`);
+                 showAdvisory(`Identity fixed! You are ${myPlayer.name}. Waiting for ${currentPlayer?.name}'s turn.`, 'info');
+             }
+             
+             // Update UI
+             enableDiceSection();
+         } else {
+             console.log('Could not find matching player by host status');
+         }
+     }
+     
+     console.log('=== END IDENTITY FIX ===');
+ };
+ 
+ window.checkTokenStatus = function() {
+     console.log('=== CHECKING TOKEN STATUS ===');
+     
+     if (!players || !Array.isArray(players)) {
+         console.log('No players array found');
+         return;
+     }
+     
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -7869,51 +7869,51 @@ async function triggerDiceRoll() {
+     console.log('triggerDiceRoll called - Current state:', {
+         isAITurn,
+         isRecordingEyes,
+         currentPlayerIndex,
+         currentPlayer: players[currentPlayerIndex]?.name
+     });
+ 
+     // Prevent clicking if recording eyes
+     if (isRecordingEyes) {
+         console.log('Cannot roll - recording eyes', { isRecordingEyes });
+         return;
+     }
+     
+     // In multiplayer, check if it's the current player's turn
+     if (isMultiplayerGame) {
+         const currentPlayer = players[currentPlayerIndex];
+         let playerName = document.getElementById('player1-name').value.trim();
+         
+         // If player name is empty, try to get it from the stored local player name
+         if (!playerName && window.localPlayerName) {
+             playerName = window.localPlayerName;
+             document.getElementById('player1-name').value = playerName;
+         }
+         
+         // Check if this browser belongs to the current player by comparing names
+-        const isMyTurn = currentPlayer && currentPlayer.name === playerName;
++        const isMyTurn = currentPlayer && currentPlayer.name.toLowerCase() === playerName.toLowerCase();
+         
+         if (!isMyTurn) {
+             console.log('Cannot roll - not your turn in multiplayer', { 
+                 currentPlayer: currentPlayer ? currentPlayer.name : 'Unknown', 
+                 yourName: playerName,
+                 currentPlayerIndex: currentPlayerIndex,
+                 isMyTurn: isMyTurn
+             });
+             
+             // Show clearer turn information
+             const turnMessage = currentPlayer ? 
+                 `Waiting for ${currentPlayer.name}'s turn (You are ${playerName})` : 
+                 'Waiting for another player\'s turn';
+             showAdvisory(turnMessage, 'info');
+             return;
+         }
+     }
+     
+     // Prevent clicking if it's AI's turn (only for AI vs Human games)
+     if (!isMultiplayerGame && isAITurn) {
+         console.log('Cannot roll - AI turn', { isAITurn });
+         return;
+     }
+     
+     // Check if player is on an unpurchased property or can develop a property they own
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -8223,52 +8223,52 @@ function handlePropertySteal(clickX, clickY) {
+         currentPlayer.properties.push(targetSquare);
+         
+         // Update property state
+         targetProperty.state.owner = currentPlayer.name;
+         targetProperty.state.ownerColor = currentPlayer.color || getPlayerColor(currentPlayer.name);
+         
+         // Use a steal card
+         currentPlayer.stealCards--;
+         
+         // Show steal message
+         const propertyDisplayName = getPropertyDisplayNameWithoutNumber(targetProperty);
+         showAdvisory(`${currentPlayer.name} used a STEAL CARD to steal ${propertyDisplayName} from ${previousOwner.name}!`, 'turn');
+         
+         // Play a sound effect for the steal
+         playZapSound();
+         
+         console.log(`${currentPlayer.name} stole ${targetSquare} from ${previousOwner.name} using a steal card`);
+         
+         // Update the game display
+         updateInfoPanel();
+         updateGameFrame();
+         
+         // Sync to Firebase if multiplayer
+         if (isMultiplayerGame) {
+             // Update both players' data
+-            const currentPlayerIndex = players.findIndex(p => p.name === currentPlayer.name);
+-            const previousOwnerIndex = players.findIndex(p => p.name === previousOwner.name);
++            const currentPlayerIndex = players.findIndex(p => p.name.toLowerCase() === currentPlayer.name.toLowerCase());
++            const previousOwnerIndex = players.findIndex(p => p.name.toLowerCase() === previousOwner.name.toLowerCase());
+             
+             if (currentPlayerIndex !== -1) {
+                 updatePlayerData(currentPlayerIndex, {
+                     properties: currentPlayer.properties,
+                     stealCards: currentPlayer.stealCards
+                 }).catch(error => console.error('Error updating current player steal data:', error));
+             }
+             
+             if (previousOwnerIndex !== -1) {
+                 updatePlayerData(previousOwnerIndex, {
+                     properties: previousOwner.properties
+                 }).catch(error => console.error('Error updating previous owner data:', error));
+             }
+             
+             // Update property state
+             updatePropertyState(targetSquare, targetProperty.state).catch(error => 
+                 console.error('Error updating property state:', error));
+         }
+     }
+ }
+ 
+ // Determine the best property for the AI to steal
+ function findBestStealTarget(ai) {
+     console.log(`[findBestStealTarget] Checking steal targets for ${ai.name}`);
+     let bestSquare = null;
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -8313,78 +8313,78 @@ function findBestStealTarget(ai) {
+     console.log(`[findBestStealTarget] Final result: ${bestSquare} with score ${bestScore}`);
+     return bestSquare;
+ }
+ 
+ // AI uses a steal card on the most valuable target
+ async function aiUseStealCard(ai) {
+     console.log(`[aiUseStealCard] Called for ${ai.name}, steal cards: ${ai.stealCards}`);
+     
+     if (ai.stealCards <= 0) {
+         console.log(`[aiUseStealCard] ${ai.name} has no steal cards`);
+         return false;
+     }
+ 
+     const targetSquare = findBestStealTarget(ai);
+     if (!targetSquare) {
+         console.log(`[aiUseStealCard] No suitable steal target found for ${ai.name}`);
+         return false;
+     }
+ 
+     const propertyInfo = getPropertyInfo(targetSquare);
+     if (!propertyInfo || !propertyInfo.state.owner) {
+         console.log(`[aiUseStealCard] Property info or owner missing for ${targetSquare}`);
+         return false;
+     }
+ 
+-    const previousOwner = players.find(p => p.name === propertyInfo.state.owner);
++    const previousOwner = players.find(p => p.name.toLowerCase() === (propertyInfo.state.owner || '').toLowerCase());
+     if (!previousOwner) {
+         console.log(`[aiUseStealCard] Previous owner not found: ${propertyInfo.state.owner}`);
+         return false;
+     }
+ 
+     console.log(`[aiUseStealCard] ${ai.name} stealing ${targetSquare} from ${previousOwner.name}`);
+ 
+     // Execute the steal
+     previousOwner.properties = previousOwner.properties.filter(p => p !== targetSquare);
+     ai.properties.push(targetSquare);
+ 
+     propertyInfo.state.owner = ai.name;
+     propertyInfo.state.ownerColor = ai.color || getPlayerColor(ai.name);
+ 
+     ai.stealCards--;
+ 
+     const propertyDisplayName = getPropertyDisplayNameWithoutNumber(propertyInfo);
+     showAdvisory(`${ai.name} used a STEAL CARD to steal ${propertyDisplayName} from ${previousOwner.name}!`, 'turn');
+     await playStealSound();
+ 
+     updateInfoPanel();
+     startStolenPropertyPulse(targetSquare);
+     updateGameFrame();
+ 
+     if (isMultiplayerGame) {
+-        const aiIndex = players.findIndex(p => p.name === ai.name);
+-        const prevIndex = players.findIndex(p => p.name === previousOwner.name);
++        const aiIndex = players.findIndex(p => p.name.toLowerCase() === ai.name.toLowerCase());
++        const prevIndex = players.findIndex(p => p.name.toLowerCase() === previousOwner.name.toLowerCase());
+ 
+         if (aiIndex !== -1) {
+             updatePlayerData(aiIndex, {
+                 properties: ai.properties,
+                 stealCards: ai.stealCards
+             }).catch(error => console.error('Error updating AI steal data:', error));
+         }
+ 
+         if (prevIndex !== -1) {
+             updatePlayerData(prevIndex, {
+                 properties: previousOwner.properties
+             }).catch(error => console.error('Error updating stolen player data:', error));
+         }
+ 
+         updatePropertyState(targetSquare, propertyInfo.state).catch(error =>
+             console.error('Error updating property state:', error));
+     }
+ 
+     console.log(`[aiUseStealCard] Successfully stole ${targetSquare} for ${ai.name}`);
+     return true;
+ }
+ 
+ // Test function to debug AI steal card usage
+ function testAIStealCards() {
+     console.log('=== TESTING AI STEAL CARD SYSTEM ===');
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -9313,52 +9313,52 @@ function testDicePulsing() {
+         return;
+     }
+     
+     console.log('Current dice state:');
+     console.log('- Classes:', diceSection.className);
+     console.log('- Pointer events:', diceSection.style.pointerEvents);
+     console.log('- isMultiplayerGame:', isMultiplayerGame);
+     console.log('- currentPlayerIndex:', currentPlayerIndex);
+     console.log('- currentPlayer:', players[currentPlayerIndex]?.name);
+     console.log('- isAITurn:', isAITurn);
+     console.log('- isPlayerMoving:', isPlayerMoving);
+     
+     if (isMultiplayerGame) {
+         const playerName = document.getElementById('player1-name').value.trim();
+         const localPlayerName = window.localPlayerName;
+         const currentPlayer = players[currentPlayerIndex];
+         
+         console.log('Multiplayer state:');
+         console.log('- Input player name:', playerName);
+         console.log('- Local player name:', localPlayerName);
+         console.log('- Current player name:', currentPlayer?.name);
+         console.log('- Current player is host:', currentPlayer?.isHost);
+         console.log('- Local is host:', isHost);
+         
+         const isMyTurn = currentPlayer && (
+-            currentPlayer.name === playerName ||
+-            currentPlayer.name === localPlayerName ||
++            currentPlayer.name.toLowerCase() === (playerName || '').toLowerCase() ||
++            currentPlayer.name.toLowerCase() === (localPlayerName || '').toLowerCase() ||
+             (currentPlayer.isHost === isHost && (playerName || localPlayerName))
+         );
+         
+         console.log('- Is my turn:', isMyTurn);
+         console.log('- Current player bankrupt:', currentPlayer?.bankrupt);
+     }
+     
+     console.log('Expected behavior:');
+     console.log('- Green pulse (dice-pulse): Your turn, can roll');
+     console.log('- Blue pulse (dice-pulse-blue): AI turn');
+     console.log('- Red pulse (dice-pulse-red): Your turn but waiting for decision (purchase/develop)');
+     console.log('- No pulse: Not your turn in multiplayer');
+     
+     console.log('=== END DICE PULSING TEST ===');
+ }
+ 
+ // Test function to debug rent collection in multiplayer
+ function testRentCollection() {
+     console.log('=== RENT COLLECTION DEBUG TEST ===');
+     
+     if (!isMultiplayerGame) {
+         console.log('Not in multiplayer mode. Starting multiplayer test...');
+         // Set up a basic multiplayer test scenario
+         isMultiplayerGame = true;
+         currentRoomId = 'test-room';
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -9733,51 +9733,51 @@ function debugRentIssue() {
+             console.log(`${prop}: owner=${propertyState[prop].owner || 'none'}, graveyards=${propertyState[prop].graveyards || 0}, crypt=${propertyState[prop].hasCrypt || false}`);
+         } else {
+             console.log(`${prop}: NOT FOUND in propertyState`);
+         }
+     });
+     
+     console.log('\n=== CURRENT PLAYER INFO ===');
+     if (currentPlayerIndex >= 0 && currentPlayerIndex < players.length) {
+         const currentPlayer = players[currentPlayerIndex];
+         console.log(`Current player: ${currentPlayer.name}`);
+         console.log(`Current square: ${currentPlayer.currentSquare}`);
+         console.log(`Money: £${currentPlayer.money}`);
+         
+         // Check if current square has property info
+         const propertyInfo = getPropertyInfo(currentPlayer.currentSquare);
+         if (propertyInfo) {
+             console.log(`✅ Current square IS a property: ${getPropertyDisplayName(propertyInfo)}`);
+             console.log(`   Owner: ${propertyInfo.state.owner || 'none'}`);
+             console.log(`   Cost: £${propertyInfo.cost}`);
+             
+             if (propertyInfo.state.owner && propertyInfo.state.owner !== currentPlayer.name) {
+                 const rentInfo = calculateRent(propertyInfo);
+                 console.log(`   Expected rent: £${rentInfo.amount}`);
+                 console.log(`   Rent breakdown: ${rentInfo.breakdown.join(', ')}`);
+                 
+-                const owner = players.find(p => p.name === propertyInfo.state.owner);
++                const owner = players.find(p => p.name.toLowerCase() === (propertyInfo.state.owner || '').toLowerCase());
+                 if (owner) {
+                     console.log(`   ✅ Owner found in players array: ${owner.name} (£${owner.money})`);
+                 } else {
+                     console.log(`   ❌ Owner NOT found in players array!`);
+                 }
+             } else if (propertyInfo.state.owner === currentPlayer.name) {
+                 console.log(`   ℹ️  Player owns this property - no rent to pay`);
+             } else {
+                 console.log(`   ℹ️  Property is unowned - no rent to pay`);
+             }
+         } else {
+             console.log(`ℹ️  Current square is NOT a property: ${currentPlayer.currentSquare}`);
+         }
+     } else {
+         console.log('❌ Invalid currentPlayerIndex!');
+     }
+     
+     console.log('\n=== DIAGNOSTIC COMPLETE ===');
+     console.log('To test rent manually, you can run:');
+     console.log('1. testRentDeduction() - Tests rent deduction with mock data');
+     console.log('2. testRentCollection() - Tests rent collection');
+     console.log('3. Move a player to a property owned by another player and see if rent is deducted');
+ }
+ 
+ window.debugRentIssue = debugRentIssue;
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -11208,51 +11208,51 @@ window.fixPlayerIdentityNow = function() {
+     console.log('- currentPlayer:', players[currentPlayerIndex]?.name);
+     console.log('- localPlayerName:', window.localPlayerName);
+     console.log('- input field name:', document.getElementById('player1-name')?.value);
+     console.log('- isHost:', isHost);
+     
+     // Try to match by host status
+     const myPlayer = players.find(p => p.isHost === isHost);
+     if (myPlayer) {
+         console.log(`Found matching player by host status: "${myPlayer.name}"`);
+         
+         // Update local identity
+         window.localPlayerName = myPlayer.name;
+         const inputField = document.getElementById('player1-name');
+         if (inputField) {
+             inputField.value = myPlayer.name;
+         }
+         
+         console.log(`Identity updated: You are now "${myPlayer.name}" (host: ${isHost})`);
+         
+         // Update UI immediately
+         enableDiceSection();
+         updateInfoPanel();
+         
+         // Check if it's now your turn
+         const currentPlayer = players[currentPlayerIndex];
+-        if (currentPlayer && currentPlayer.name === myPlayer.name) {
++        if (currentPlayer && currentPlayer.name.toLowerCase() === myPlayer.name.toLowerCase()) {
+             console.log('After identity fix, it IS your turn!');
+             showAdvisory(`Identity fixed! It's your turn, ${myPlayer.name}. Click dice to roll!`, 'success');
+         } else {
+             console.log(`After identity fix, it's ${currentPlayer?.name}'s turn, not yours`);
+             showAdvisory(`Identity fixed! You are ${myPlayer.name}. Waiting for ${currentPlayer?.name}'s turn.`, 'info');
+         }
+         
+         return true;
+     } else {
+         console.log('Could not find matching player by host status');
+         showAdvisory('Could not fix player identity automatically', 'error');
+         return false;
+     }
+ };
+ 
+ // Debug function to check dice state and fix red pulsing issue
+ window.debugDiceState = function() {
+     console.log('=== DICE STATE DEBUG ===');
+     
+     const diceSection = document.getElementById('dice-section');
+     if (!diceSection) {
+         console.log('ERROR: Dice section not found');
+         return;
+     }
+     
+diff --git a/game.js b/game.js
+index 7638149c5054ec3328037d92effc9ec5b06b5085..7e67edd682fde0c8f1af8cb25f1a4c632b5e40ec 100644
+--- a/game.js
++++ b/game.js
+@@ -11260,52 +11260,52 @@ window.debugDiceState = function() {
+     console.log('- Classes:', diceSection.className);
+     console.log('- Pointer events:', diceSection.style.pointerEvents);
+     console.log('- Computed style pointer events:', window.getComputedStyle(diceSection).pointerEvents);
+     
+     console.log('Game state:');
+     console.log('- isMultiplayerGame:', isMultiplayerGame);
+     console.log('- currentPlayerIndex:', currentPlayerIndex);
+     console.log('- currentPlayer:', players[currentPlayerIndex]?.name);
+     console.log('- currentPlayer bankrupt:', players[currentPlayerIndex]?.bankrupt);
+     console.log('- isAITurn:', isAITurn);
+     console.log('- isPlayerMoving:', isPlayerMoving);
+     console.log('- isRecordingEyes:', isRecordingEyes);
+     
+     const playerName = document.getElementById('player1-name')?.value.trim();
+     const localPlayerName = window.localPlayerName;
+     const currentPlayer = players[currentPlayerIndex];
+     
+     console.log('Player identity:');
+     console.log('- Input player name:', playerName);
+     console.log('- Local player name:', localPlayerName);
+     console.log('- Current player name:', currentPlayer?.name);
+     console.log('- Is host:', isHost);
+     console.log('- Current player is host:', currentPlayer?.isHost);
+     
+     const isMyTurn = currentPlayer && (
+-        currentPlayer.name === playerName ||
+-        currentPlayer.name === localPlayerName
++        currentPlayer.name.toLowerCase() === (playerName || '').toLowerCase() ||
++        currentPlayer.name.toLowerCase() === (localPlayerName || '').toLowerCase()
+     );
+     
+     console.log('- Is my turn calculated:', isMyTurn);
+     
+     // Check if there are any overriding CSS rules
+     const allStyles = window.getComputedStyle(diceSection);
+     console.log('All computed styles for dice section:');
+     console.log('- display:', allStyles.display);
+     console.log('- visibility:', allStyles.visibility);
+     console.log('- opacity:', allStyles.opacity);
+     console.log('- pointer-events:', allStyles.pointerEvents);
+     
+     console.log('=== END DICE DEBUG ===');
+ };
+ 
+ // Debug function to force fix dice state
+ window.forceDiceFix = function() {
+     console.log('=== FORCING DICE FIX ===');
+     
+     const diceSection = document.getElementById('dice-section');
+     if (!diceSection) {
+         console.log('ERROR: Dice section not found');
+         return;
+     }
+     
+ 
+EOF
+)

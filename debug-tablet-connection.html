@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablet Connection Debugger</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .debug-section {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .error { color: #ff4444; }
+        .success { color: #00ff00; }
+        .warning { color: #ffaa00; }
+        .info { color: #4444ff; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        button:hover { background: #44ff44; }
+        input {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 8px;
+            margin: 5px;
+            font-family: inherit;
+        }
+        #logs {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Tablet Connection Debugger</h1>
+    
+    <div class="debug-section">
+        <h3>Device Detection</h3>
+        <div id="deviceInfo"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Firebase Connection Test</h3>
+        <input type="text" id="roomId" placeholder="Room ID (e.g., KITTENS_REST2)" />
+        <input type="text" id="playerName" placeholder="Player Name (e.g., Wednesday)" />
+        <button onclick="testFirebaseConnection()">Test Connection</button>
+        <button onclick="testRoomJoin()">Test Room Join</button>
+        <div id="firebaseStatus"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Touch System Status</h3>
+        <button onclick="testTouchHandlers()">Test Touch Handlers</button>
+        <div id="touchStatus"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Network Diagnostics</h3>
+        <button onclick="testNetworkLatency()">Test Network</button>
+        <div id="networkStatus"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>Live Debug Log</h3>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <div id="logs"></div>
+    </div>
+
+    <!-- Include Firebase modules -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
+        // Firebase config (replace with your actual config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGpAHHbR2lYENcQ8ZmQjTyiUQ9QGfnOVo",
+            authDomain: "horropoly-6e2f0.firebaseapp.com",
+            projectId: "horropoly-6e2f0",
+            storageBucket: "horropoly-6e2f0.firebasestorage.app",
+            messagingSenderId: "1092806430599",
+            appId: "1:1092806430599:web:b5b9d5f9e8e6f5e5f5e5f5"
+        };
+
+        let app, db;
+
+        // Initialize Firebase
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            log('✅ Firebase initialized successfully', 'success');
+        } catch (error) {
+            log('❌ Firebase initialization failed: ' + error.message, 'error');
+        }
+
+        // Make functions globally available
+        window.testFirebaseConnection = testFirebaseConnection;
+        window.testRoomJoin = testRoomJoin;
+        window.testTouchHandlers = testTouchHandlers;
+        window.testNetworkLatency = testNetworkLatency;
+        window.clearLogs = clearLogs;
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            logs.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function testFirebaseConnection() {
+            log('🔄 Testing Firebase connection...', 'info');
+            
+            try {
+                // Test basic connection
+                const testDoc = doc(db, 'test', 'connection');
+                const docSnap = await getDoc(testDoc);
+                log('✅ Firebase connection test passed', 'success');
+                
+                document.getElementById('firebaseStatus').innerHTML = 
+                    '<span class="success">✅ Firebase Connected</span>';
+            } catch (error) {
+                log('❌ Firebase connection failed: ' + error.message, 'error');
+                document.getElementById('firebaseStatus').innerHTML = 
+                    '<span class="error">❌ Firebase Connection Failed: ' + error.message + '</span>';
+            }
+        }
+
+        async function testRoomJoin() {
+            const roomId = document.getElementById('roomId').value.trim();
+            const playerName = document.getElementById('playerName').value.trim();
+            
+            if (!roomId || !playerName) {
+                log('❌ Please enter both Room ID and Player Name', 'error');
+                return;
+            }
+
+            log(`🔄 Testing room join for ${playerName} in room ${roomId}...`, 'info');
+            
+            try {
+                const gameRoomRef = doc(db, 'gameRooms', roomId);
+                const roomDoc = await getDoc(gameRoomRef);
+                
+                if (!roomDoc.exists()) {
+                    log('❌ Room not found: ' + roomId, 'error');
+                    return;
+                }
+
+                const gameState = roomDoc.data();
+                log('✅ Room found. Current state:', 'success');
+                log('  - Game Started: ' + (gameState.gameStarted || false), 'info');
+                log('  - Max Players: ' + (gameState.maxPlayers || 2), 'info');
+                log('  - Current Players: ' + (gameState.players ? gameState.players.length : 0), 'info');
+                
+                // Check if player exists
+                let players = gameState.players || [];
+                if (!Array.isArray(players)) {
+                    players = Object.values(players);
+                }
+                
+                const validPlayers = players.filter(p => p && p.userId);
+                const existingPlayer = validPlayers.find(p => p.name === playerName);
+                
+                if (existingPlayer) {
+                    log('✅ Player found in room - should be able to rejoin', 'success');
+                    log('  - Player ID: ' + existingPlayer.userId, 'info');
+                    log('  - Token Index: ' + (existingPlayer.tokenIndex || 0), 'info');
+                } else {
+                    log('⚠️ Player not found in room', 'warning');
+                    if (gameState.gameStarted) {
+                        log('❌ Cannot join - game already started and player not in room', 'error');
+                    } else if (validPlayers.length >= (gameState.maxPlayers || 2)) {
+                        log('❌ Cannot join - room is full', 'error');
+                    } else {
+                        log('✅ Should be able to join as new player', 'success');
+                    }
+                }
+                
+            } catch (error) {
+                log('❌ Room join test failed: ' + error.message, 'error');
+            }
+        }
+
+        function testTouchHandlers() {
+            log('🔄 Testing touch handler system...', 'info');
+            
+            const touchInfo = {
+                hasTouchSupport: 'ontouchstart' in window,
+                maxTouchPoints: navigator.maxTouchPoints || 0,
+                msMaxTouchPoints: navigator.msMaxTouchPoints || 0,
+                touchManager: window.tabletTouchManager ? 'Available' : 'Not Available'
+            };
+            
+            log('Touch Support Info:', 'info');
+            Object.entries(touchInfo).forEach(([key, value]) => {
+                log(`  - ${key}: ${value}`, 'info');
+            });
+            
+            // Test if tablet touch manager is working
+            if (window.tabletTouchManager) {
+                const managerInfo = window.tabletTouchManager.getInfo();
+                log('Tablet Touch Manager Info:', 'success');
+                log(`  - Is Tablet: ${managerInfo?.isTablet || 'Unknown'}`, 'info');
+                log(`  - Last Touch: ${window.tabletTouchManager.getLastTouchTime() || 'Never'}`, 'info');
+                log(`  - Active: ${window.tabletTouchManager.isActive()}`, 'info');
+            } else {
+                log('⚠️ Tablet touch manager not found', 'warning');
+            }
+            
+            document.getElementById('touchStatus').innerHTML = 
+                `<span class="info">Touch support: ${touchInfo.hasTouchSupport ? '✅' : '❌'}</span><br>` +
+                `<span class="info">Max touch points: ${touchInfo.maxTouchPoints}</span><br>` +
+                `<span class="info">Touch manager: ${touchInfo.touchManager}</span>`;
+        }
+
+        async function testNetworkLatency() {
+            log('🔄 Testing network latency...', 'info');
+            
+            const startTime = performance.now();
+            
+            try {
+                const response = await fetch(window.location.origin + '/favicon.ico');
+                const endTime = performance.now();
+                const latency = Math.round(endTime - startTime);
+                
+                log(`✅ Network latency: ${latency}ms`, latency < 100 ? 'success' : latency < 300 ? 'warning' : 'error');
+                
+                document.getElementById('networkStatus').innerHTML = 
+                    `<span class="${latency < 100 ? 'success' : latency < 300 ? 'warning' : 'error'}">Latency: ${latency}ms</span>`;
+                    
+            } catch (error) {
+                log('❌ Network test failed: ' + error.message, 'error');
+                document.getElementById('networkStatus').innerHTML = 
+                    '<span class="error">❌ Network Error</span>';
+            }
+        }
+
+        // Device detection
+        function detectDevice() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const pixelRatio = window.devicePixelRatio || 1;
+            const maxDimension = Math.max(screenWidth, screenHeight);
+            const minDimension = Math.min(screenWidth, screenHeight);
+            
+            const isIPad = /iPad|iPad Pro/i.test(userAgent) || 
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isAndroidTablet = /android/i.test(userAgent) && !/mobile/i.test(userAgent);
+            const isSurfaceTablet = /Windows NT.*Touch/i.test(userAgent) && !/Phone/i.test(userAgent);
+            const isTabletBySize = (minDimension >= 768 && maxDimension >= 1024) || 
+                                  (screenWidth > 768 && screenWidth <= 1366 && 'ontouchstart' in window);
+            
+            const isTablet = isIPad || isAndroidTablet || isSurfaceTablet || isTabletBySize;
+            const isMobile = !isTablet && (/android|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent) || screenWidth <= 768);
+            
+            return {
+                userAgent,
+                screenWidth,
+                screenHeight,
+                pixelRatio,
+                maxDimension,
+                minDimension,
+                isIPad,
+                isAndroidTablet,
+                isSurfaceTablet,
+                isTabletBySize,
+                isTablet,
+                isMobile,
+                platform: navigator.platform,
+                maxTouchPoints: navigator.maxTouchPoints || 0
+            };
+        }
+
+        // Display device info on load
+        window.addEventListener('load', () => {
+            const deviceInfo = detectDevice();
+            const deviceInfoDiv = document.getElementById('deviceInfo');
+            
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            Object.entries(deviceInfo).forEach(([key, value]) => {
+                const displayValue = typeof value === 'boolean' ? (value ? '✅ Yes' : '❌ No') : value;
+                const colorClass = key.includes('isTablet') && value ? 'success' : 
+                                 key.includes('isMobile') && value ? 'warning' : 'info';
+                html += `<tr><td style="padding: 2px; border: 1px solid #333;"><strong>${key}:</strong></td><td style="padding: 2px; border: 1px solid #333;" class="${colorClass}">${displayValue}</td></tr>`;
+            });
+            html += '</table>';
+            
+            deviceInfoDiv.innerHTML = html;
+            
+            log('Device detection completed', 'success');
+            log(`Detected as: ${deviceInfo.isTablet ? 'Tablet' : deviceInfo.isMobile ? 'Mobile' : 'Desktop'}`, 'info');
+        });
+    </script>
+</body>
+</html>

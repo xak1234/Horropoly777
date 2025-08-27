@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Version Click</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .version-span {
+            font-size: 0.6em;
+            color: #ffff00;
+            cursor: pointer;
+            user-select: none;
+            padding: 10px;
+            border: 1px solid #ffff00;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px;
+        }
+        .log {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            margin: 10px;
+            text-align: left;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Version Click</h1>
+    
+    <div>
+        <span id="version-span" class="version-span">v6.5</span>
+    </div>
+    
+    <div id="click-count" style="margin: 20px; font-size: 18px; color: #ffff00;">
+        Clicks: 0/6
+    </div>
+    
+    <div class="log" id="debug-log">
+        Debug log will appear here...
+    </div>
+    
+    <button onclick="forceAttachListeners()" style="margin: 10px; padding: 5px 10px;">Force Attach Listeners</button>
+    <button onclick="testClick()" style="margin: 10px; padding: 5px 10px;">Test Click</button>
+
+    <script>
+        let versionTapCount = 0;
+        let versionTapTimeout = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function handleVersionTap() {
+            versionTapCount++;
+            log(`🔧 Version tap count: ${versionTapCount}/6`);
+            
+            // Update display
+            document.getElementById('click-count').textContent = `Clicks: ${versionTapCount}/6`;
+            
+            // Reset counter after 3 seconds of no taps
+            clearTimeout(versionTapTimeout);
+            versionTapTimeout = setTimeout(() => {
+                versionTapCount = 0;
+                document.getElementById('click-count').textContent = `Clicks: 0/6`;
+                log('🔧 Counter reset due to timeout');
+            }, 3000);
+            
+            // Visual feedback
+            const versionSpan = document.getElementById('version-span');
+            if (versionSpan) {
+                log('🎨 Applying visual feedback');
+                versionSpan.style.color = '#ff0000';
+                setTimeout(() => {
+                    versionSpan.style.color = '#ffff00';
+                    log('🎨 Visual feedback complete');
+                }, 150);
+            } else {
+                log('❌ Version span not found!');
+            }
+            
+            // Unlock after 6 taps
+            if (versionTapCount >= 6) {
+                log('🔓 Testing unlock activated!');
+                versionTapCount = 0;
+                clearTimeout(versionTapTimeout);
+                
+                // Visual confirmation
+                if (versionSpan) {
+                    versionSpan.style.color = '#00ff00';
+                    versionSpan.textContent = 'v6.5 🔓';
+                    log('✅ Visual confirmation applied');
+                }
+                
+                // Simulate localStorage changes
+                localStorage.setItem('multiplayerPaid', 'true');
+                localStorage.setItem('testingUnlock', 'true');
+                localStorage.setItem('stripe_session_id', 'test_session_' + Date.now());
+                localStorage.setItem('userId', 'test_user_' + Date.now());
+                
+                log('💾 localStorage updated');
+                log('🧪 Testing unlock complete - paywall bypassed');
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 255, 0, 0.9);
+                    color: #000;
+                    padding: 20px;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    z-index: 10000;
+                    text-align: center;
+                    border: 2px solid #00ff00;
+                    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+                `;
+                successDiv.innerHTML = `
+                    🧪 TESTING MODE ACTIVATED<br>
+                    <span style="font-size: 14px;">Paywall unlocked for testing</span><br>
+                    <span style="font-size: 12px; opacity: 0.8;">Multiplayer access enabled</span>
+                `;
+                
+                document.body.appendChild(successDiv);
+                log('🎉 Success message displayed');
+                
+                // Remove success message after 3 seconds
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.parentNode.removeChild(successDiv);
+                        log('🗑️ Success message removed');
+                    }
+                }, 3000);
+            }
+        }
+
+        function forceAttachListeners() {
+            log('🔧 Force attaching event listeners...');
+            const versionSpan = document.getElementById('version-span');
+            if (versionSpan) {
+                // Remove any existing listeners
+                versionSpan.replaceWith(versionSpan.cloneNode(true));
+                const newVersionSpan = document.getElementById('version-span');
+                
+                // Add new listeners
+                newVersionSpan.addEventListener('click', function(e) {
+                    log('🖱️ Click event triggered');
+                    handleVersionTap();
+                });
+                newVersionSpan.addEventListener('touchend', function(e) {
+                    log('👆 Touch event triggered');
+                    e.preventDefault();
+                    handleVersionTap();
+                });
+                log('✅ Event listeners force-attached successfully');
+            } else {
+                log('❌ Version span not found for force attach');
+            }
+        }
+
+        function testClick() {
+            log('🧪 Manual test click triggered');
+            handleVersionTap();
+        }
+
+        // Multiple attempts to attach listeners
+        function attachListeners() {
+            log('📄 Attempting to attach event listeners...');
+            const versionSpan = document.getElementById('version-span');
+            if (versionSpan) {
+                log('✅ Version span found, adding event listeners');
+                versionSpan.addEventListener('click', function(e) {
+                    log('🖱️ Click event triggered');
+                    handleVersionTap();
+                });
+                versionSpan.addEventListener('touchend', function(e) {
+                    log('👆 Touch event triggered');
+                    e.preventDefault();
+                    handleVersionTap();
+                });
+                log('✅ Event listeners attached successfully');
+            } else {
+                log('❌ Version span not found during attach attempt');
+            }
+        }
+
+        // Try multiple times to ensure it works
+        document.addEventListener('DOMContentLoaded', function() {
+            log('📄 DOM Content Loaded');
+            attachListeners();
+            
+            // Try again after a short delay
+            setTimeout(attachListeners, 100);
+            setTimeout(attachListeners, 500);
+            setTimeout(attachListeners, 1000);
+        });
+
+        // Also try on window load
+        window.addEventListener('load', function() {
+            log('🌐 Window loaded');
+            attachListeners();
+        });
+
+        log('🚀 Fix script loaded');
+    </script>
+</body>
+</html> 

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Force Token Colors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+        .fix-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        button {
+            background: #8b0000;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #cc0000;
+        }
+        .console-output {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Force Token Colors Fix</h1>
+    
+    <div class="fix-section">
+        <h2>✅ Enhanced Token Color System</h2>
+        <p>I've made several improvements to fix the token color issue:</p>
+        <ul>
+            <li><strong>Better color validation:</strong> Now checks for valid colors vs undefined/null</li>
+            <li><strong>Improved logging:</strong> Clear messages about whether assigned colors are used</li>
+            <li><strong>Force re-renders:</strong> Automatically triggers updates after color assignment</li>
+            <li><strong>Enhanced star display:</strong> More prominent colored stars in player info</li>
+        </ul>
+    </div>
+
+    <div class="fix-section">
+        <h2>🔧 Immediate Fix Actions</h2>
+        <p>Click these buttons while in a multiplayer game to force the colors to apply:</p>
+        
+        <button onclick="forceTokenColorFix()">🎨 Force Token Color Fix</button>
+        <button onclick="debugCurrentState()">🔍 Debug Current State</button>
+        <button onclick="manualColorAssign()">⚡ Manual Color Assignment</button>
+    </div>
+
+    <div id="output" class="console-output"></div>
+
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            console.log(message);
+        }
+
+        function forceTokenColorFix() {
+            log('🎨 FORCING TOKEN COLOR FIX...');
+            
+            if (typeof players === 'undefined' || !players) {
+                log('❌ Players array not available');
+                return;
+            }
+            
+            log(`Found ${players.length} players`);
+            
+            // Check current colors
+            players.forEach((player, i) => {
+                log(`Player ${i + 1}: ${player.name} - Color: ${player.color || 'MISSING'}`);
+            });
+            
+            // Force color assignment if needed
+            const needsColors = players.some(p => !p.color || p.color === 'undefined' || p.color === 'null');
+            if (needsColors && typeof assignPlayerColors === 'function') {
+                log('🔧 Some players missing colors, assigning now...');
+                assignPlayerColors(players);
+                
+                players.forEach((player, i) => {
+                    log(`After assignment - Player ${i + 1}: ${player.name} - Color: ${player.color}`);
+                });
+            } else {
+                log('✅ All players have colors assigned');
+            }
+            
+            // Force updates
+            if (typeof setPlayers === 'function') {
+                log('🔄 Updating game_utils with player data...');
+                setPlayers(players);
+            }
+            
+            if (typeof updateGameFrame === 'function') {
+                log('🖼️ Forcing game frame update...');
+                updateGameFrame();
+            }
+            
+            if (typeof updateInfoPanel === 'function') {
+                log('📋 Updating info panel...');
+                updateInfoPanel();
+            }
+            
+            log('✅ Force fix complete! Check the game board now.');
+        }
+
+        function debugCurrentState() {
+            log('🔍 DEBUGGING CURRENT STATE...');
+            
+            if (typeof players === 'undefined' || !players) {
+                log('❌ Players array not available');
+                return;
+            }
+            
+            players.forEach((player, i) => {
+                log(`Player ${i + 1}: ${player.name}`);
+                log(`  - Color: ${player.color || 'MISSING'}`);
+                log(`  - ColorName: ${player.colorName || 'MISSING'}`);
+                log(`  - IsAI: ${player.isAI}`);
+                log(`  - Expected: ${['Red', 'Blue', 'Green', 'Yellow', 'Purple'][i % 5]}`);
+            });
+            
+            // Check if debug functions are available
+            if (typeof debugTokenOutlines === 'function') {
+                log('🛠️ Running debugTokenOutlines...');
+                debugTokenOutlines();
+            }
+        }
+
+        function manualColorAssign() {
+            log('⚡ MANUAL COLOR ASSIGNMENT...');
+            
+            if (typeof players === 'undefined' || !players) {
+                log('❌ Players array not available');
+                return;
+            }
+            
+            const colors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#800080'];
+            const colorNames = ['Red', 'Blue', 'Green', 'Yellow', 'Purple'];
+            
+            players.forEach((player, index) => {
+                const oldColor = player.color;
+                player.color = colors[index % colors.length];
+                player.colorName = colorNames[index % colorNames.length];
+                log(`${player.name}: ${oldColor || 'NONE'} → ${player.color} (${player.colorName})`);
+            });
+            
+            // Force updates
+            if (typeof setPlayers === 'function') {
+                setPlayers(players);
+            }
+            if (typeof updateGameFrame === 'function') {
+                updateGameFrame();
+            }
+            if (typeof updateInfoPanel === 'function') {
+                updateInfoPanel();
+            }
+            
+            log('✅ Manual assignment complete!');
+        }
+
+        log('🎯 Force Token Colors tool loaded!');
+        log('Start a multiplayer game, then click the buttons above to fix token colors.');
+    </script>
+</body>
+</html>

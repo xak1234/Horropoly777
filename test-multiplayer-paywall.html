@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multiplayer Paywall</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #333;
+        }
+        
+        h1 {
+            color: #ff4444;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .test-section h3 {
+            color: #ff6666;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.3);
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+        
+        .status.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+        
+        .status.info {
+            background: rgba(0, 150, 255, 0.2);
+            border: 1px solid #0096ff;
+            color: #0096ff;
+        }
+        
+        .create-dungeon-section {
+            position: relative;
+            background: rgba(139, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .create-dungeon-btn {
+            background: rgba(139, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .join-button {
+            background: rgba(139, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px 12px;
+            border-radius: 3px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .multiplayer-controls {
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid #666;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .button-secondary {
+            background: #666;
+            padding: 10px 20px;
+        }
+        
+        .button-secondary:hover {
+            background: #777;
+        }
+        
+        .log {
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔒 Multiplayer Paywall Test</h1>
+        
+        <div class="test-section">
+            <h3>Payment Status</h3>
+            <div id="payment-status" class="status info">Checking payment status...</div>
+            <button onclick="checkPaymentStatus()">🔍 Check Payment Status</button>
+            <button onclick="resetPaymentState()">🔄 Reset Payment State</button>
+            <button onclick="simulatePayment()">💳 Simulate Payment</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Available Rooms Interface Test</h3>
+            <div class="create-dungeon-section">
+                <h4 style="color: #ff4444; margin: 0 0 10px 0;">Create New Dungeon</h4>
+                <input type="text" placeholder="Dungeon name..." style="padding: 8px; margin-right: 10px; border-radius: 4px; border: 1px solid #666; background: rgba(255,255,255,0.1); color: #fff;">
+                <button class="create-dungeon-btn" onclick="testCreateDungeon()">Create Dungeon</button>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <h4 style="color: #ff4444;">Available Dungeons</h4>
+                <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                        <span>Test Dungeon 1 (1/2 players)</span>
+                        <button class="join-button" onclick="testJoinRoom('Test Dungeon 1')">Join</button>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 5px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                        <span>Test Dungeon 2 (2/3 players)</span>
+                        <button class="join-button" onclick="testJoinRoom('Test Dungeon 2')">Join</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Gamestart Interface Test</h3>
+            <div class="multiplayer-controls">
+                <h4 style="color: #ff4444; margin-top: 0;">Multiplayer Controls</h4>
+                <div class="button-group">
+                    <button id="create-room-btn" class="button-secondary" onclick="testCreateRoom()">Create Room</button>
+                    <button id="join-room-btn" class="button-secondary" onclick="testJoinRoom('gamestart')">Join Room</button>
+                </div>
+                <div style="margin: 10px 0;">
+                    <label>Players: </label>
+                    <select style="padding: 6px; border-radius: 4px; background: #333; color: #fff; border: 1px solid #666;">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Manual Tests</h3>
+            <button onclick="showPaywall()">🔒 Show Paywall</button>
+            <button onclick="showAccessDenied()">🚫 Show Access Denied</button>
+            <button onclick="testPaymentFlow()">💳 Test Payment Flow</button>
+            <button onclick="refreshUI()">🔄 Refresh UI</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Log</h3>
+            <div id="console-log" class="log">Console output will appear here...</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import multiplayerPaywall from './multiplayer-paywall-system.js';
+        import paywallIntegration from './multiplayer-paywall-integration.js';
+
+        // Make functions globally available
+        window.multiplayerPaywall = multiplayerPaywall;
+        window.paywallIntegration = paywallIntegration;
+
+        // Console logging override
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addToLog(message, type = 'log') {
+            const logDiv = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff6666' : type === 'warn' ? '#ffaa00' : '#ccc';
+            logDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog('ERROR: ' + args.join(' '), 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog('WARN: ' + args.join(' '), 'warn');
+        };
+
+        // Test functions
+        window.checkPaymentStatus = async function() {
+            console.log('🔍 Checking payment status...');
+            try {
+                const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+                const statusDiv = document.getElementById('payment-status');
+                
+                if (hasAccess) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ Multiplayer access granted';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '🔒 Multiplayer access required';
+                }
+                
+                console.log('Payment status result:', hasAccess);
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+                const statusDiv = document.getElementById('payment-status');
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Error checking payment status';
+            }
+        };
+
+        window.resetPaymentState = function() {
+            console.log('🔄 Resetting payment state...');
+            localStorage.removeItem('multiplayerPaid');
+            localStorage.removeItem('stripe_session_id');
+            localStorage.removeItem('currentSessionId');
+            sessionStorage.clear();
+            console.log('Payment state reset');
+            checkPaymentStatus();
+            paywallIntegration.refresh();
+        };
+
+        window.simulatePayment = function() {
+            console.log('💳 Simulating successful payment...');
+            localStorage.setItem('multiplayerPaid', 'true');
+            console.log('Payment simulation complete');
+            checkPaymentStatus();
+            paywallIntegration.refresh();
+        };
+
+        window.testCreateDungeon = function() {
+            console.log('🏰 Testing create dungeon...');
+            alert('Create dungeon test - this would normally create a new dungeon');
+        };
+
+        window.testJoinRoom = function(roomName) {
+            console.log(`🚪 Testing join room: ${roomName}`);
+            alert(`Join room test - this would normally join ${roomName}`);
+        };
+
+        window.testCreateRoom = function() {
+            console.log('🏰 Testing create room...');
+            alert('Create room test - this would normally create a new room');
+        };
+
+        window.showPaywall = function() {
+            console.log('🔒 Showing paywall...');
+            multiplayerPaywall.showPaywall();
+        };
+
+        window.showAccessDenied = function() {
+            console.log('🚫 Showing access denied...');
+            multiplayerPaywall.showAccessDenied('test multiplayer features');
+        };
+
+        window.testPaymentFlow = async function() {
+            console.log('💳 Testing payment flow...');
+            try {
+                await multiplayerPaywall.startPayment();
+            } catch (error) {
+                console.error('Payment flow test error:', error);
+            }
+        };
+
+        window.refreshUI = function() {
+            console.log('🔄 Refreshing UI...');
+            paywallIntegration.refresh();
+        };
+
+        window.clearLog = function() {
+            document.getElementById('console-log').innerHTML = 'Console cleared...';
+        };
+
+        // Initialize
+        console.log('🚀 Multiplayer paywall test page loaded');
+        setTimeout(() => {
+            checkPaymentStatus();
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===== SECURE GAME ARCHITECTURE =====
+    
+    // Game rooms collection - SECURE ARCHITECTURE PER SPEC
+    match /gameRooms/{roomId} {
+      
+      // Authoritative game state - backend only
+      match /state {
+        allow read: if request.auth != null;        // clients read state
+        allow write: if false;                      // only backend writes
+      }
+      
+      // Inbox - clients push intents here
+      match /inbox/{intentId} {
+        allow create: if request.auth != null;      // players submit moves
+        allow update, delete: if false;             // backend clears after processing
+        allow read: if request.auth != null;        // optional: allow read-back
+      }
+      
+      // Log - authoritative move history
+      match /log/{actionId} {
+        allow read: if request.auth != null;        // clients can read for history/debug
+        allow write: if false;                      // backend only
+      }
+    }
+    
+    // Pre-game lobby (unchanged)
+    match /rooms/{roomId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ===== PAYMENT COLLECTIONS =====
+    // Allow read/write for payment operations (no auth required for now)
+    
+    // Payments collection - allow access for payment processing
+    match /payments/{userId} {
+      allow read, write: if true;
+    }
+    
+    // Payment devices collection - allow access for fraud prevention
+    match /paymentDevices/{deviceId} {
+      allow read, write: if true;
+    }
+    
+    // Payment sessions collection - allow access for session management
+    match /paymentSessions/{sessionId} {
+      allow read, write: if true;
+    }
+    
+    // Failed payments collection - allow access for failed payment tracking
+    match /failedPayments/{paymentId} {
+      allow read, write: if true;
+    }
+    
+    // ===== USER DATA =====
+    
+    // User profiles - allow access for user data
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+    
+    // ===== ADMIN COLLECTIONS =====
+    
+    // Admin settings - allow access for admin functionality
+    match /admin/{document=**} {
+      allow read, write: if true;
+    }
+    
+    // ===== ANALYTICS COLLECTIONS =====
+    
+    // Analytics data - allow access for analytics
+    match /analytics/{document=**} {
+      allow read, write: if true;
+    }
+    
+    // ===== SECURITY RULES =====
+    
+    // Basic validation for all documents
+    match /{document=**} {
+      // Prevent excessive data size
+      allow write: if request.resource.size < 1 * 1024 * 1024; // 1MB limit
+    }
+  }
+} 

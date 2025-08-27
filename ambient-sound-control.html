@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambient Sound Control - Horropoly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .container {
+            background-color: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.danger {
+            background-color: #f44336;
+        }
+        button.danger:hover {
+            background-color: #da190b;
+        }
+        button.info {
+            background-color: #2196F3;
+        }
+        button.info:hover {
+            background-color: #1976D2;
+        }
+        .status {
+            background-color: #333;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left: 4px solid #4CAF50;
+        }
+        .warning {
+            border-left: 4px solid #ff9800;
+        }
+        .error {
+            border-left: 4px solid #f44336;
+        }
+        .info {
+            border-left: 4px solid #2196F3;
+        }
+        .sound-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .sound-name {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .sound-status {
+            color: #ccc;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌬️ Ambient Sound Control - Horropoly</h1>
+    
+    <div class="container">
+        <h2>Ambient Sound System</h2>
+        <p>Your game now includes atmospheric ambient sounds that play randomly every 1-5 minutes:</p>
+        <div class="sound-item">
+            <div>
+                <div class="sound-name">🌪️ Wind 1</div>
+                <div class="sound-status">Plays every 1-5 minutes at 30% volume</div>
+            </div>
+        </div>
+        <div class="sound-item">
+            <div>
+                <div class="sound-name">🌊 Wind 2</div>
+                <div class="sound-status">Plays every 1-5 minutes at 30% volume</div>
+            </div>
+        </div>
+        <div class="sound-item">
+            <div>
+                <div class="sound-name">🔔 Chimes</div>
+                <div class="sound-status">Plays every 1-5 minutes at 40% volume</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Control Panel</h2>
+        <p>Use these controls to manage the ambient sound system:</p>
+        
+        <button onclick="startAmbientSounds()">🎵 Start Ambient Sounds</button>
+        <button class="danger" onclick="stopAmbientSounds()">🔇 Stop Ambient Sounds</button>
+        <button class="info" onclick="toggleAmbientSounds()">🔄 Toggle Ambient Sounds</button>
+        <button onclick="checkAmbientStatus()">📊 Check Status</button>
+        
+        <div id="controlOutput" class="status info">
+            Ambient sound system is ready! Sounds will start automatically when the game initializes.
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Console Commands</h2>
+        <p>You can also control ambient sounds from the browser console (F12):</p>
+        
+        <button onclick="showConsoleCommands()">📋 Show Console Commands</button>
+        
+        <div id="consoleOutput" class="status"></div>
+    </div>
+
+    <div class="container">
+        <h2>How It Works</h2>
+        <ul>
+            <li><strong>Random Timing</strong>: Each sound plays at random intervals between 1-5 minutes</li>
+            <li><strong>No Overlap</strong>: Only one ambient sound plays at a time</li>
+            <li><strong>Automatic Start</strong>: Sounds begin when the game initializes</li>
+            <li><strong>Staggered Delays</strong>: Initial sounds are staggered to prevent simultaneous playing</li>
+            <li><strong>Volume Control</strong>: Wind sounds at 30%, chimes at 40% volume</li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <h2>Technical Details</h2>
+        <div class="status info">
+✅ Audio files loaded: wind1.mp3, wind2.mp3, chimes.mp3
+✅ Ambient sound system integrated into game.js
+✅ Random interval system: 60000ms - 300000ms (1-5 minutes)
+✅ Overlap prevention: Only one ambient sound at a time
+✅ Auto-start on game initialization
+✅ Console control functions available
+        </div>
+    </div>
+
+    <script>
+        function startAmbientSounds() {
+            const output = document.getElementById('controlOutput');
+            if (typeof window.startAmbientSounds === 'function') {
+                window.startAmbientSounds();
+                output.className = 'status success';
+                output.textContent = '🎵 Ambient sounds started! They will play randomly every 1-5 minutes.';
+            } else {
+                output.className = 'status error';
+                output.textContent = '❌ Ambient sound functions not available. Make sure you\'re running this from the game page.';
+            }
+        }
+
+        function stopAmbientSounds() {
+            const output = document.getElementById('controlOutput');
+            if (typeof window.stopAmbientSounds === 'function') {
+                window.stopAmbientSounds();
+                output.className = 'status warning';
+                output.textContent = '🔇 Ambient sounds stopped. All timers cleared and sounds paused.';
+            } else {
+                output.className = 'status error';
+                output.textContent = '❌ Ambient sound functions not available. Make sure you\'re running this from the game page.';
+            }
+        }
+
+        function toggleAmbientSounds() {
+            const output = document.getElementById('controlOutput');
+            if (typeof window.toggleAmbientSounds === 'function') {
+                const isActive = window.toggleAmbientSounds();
+                output.className = 'status info';
+                output.textContent = `🔄 Ambient sounds ${isActive ? 'started' : 'stopped'}. Current state: ${isActive ? 'Active' : 'Inactive'}`;
+            } else {
+                output.className = 'status error';
+                output.textContent = '❌ Ambient sound functions not available. Make sure you\'re running this from the game page.';
+            }
+        }
+
+        function checkAmbientStatus() {
+            const output = document.getElementById('controlOutput');
+            if (typeof window.debugAmbientSounds === 'function') {
+                output.className = 'status info';
+                output.textContent = 'Check the browser console (F12) for detailed ambient sound status.';
+                window.debugAmbientSounds();
+            } else {
+                output.className = 'status error';
+                output.textContent = '❌ Ambient sound functions not available. Make sure you\'re running this from the game page.';
+            }
+        }
+
+        function showConsoleCommands() {
+            const output = document.getElementById('consoleOutput');
+            output.className = 'status info';
+            output.textContent = `Console Commands (open F12 and type these):
+
+startAmbientSounds()     - Start the ambient sound system
+stopAmbientSounds()      - Stop all ambient sounds
+toggleAmbientSounds()    - Toggle ambient sounds on/off
+debugAmbientSounds()     - Show detailed status information
+
+Example usage:
+> debugAmbientSounds()
+🌬️ === AMBIENT SOUND STATUS ===
+Active: true
+Currently Playing: None
+wind1: Next in 127s
+wind2: Next in 89s
+chimes: Next in 203s`;
+        }
+
+        // Check if we're on the game page and show appropriate message
+        document.addEventListener('DOMContentLoaded', function() {
+            const output = document.getElementById('controlOutput');
+            
+            if (typeof window.startAmbientSounds === 'function') {
+                output.className = 'status success';
+                output.textContent = '✅ Ambient sound system detected! Controls are ready to use.';
+            } else {
+                output.className = 'status warning';
+                output.textContent = '⚠️ Open this page from within the game (game.html) to use the controls, or use the console commands directly.';
+            }
+        });
+    </script>
+</body>
+</html>

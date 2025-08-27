@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Version Click - Simple</title>
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .status {
+            background: #111;
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .success { border-color: #00ff00; }
+        .error { border-color: #ff0000; }
+        .info { border-color: #ffff00; }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Version Click - Simple</h1>
+    
+    <div class="status info" id="status">
+        Loading fix...
+    </div>
+    
+    <div id="results"></div>
+    
+    <button onclick="applyFix()">Apply Fix</button>
+    <button onclick="testFix()">Test Fix</button>
+    <button onclick="clearResults()">Clear Results</button>
+
+    <script>
+        function log(message, type = 'info') {
+            const resultsDiv = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            resultsDiv.innerHTML += `<div class="status ${type}">[${timestamp}] ${message}</div>`;
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function applyFix() {
+            log('🔧 Applying version click fix...', 'info');
+            
+            // Define the version clicking functions
+            window.versionTapCount = 0;
+            window.versionTapTimeout = null;
+
+            window.handleVersionTap = function() {
+                window.versionTapCount++;
+                console.log(`🔧 Version tap count: ${window.versionTapCount}/6`);
+                
+                // Reset counter after 3 seconds of no taps
+                clearTimeout(window.versionTapTimeout);
+                window.versionTapTimeout = setTimeout(() => {
+                    window.versionTapCount = 0;
+                }, 3000);
+                
+                // Visual feedback
+                const versionSpan = document.getElementById('version-span');
+                if (versionSpan) {
+                    versionSpan.style.color = '#ff0000';
+                    setTimeout(() => {
+                        versionSpan.style.color = '#ffff00';
+                    }, 150);
+                }
+                
+                // Unlock after 6 taps
+                if (window.versionTapCount >= 6) {
+                    console.log('🔓 Testing unlock activated!');
+                    window.versionTapCount = 0;
+                    clearTimeout(window.versionTapTimeout);
+                    
+                    // Visual confirmation
+                    if (versionSpan) {
+                        versionSpan.style.color = '#00ff00';
+                        versionSpan.textContent = 'v6.5 🔓';
+                    }
+                    
+                    // Unlock paywall for testing
+                    window.unlockPaywallForTesting();
+                }
+            };
+
+            window.unlockPaywallForTesting = function() {
+                console.log('🧪 TESTING MODE: Unlocking paywall...');
+                
+                // Set localStorage flags to simulate payment
+                localStorage.setItem('multiplayerPaid', 'true');
+                localStorage.setItem('testingUnlock', 'true');
+                localStorage.setItem('stripe_session_id', 'test_session_' + Date.now());
+                localStorage.setItem('userId', 'test_user_' + Date.now());
+                
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 255, 0, 0.9);
+                    color: #000;
+                    padding: 20px;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    z-index: 10000;
+                    text-align: center;
+                    border: 2px solid #00ff00;
+                    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+                `;
+                successDiv.innerHTML = `
+                    🧪 TESTING MODE ACTIVATED<br>
+                    <span style="font-size: 14px;">Paywall unlocked for testing</span><br>
+                    <span style="font-size: 12px; opacity: 0.8;">Multiplayer access enabled</span>
+                `;
+                
+                document.body.appendChild(successDiv);
+                
+                // Remove success message after 3 seconds
+                setTimeout(() => {
+                    if (successDiv.parentNode) {
+                        successDiv.parentNode.removeChild(successDiv);
+                    }
+                }, 3000);
+                
+                // Hide modal paywall if it exists
+                const modalPaywall = document.getElementById('multiplayer-payment-wall-modal');
+                if (modalPaywall) {
+                    modalPaywall.style.display = 'none';
+                }
+                
+                // Show create dungeon section if it exists
+                const createDungeonSection = document.getElementById('create-dungeon-section');
+                if (createDungeonSection) {
+                    createDungeonSection.style.display = 'block';
+                }
+                
+                console.log('🧪 Testing unlock complete - paywall bypassed');
+            };
+
+            // Attach event listeners to version span
+            function attachVersionListeners() {
+                const versionSpan = document.getElementById('version-span');
+                if (versionSpan) {
+                    log('✅ Version span found, attaching listeners', 'success');
+                    
+                    // Remove existing listeners by cloning
+                    const newSpan = versionSpan.cloneNode(true);
+                    versionSpan.parentNode.replaceChild(newSpan, versionSpan);
+                    
+                    // Add new listeners
+                    newSpan.addEventListener('click', function(e) {
+                        log('🖱️ Click detected on version span', 'info');
+                        window.handleVersionTap();
+                    });
+                    
+                    newSpan.addEventListener('touchend', function(e) {
+                        log('👆 Touch detected on version span', 'info');
+                        e.preventDefault();
+                        window.handleVersionTap();
+                    });
+                    
+                    log('✅ Event listeners attached successfully', 'success');
+                    return true;
+                } else {
+                    log('❌ Version span not found', 'error');
+                    return false;
+                }
+            }
+
+            // Try to attach listeners immediately
+            if (attachVersionListeners()) {
+                log('✅ Fix applied successfully!', 'success');
+                document.getElementById('status').innerHTML = '✅ Fix applied successfully! Version clicking should now work.';
+                document.getElementById('status').className = 'status success';
+            } else {
+                log('⚠️ Version span not found, will retry...', 'info');
+                
+                // Try again after DOM is ready
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (attachVersionListeners()) {
+                        log('✅ Fix applied after DOM ready!', 'success');
+                        document.getElementById('status').innerHTML = '✅ Fix applied successfully! Version clicking should now work.';
+                        document.getElementById('status').className = 'status success';
+                    } else {
+                        log('❌ Failed to apply fix - version span not found', 'error');
+                        document.getElementById('status').innerHTML = '❌ Failed to apply fix - version span not found';
+                        document.getElementById('status').className = 'status error';
+                    }
+                });
+            }
+        }
+
+        function testFix() {
+            log('🧪 Testing version click fix...', 'info');
+            
+            // Check if functions exist
+            if (typeof window.handleVersionTap === 'function') {
+                log('✅ handleVersionTap function exists', 'success');
+            } else {
+                log('❌ handleVersionTap function not found', 'error');
+            }
+            
+            if (typeof window.unlockPaywallForTesting === 'function') {
+                log('✅ unlockPaywallForTesting function exists', 'success');
+            } else {
+                log('❌ unlockPaywallForTesting function not found', 'error');
+            }
+            
+            // Check version span
+            const versionSpan = document.getElementById('version-span');
+            if (versionSpan) {
+                log('✅ Version span found', 'success');
+                log(`📝 Text: "${versionSpan.textContent}"`, 'info');
+                
+                // Test click
+                log('🖱️ Testing click...', 'info');
+                versionSpan.click();
+                
+                setTimeout(() => {
+                    log(`📊 Tap count: ${window.versionTapCount || 'undefined'}`, 'info');
+                }, 100);
+            } else {
+                log('❌ Version span not found', 'error');
+            }
+            
+            // Check localStorage
+            log(`💾 multiplayerPaid: ${localStorage.getItem('multiplayerPaid')}`, 'info');
+            log(`💾 testingUnlock: ${localStorage.getItem('testingUnlock')}`, 'info');
+        }
+
+        // Auto-apply fix when page loads
+        window.addEventListener('load', function() {
+            log('🚀 Fix page loaded', 'info');
+            setTimeout(applyFix, 500);
+        });
+    </script>
+</body>
+</html> 

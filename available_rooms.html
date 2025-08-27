@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Dungeons</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url('available.png') center/cover no-repeat fixed #000;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    
+    .lobby-panel {
+      background: rgba(64, 64, 64, 0.95);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      padding: 4px 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+      width: 200px;
+      max-width: 64vw;
+      max-height: 70vh;
+      overflow-y: auto;
+      margin: 0 auto;
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    h2 {
+      flex: 1;
+      text-align: center;
+      margin: 0;
+      font-size: 12px;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      font-weight: bold;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: rgba(139,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .close-btn:hover {
+      background: rgba(180,0,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: scale(1.1);
+    }
+
+    /* Create Dungeon Section */
+    .create-dungeon-section {
+      background: rgba(139,0,0,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .create-dungeon-section h3 {
+      color: #ff4444;
+      text-align: center;
+      margin: 0 0 4px 0;
+      font-size: 10px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .create-form {
+      display: flex;
+      flex-direction: row;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dungeon-input {
+      width: 100%;
+      max-width: 100px;
+      padding: 3px 5px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 9px;
+      text-align: center;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .dungeon-input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .dungeon-input:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+    }
+
+    .friend-select {
+      width: 100%;
+      max-width: 80px;
+      padding: 3px 5px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 8px;
+      text-align: center;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+
+    .friend-select:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+    }
+
+    .friend-select option {
+      background: rgba(20,20,20,0.95);
+      color: #fff;
+    }
+
+    .create-dungeon-btn {
+      background: rgba(139,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 3px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 8px;
+      padding: 3px 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      max-width: 60px;
+      white-space: nowrap;
+    }
+
+    .create-dungeon-btn:hover {
+      background: rgba(180,0,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+    }
+
+    .create-dungeon-btn:disabled {
+      background: rgba(68,68,68,0.6);
+      border-color: rgba(255,255,255,0.2);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 8px;
+      }
+      
+      .lobby-panel {
+        width: 76vw;
+        max-width: 76vw;
+        padding: 10px 12px;
+        max-height: 75vh;
+        border-radius: 6px;
+      }
+      
+      h2 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+      
+      .room-card {
+        padding: 8px;
+        margin-top: 4px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      
+      .room-name {
+        font-size: 1rem;
+      }
+      
+      .dungeon-master, .victim-count {
+        font-size: 0.8rem;
+        margin-top: 1px;
+      }
+      
+      .room-actions {
+        align-self: stretch;
+        justify-content: center;
+      }
+      
+      .join-button, .cancel-button {
+        padding: 6px 12px;
+        font-size: 12px;
+        flex: 1;
+        max-width: 120px;
+      }
+      
+      /* Mobile create dungeon adjustments */
+      .create-dungeon-section {
+        padding: 10px;
+        margin-bottom: 12px;
+      }
+      
+      .create-dungeon-section h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+      
+      .create-form {
+        gap: 6px;
+        flex-wrap: nowrap;
+      }
+      
+      .dungeon-input, .friend-select {
+        max-width: none;
+        flex: 1;
+        font-size: 12px;
+        padding: 6px 8px;
+      }
+      
+      .create-dungeon-btn {
+        font-size: 11px;
+        padding: 6px 10px;
+        max-width: 80px;
+        flex-shrink: 0;
+      }
+    }
+
+    .room-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 100%;
+      background: #000;
+      border: 2px solid rgba(139,0,0,0.6);
+      border-radius: 6px;
+      padding: 8px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+    }
+
+    .room-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 6px;
+      margin-top: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      transition: all 0.3s ease;
+    }
+
+    .room-card:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-2px);
+    }
+
+    .room-header {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .room-name {
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .dungeon-master {
+      font-size: 0.7rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 1px;
+    }
+
+    .victim-count {
+      font-size: 0.7rem;
+      color: #ff4444;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 1px;
+    }
+
+    .waiting-status {
+      font-size: 0.65rem;
+      color: #ffff00;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+      margin-top: 2px;
+      animation: flashWaiting 1.5s ease-in-out infinite;
+    }
+
+    @keyframes flashWaiting {
+      0%, 50% {
+        opacity: 1;
+      }
+      25%, 75% {
+        opacity: 0.3;
+      }
+    }
+
+    .room-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .join-button {
+      cursor: pointer;
+      background: rgba(139,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 3px 6px;
+      border-radius: 3px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    
+    .join-button:hover {
+      background: rgba(180,0,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+    }
+    
+    .join-button:disabled {
+      background: rgba(68,68,68,0.6);
+      border-color: rgba(255,255,255,0.2);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .cancel-button {
+      cursor: pointer;
+      background: rgba(139,0,0,0.8);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 3px 6px;
+      border-radius: 3px;
+      color: #fff;
+      font-weight: bold;
+      font-size: 8px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+    }
+    
+    .cancel-button:hover {
+      background: rgba(180,0,0,0.9);
+      border-color: rgba(255,255,255,0.5);
+      transform: translateY(-1px);
+    }
+
+    /* Mobile input modal */
+    .mobile-input-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .mobile-input-content {
+      background: rgba(20,20,20,0.95);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 300px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .mobile-input-content h3 {
+      color: #fff;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .mobile-input-content input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 5px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    .mobile-input-content button {
+      padding: 10px 20px;
+      margin: 0 5px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .mobile-input-content .confirm-btn {
+      background: rgba(0,128,0,0.8);
+      color: #fff;
+    }
+
+    .mobile-input-content .cancel-btn {
+      background: rgba(128,0,0,0.8);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<div class="lobby-panel">
+  <div class="header-container">
+    <div id="lobby-version" style="position:absolute; left:0; font-size:10px; color:#ffff00; user-select:none;">
+      Version <span id="lobby-version-number">XV3.1</span> <span id="lobby-version-lock" title="Multiplayer unlocked" style="display:none;">🔓</span>
+    </div>
+    <h2>Available Dungeons</h2>
+    <button class="close-btn" onclick="window.close()" title="Close Window">×</button>
+  </div>
+
+  <!-- Create New Dungeon Section -->
+  <div class="create-dungeon-section">
+    <h3>Create New Dungeon</h3>
+    <div class="create-form">
+      <input type="text" id="dungeonNameInput" placeholder="Enter dungeon name..." maxlength="20" class="dungeon-input">
+      <select id="maxPlayersSelect" class="friend-select">
+        <option value="2">1 Friend (2 players)</option>
+        <option value="3">2 Friends (3 players)</option>
+        <option value="4">3 Friends (4 players)</option>
+      </select>
+      <button class="create-dungeon-btn" onclick="createNewDungeon()">Create Dungeon</button>
+    </div>
+  </div>
+
+  <div class="room-list" id="roomList">
+    <!-- Firebase rooms will be injected here -->
+  </div>
+</div>
+
+<!-- Mobile-friendly input modal -->
+<div class="mobile-input-modal" id="mobileInputModal">
+  <div class="mobile-input-content">
+    <h3 id="inputModalTitle">Enter your name:</h3>
+    <input type="text" id="playerNameInput" placeholder="Your name..." maxlength="20">
+    <div>
+      <button class="confirm-btn" onclick="confirmPlayerName()">Join</button>
+      <button class="cancel-btn" onclick="cancelPlayerName()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Firebase SDKs + Mobile Compatibility -->
+  <script>
+    // Check for ES6 module support
+    const supportsModules = (() => {
+      try {
+        return typeof Symbol !== 'undefined' && Symbol.iterator;
+      } catch (e) {
+        return false;
+      }
+    })();
+
+    if (!supportsModules) {
+      // Load Firebase compat for older browsers
+      const script1 = document.createElement('script');
+      script1.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+      script1.onload = function() {
+        const script2 = document.createElement('script');
+        script2.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js';
+        script2.onload = function() {
+          initFirebaseCompat();
+        };
+        document.head.appendChild(script2);
+      };
+      document.head.appendChild(script1);
+    }
+  </script>
+  
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, onSnapshot, query, where, getDocs, doc, deleteDoc, updateDoc, getDoc, addDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import multiplayerPaywall from './multiplayer-paywall-system.js';
+    import paywallIntegration from './multiplayer-paywall-integration.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+      authDomain: "horropoly.firebaseapp.com",
+      projectId: "horropoly",
+      storageBucket: "horropoly.firebasestorage.app",
+      messagingSenderId: "582020770053",
+      appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const roomsRef = collection(db, "gameRooms");
+
+    // Make Firebase variables globally accessible
+    window.firebaseDB = db;
+    window.firebaseRoomsRef = roomsRef;
+    window.firebaseFunctions = {
+      query, where, getDocs, doc, deleteDoc, updateDoc, getDoc, addDoc, setDoc, collection
+    };
+
+    const roomListEl = document.getElementById("roomList");
+    const searchInput = document.getElementById("searchInput");
+
+    // Show unlocked padlock next to version when multiplayer is unlocked
+    async function updateLobbyVersionBadge() {
+      try {
+        const lockEl = document.getElementById('lobby-version-lock');
+        if (!lockEl) return;
+        const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+        lockEl.style.display = hasAccess ? 'inline' : 'none';
+      } catch (e) {
+        const lockEl = document.getElementById('lobby-version-lock');
+        if (lockEl) lockEl.style.display = 'none';
+      }
+    }
+
+    // Initial check and event hooks for future changes
+    updateLobbyVersionBadge();
+    window.addEventListener('focus', () => setTimeout(updateLobbyVersionBadge, 500));
+    window.addEventListener('multiplayerPaymentSuccess', updateLobbyVersionBadge);
+
+    // Secure name sanitization and validation
+    function sanitizePlayerName(raw) {
+      if (!raw || typeof raw !== 'string') return '';
+      let name = raw
+        .replace(/[\u0000-\u001F\u007F]/g, '') // control chars
+        .replace(/<[^>]*>/g, '') // strip tags
+        .replace(/[\t\n\r]/g, ' ') // collapse whitespace
+        .trim();
+      // Allow letters, numbers, spaces, underscore, hyphen only
+      name = name.replace(/[^A-Za-z0-9 _-]/g, '');
+      // Collapse multiple spaces
+      name = name.replace(/\s{2,}/g, ' ');
+      // Enforce length 3-20
+      if (name.length > 20) name = name.slice(0, 20).trim();
+      return name;
+    }
+
+    function validatePlayerName(name) {
+      if (!name) return { ok: false, reason: 'Name is required' };
+      if (name.length < 3) return { ok: false, reason: 'Name must be at least 3 characters' };
+      if (name.length > 20) return { ok: false, reason: 'Name must be at most 20 characters' };
+      if (!/^[A-Za-z0-9 _-]+$/.test(name)) return { ok: false, reason: 'Only letters, numbers, space, _ and - allowed' };
+      // Disallow abusive/obscene fragments (basic word filter)
+      const blocked = ['admin', 'moderator', 'host', 'owner'];
+      const lower = name.toLowerCase();
+      if (blocked.some(b => lower === b || lower.includes(b))) return { ok: false, reason: 'Please choose a different name' };
+      return { ok: true };
+    }
+
+    function renderRoom(roomData, roomId) {
+      const { players, maxPlayers, gameStarted, roomCreatedBy } = roomData;
+      
+      // players is an array, get count and host info
+      const playersArray = Array.isArray(players) ? players : [];
+      const playerCount = playersArray.length;
+      const hostPlayer = playersArray.find(p => p.isHost) || playersArray[0];
+      const isFull = playerCount >= maxPlayers;
+      const dungeonMaster = hostPlayer ? (hostPlayer.name || 'Unknown Master') : 'Unknown Master';
+      const victimCount = `${playerCount}/${maxPlayers} Victims`;
+      
+      // Use the stored room name if available, otherwise fall back to roomId
+      const roomName = (roomData.roomName || roomId).toString().slice(0, 20);
+      
+      // Check if room should be removed (game started/unknown creator)
+      const shouldBeRemoved = gameStarted || dungeonMaster === 'Unknown Master';
+      if (shouldBeRemoved) {
+        return null; // Don't render this room
+      }
+      
+      // Check if room is waiting for players
+      const isWaitingForPlayers = !isFull && !gameStarted;
+      
+      // Show cancel option for all rooms - ownership will be verified when clicked
+      const isMyRoom = true; // Allow cancel attempt, will be verified in cancelRoom function
+
+      return `
+        <div class="room-card" data-name="${roomName.toLowerCase()}">
+          <div class="room-header">
+            <span class="room-name" title="Dungeon: ${roomName}">${roomName}</span>
+            <span class="dungeon-master">Dungeon Master: ${dungeonMaster}</span>
+            <span class="victim-count">Number of Victims: ${victimCount}</span>
+            ${isWaitingForPlayers ? '<span class="waiting-status">Waiting for Players</span>' : ''}
+          </div>
+          <div class="room-actions">
+            <button class="join-button" ${isFull ? 'disabled' : ''} onclick="joinRoom('${roomName}')">
+              ${isFull ? 'Full' : 'Join'}
+            </button>
+            <button class="cancel-button" onclick="cancelRoom('${roomName}')">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function updateRoomList(snapshot) {
+      roomListEl.innerHTML = "";
+      
+      // Collect all valid rooms first
+      const validRooms = [];
+      snapshot.forEach(doc => {
+        const roomData = doc.data();
+        const roomId = doc.id;
+        const roomHtml = renderRoom(roomData, roomId);
+        if (roomHtml) { // Only add if room should be displayed
+          validRooms.push({ html: roomHtml, name: roomId, createdAt: roomData.createdAt });
+        }
+      });
+      
+      // Sort rooms alphabetically by player-chosen dungeon name
+      validRooms.sort((a, b) => {
+        // Primary sort: alphabetical by room name
+        const nameComparison = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+        if (nameComparison !== 0) return nameComparison;
+        
+        // Secondary sort: newest first if names are identical
+        const timeA = a.createdAt ? new Date(a.createdAt.seconds ? a.createdAt.seconds * 1000 : a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt.seconds ? b.createdAt.seconds * 1000 : b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      
+      // Add sorted rooms to the display
+      validRooms.forEach(room => {
+        roomListEl.innerHTML += room.html;
+      });
+    }
+
+    // Optimized live update rooms with filtering
+    const RECENT_MS = 1000 * 60 * 10; // last 10 min for live updates
+    const minIso = new Date(Date.now() - RECENT_MS).toISOString();
+    
+    // Create optimized query for real-time updates
+    const optimizedQuery = query(
+      roomsRef,
+      where('gameStarted', '==', false),
+      where('lastUpdated', '>=', minIso)
+    );
+    
+    onSnapshot(optimizedQuery, (snapshot) => {
+      console.log(`🔄 Optimized live query returned ${snapshot.docs.length} recent rooms`);
+      
+      // Filter out invalid rooms on the client side as well
+      const validRooms = [];
+      const now = Date.now();
+      const staleThreshold = 10 * 60 * 1000; // 10 minutes for live updates
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const lastUpdated = data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0;
+        const isStale = (now - lastUpdated) > staleThreshold;
+        
+        // Check if room has unknown creator/master
+        const playersArray = Array.isArray(data.players) ? data.players : [];
+        const hostPlayer = playersArray.find(p => p.isHost) || playersArray[0];
+        const dungeonMaster = hostPlayer ? (hostPlayer.name || 'Unknown Master') : 'Unknown Master';
+        const hasUnknownCreator = dungeonMaster === 'Unknown Master';
+        const gameStarted = data.gameStarted || false;
+        
+        // Check if room has capacity
+        const hasCapacity = playersArray.length < (data.maxPlayers || 2);
+        
+        // Only include rooms that are waiting for players, not stale, have known creators, and have capacity
+        if (!gameStarted &&
+            !isStale &&
+            !hasUnknownCreator &&
+            hasCapacity) {
+          validRooms.push(doc);
+        } else {
+          if (isStale) {
+            console.warn('Filtering out stale room (>10min inactive):', doc.id);
+          } else if (hasUnknownCreator) {
+            console.warn('Deleting room with unknown creator:', doc.id);
+            // Delete rooms with unknown creators
+            deleteDoc(doc.ref).then(() => {
+              console.log('✅ Deleted room with unknown creator:', doc.id);
+            }).catch(error => {
+              console.error('❌ Failed to delete unknown creator room:', doc.id, error);
+            });
+          } else if (gameStarted) {
+            console.warn('Filtering out started game:', doc.id);
+          } else if (!hasCapacity) {
+            console.warn('Filtering out full room:', doc.id);
+          } else {
+            console.warn('Filtering out invalid room from live updates:', doc.id);
+          }
+        }
+      });
+      
+      // Create a mock snapshot with filtered docs
+      const filteredSnapshot = {
+        docs: validRooms,
+        forEach: function(callback) {
+          this.docs.forEach(callback);
+        }
+      };
+      
+      updateRoomList(filteredSnapshot);
+      
+      // Show room count and last update time
+      const roomCount = validRooms.length;
+      console.log(`🔄 Optimized rooms updated: ${roomCount} available dungeons found (from ${snapshot.docs.length} recent rooms)`);
+    }, (error) => {
+      console.error('Optimized Firebase query failed, falling back to basic query:', error);
+      
+      // Fallback to basic query
+      const basicQuery = query(roomsRef, where('gameStarted', '==', false));
+      onSnapshot(basicQuery, (snapshot) => {
+        console.log(`🔄 Fallback query returned ${snapshot.docs.length} rooms`);
+        
+        const validRooms = [];
+        const now = Date.now();
+        
+        snapshot.docs.slice(0, 50).forEach(doc => { // Limit to 50 rooms max
+          const data = doc.data();
+          const playersArray = Array.isArray(data.players) ? data.players : [];
+          const hostPlayer = playersArray.find(p => p.isHost) || playersArray[0];
+          const dungeonMaster = hostPlayer ? (hostPlayer.name || 'Unknown Master') : 'Unknown Master';
+          const hasCapacity = playersArray.length < (data.maxPlayers || 2);
+          
+          if (dungeonMaster !== 'Unknown Master' && hasCapacity) {
+            validRooms.push(doc);
+          }
+        });
+        
+        const filteredSnapshot = {
+          docs: validRooms,
+          forEach: function(callback) {
+            this.docs.forEach(callback);
+          }
+        };
+        
+        updateRoomList(filteredSnapshot);
+        console.log(`🔄 Fallback rooms updated: ${validRooms.length} available dungeons found`);
+      });
+    });
+    
+    // Auto-cleanup stale rooms every 2 minutes
+    setInterval(async () => {
+      try {
+        const { cleanupStaleRooms } = await import('./firebase-init.js');
+        const result = await cleanupStaleRooms();
+        if (result && (result.roomsCleaned > 0 || result.inactivePlayersRemoved > 0)) {
+          console.log('🧹 Auto-cleanup completed:', result);
+        }
+      } catch (error) {
+        console.warn('Auto-cleanup failed:', error);
+      }
+    }, 2 * 60 * 1000); // Every 2 minutes
+
+    // Search/filter
+    searchInput.addEventListener("input", () => {
+      const term = searchInput.value.toLowerCase();
+      const cards = document.querySelectorAll(".room-card");
+      cards.forEach(card => {
+        const name = card.dataset.name;
+        card.style.display = name.includes(term) ? "flex" : "none";
+      });
+    });
+
+    // Generate session-based user ID (no localStorage dependency)
+    // User identity will be determined by active room membership in Firebase
+    window.currentUserId = null; // Will be determined by Firebase queries
+    window.currentPlayerName = null;
+
+    // Create new dungeon function with Firebase availability check and paywall
+    window.createNewDungeon = async function() {
+      // Check if user has multiplayer access first
+      const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+      if (!hasAccess) {
+        console.log('🔒 Multiplayer access required for room creation');
+        multiplayerPaywall.showAccessDenied('create dungeons');
+        return;
+      }
+
+      // Wait for Firebase to be initialized
+      if (!window.firebaseDB || !window.firebaseRoomsRef || !window.firebaseFunctions) {
+        console.warn('Firebase not ready yet, waiting...');
+        // Add counter to prevent infinite loop
+        if (!window.firebaseWaitAttempts) window.firebaseWaitAttempts = 0;
+        window.firebaseWaitAttempts++;
+        
+        if (window.firebaseWaitAttempts > 50) { // Max 5 seconds
+          alert('Firebase failed to initialize. Please refresh the page and try again.');
+          return;
+        }
+        
+        setTimeout(() => window.createNewDungeon(), 100);
+        return;
+      }
+      
+      // Reset counter on successful Firebase access
+      window.firebaseWaitAttempts = 0;
+
+      const dungeonNameInput = document.getElementById('dungeonNameInput');
+      const maxPlayersSelect = document.getElementById('maxPlayersSelect');
+      const createBtn = document.querySelector('.create-dungeon-btn');
+      
+      const dungeonName = sanitizeDungeonName(dungeonNameInput.value);
+      const maxPlayers = parseInt(maxPlayersSelect.value);
+      
+      if (!dungeonName) {
+        alert('Please enter a dungeon name!');
+        dungeonNameInput.focus();
+        return;
+      }
+      
+      if (dungeonName.length < 3) {
+        alert('Dungeon name must be at least 3 characters long!');
+        dungeonNameInput.focus();
+        return;
+      }
+      
+      // Get player name for hosting
+      let hostName;
+      if (isMobile) {
+        return new Promise((resolve) => {
+          showMobileInput('Enter your name as Dungeon Master:', async function(name) {
+            if (name && name.trim()) {
+              await proceedWithDungeonCreation(dungeonName, maxPlayers, name.trim());
+            }
+            resolve();
+          });
+        });
+      } else {
+        hostName = prompt('Enter your name as Dungeon Master:');
+        const safeHost = sanitizePlayerName(hostName || '');
+        const hostCheck = validatePlayerName(safeHost);
+        if (hostCheck.ok) {
+          await proceedWithDungeonCreation(dungeonName, maxPlayers, safeHost);
+        } else if (hostName !== null && hostName !== undefined && hostName !== '') {
+          alert(hostCheck.reason || 'Please enter a valid name');
+        }
+      }
+    };
+    
+    function sanitizeDungeonName(raw) {
+      if (!raw || typeof raw !== 'string') return '';
+      let name = raw
+        .replace(/[\u0000-\u001F\u007F]/g, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/[\t\n\r]/g, ' ')
+        .trim();
+      name = name.replace(/[^A-Za-z0-9 _-]/g, '');
+      name = name.replace(/\s{2,}/g, ' ');
+      if (name.length > 20) name = name.slice(0, 20).trim();
+      return name;
+    }
+
+    async function proceedWithDungeonCreation(dungeonName, maxPlayers, hostName) {
+      const createBtn = document.querySelector('.create-dungeon-btn');
+      const dungeonNameInput = document.getElementById('dungeonNameInput');
+      
+      // Use global Firebase references
+      const { query, where, getDocs, doc, setDoc, getDoc } = window.firebaseFunctions;
+      const db = window.firebaseDB;
+      const roomsRef = window.firebaseRoomsRef;
+      
+      try {
+        // Disable button during creation
+        createBtn.disabled = true;
+        createBtn.textContent = 'Creating...';
+        
+        // Check if room name already exists (since we use room name as document ID)
+        const roomDoc = await getDoc(doc(db, 'gameRooms', dungeonName));
+        
+        if (roomDoc.exists()) {
+          alert(`A dungeon named "${dungeonName}" already exists! Please choose a different name.`);
+          createBtn.disabled = false;
+          createBtn.textContent = 'Create Dungeon';
+          dungeonNameInput.focus();
+          return;
+        }
+        
+        // Check if user is already hosting a room
+        const allRoomsQuery = query(roomsRef, where('gameStarted', '==', false));
+        const allRooms = await getDocs(allRoomsQuery);
+        
+        let userAlreadyHosting = false;
+        allRooms.forEach(doc => {
+          const roomData = doc.data();
+          if (roomData.players && roomData.players.some(p => 
+            p.name && p.name.toLowerCase() === hostName.toLowerCase() && p.isHost
+          )) {
+            userAlreadyHosting = true;
+          }
+        });
+        
+        if (userAlreadyHosting) {
+          alert(`You are already hosting a dungeon! Only one dungeon per host is allowed.`);
+          createBtn.disabled = false;
+          createBtn.textContent = 'Create Dungeon';
+          return;
+        }
+        
+        // Sanitize and validate host name
+        const safeHost = sanitizePlayerName(hostName);
+        const hostCheck = validatePlayerName(safeHost);
+        if (!hostCheck.ok) {
+          alert(hostCheck.reason || 'Please enter a valid name');
+          createBtn.disabled = false;
+          createBtn.textContent = 'Create Dungeon';
+          return;
+        }
+
+        // Create new room data
+        const roomData = {
+          roomName: dungeonName, // Store the player-chosen room name
+          players: [{
+            name: safeHost,
+            displayName: safeHost,
+            userId: `host-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            isHost: true
+          }],
+          maxPlayers: maxPlayers,
+          gameStarted: false,
+          roomCreatedBy: hostName,
+          createdAt: new Date(),
+          lastActivity: new Date(),
+          status: 'waiting_for_players'
+        };
+        
+        // Add room to Firebase using the dungeon name as the document ID
+        await setDoc(doc(db, 'gameRooms', dungeonName), roomData);
+        
+        console.log(`✅ Dungeon "${dungeonName}" created successfully`);
+        
+        // Clear form
+        dungeonNameInput.value = '';
+        maxPlayersSelect.value = '2';
+        
+        // Redirect to the game as host
+        const gameUrl = `game.html?roomId=${encodeURIComponent(dungeonName)}&player=${encodeURIComponent(hostName)}&isHost=true`;
+        window.location.href = gameUrl;
+        
+      } catch (error) {
+        console.error('Error creating dungeon:', error);
+        alert(`Failed to create dungeon: ${error.message}`);
+        
+        // Re-enable button
+        createBtn.disabled = false;
+        createBtn.textContent = 'Create Dungeon';
+      }
+    }
+
+    // Testing utilities - can be called from browser console
+    window.testingUtils = {
+      // Clear all lobby rooms (shown in available_rooms.html)
+      clearLobbyRooms: async function() {
+        try {
+          console.log('🧹 Clearing all lobby rooms...');
+          const roomsSnapshot = await getDocs(collection(db, 'rooms'));
+          let deletedCount = 0;
+          
+          for (const roomDoc of roomsSnapshot.docs) {
+            await deleteDoc(roomDoc.ref);
+            deletedCount++;
+            console.log(`Deleted room: ${roomDoc.id} (${roomDoc.data().roomName || 'Unnamed'})`);
+          }
+          
+          console.log(`✅ Successfully deleted ${deletedCount} lobby rooms`);
+          return { success: true, deletedCount };
+        } catch (error) {
+          console.error('❌ Error clearing lobby rooms:', error);
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Clear all game rooms (active games)
+      clearGameRooms: async function() {
+        try {
+          console.log('🧹 Clearing all game rooms...');
+          const gameRoomsSnapshot = await getDocs(collection(db, 'gameRooms'));
+          let deletedCount = 0;
+          
+          for (const roomDoc of gameRoomsSnapshot.docs) {
+            await deleteDoc(roomDoc.ref);
+            deletedCount++;
+            console.log(`Deleted game room: ${roomDoc.id}`);
+          }
+          
+          console.log(`✅ Successfully deleted ${deletedCount} game rooms`);
+          return { success: true, deletedCount };
+        } catch (error) {
+          console.error('❌ Error clearing game rooms:', error);
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Clear ALL rooms (both lobby and game rooms)
+      clearAllRooms: async function() {
+        try {
+          console.log('🧹 Clearing ALL rooms (lobby + game)...');
+          const lobbyResult = await this.clearLobbyRooms();
+          const gameResult = await this.clearGameRooms();
+          
+          const totalDeleted = (lobbyResult.deletedCount || 0) + (gameResult.deletedCount || 0);
+          console.log(`✅ Total rooms deleted: ${totalDeleted}`);
+          
+          return {
+            success: lobbyResult.success && gameResult.success,
+            lobbyRooms: lobbyResult.deletedCount || 0,
+            gameRooms: gameResult.deletedCount || 0,
+            total: totalDeleted
+          };
+        } catch (error) {
+          console.error('❌ Error clearing all rooms:', error);
+          return { success: false, error: error.message };
+        }
+      },
+
+      // List all rooms for debugging
+      listAllRooms: async function() {
+        try {
+          console.log('📋 Listing all rooms...');
+          
+          // List lobby rooms
+          const lobbySnapshot = await getDocs(collection(db, 'rooms'));
+          console.log(`\n🏰 Lobby Rooms (${lobbySnapshot.docs.length}):`);
+          lobbySnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            console.log(`  - ${doc.id}: "${data.roomName || 'Unnamed'}" (${data.players?.length || 0}/${data.maxPlayers || 0} players, status: ${data.status || 'unknown'})`);
+          });
+
+          // List game rooms
+          const gameSnapshot = await getDocs(collection(db, 'gameRooms'));
+          console.log(`\n🎮 Game Rooms (${gameSnapshot.docs.length}):`);
+          gameSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            console.log(`  - ${doc.id}: ${data.players?.length || 0}/${data.maxPlayers || 0} players, started: ${data.gameStarted || false}`);
+          });
+
+          return {
+            lobbyRooms: lobbySnapshot.docs.length,
+            gameRooms: gameSnapshot.docs.length,
+            total: lobbySnapshot.docs.length + gameSnapshot.docs.length
+          };
+        } catch (error) {
+          console.error('❌ Error listing rooms:', error);
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Create test rooms for debugging
+      createTestRooms: async function(count = 3) {
+        try {
+          console.log(`🏗️ Creating ${count} test rooms...`);
+          const testNames = ['TestCastle', 'DebugDungeon', 'SampleSwamp', 'MockMansion', 'TestTomb'];
+          const createdRooms = [];
+
+          for (let i = 0; i < count; i++) {
+            const roomName = testNames[i % testNames.length] + (i > 4 ? (i - 4) : '');
+            const roomData = {
+              roomName: roomName,
+              players: [
+                {
+                  name: `TestHost${i + 1}`,
+                  displayName: `TestHost${i + 1}`,
+                  userId: `test-user-${i + 1}`,
+                  isHost: true
+                }
+              ],
+              maxPlayers: 2 + (i % 3), // 2-4 players
+              hostUid: `test-user-${i + 1}`,
+              status: 'waiting_for_players',
+              createdAt: new Date(),
+              lastActivity: new Date()
+            };
+
+            const docRef = await addDoc(collection(db, 'rooms'), roomData);
+            createdRooms.push({ id: docRef.id, name: roomName });
+            console.log(`Created test room: ${docRef.id} (${roomName})`);
+          }
+
+          console.log(`✅ Successfully created ${createdRooms.length} test rooms`);
+          return { success: true, created: createdRooms };
+        } catch (error) {
+          console.error('❌ Error creating test rooms:', error);
+          return { success: false, error: error.message };
+        }
+      },
+
+      // Clean up rooms with unknown creators
+      cleanupUnknownRooms: async function() {
+        try {
+          console.log('🧹 Cleaning up rooms with unknown creators...');
+          const roomsSnapshot = await getDocs(collection(db, 'rooms'));
+          let deletedCount = 0;
+
+          const deletePromises = [];
+          roomsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            const playersArray = Array.isArray(data.players) ? data.players : [];
+            const hostPlayer = playersArray.find(p => p.isHost) || playersArray[0];
+            const dungeonMaster = hostPlayer ? (hostPlayer.displayName || hostPlayer.name || 'Unknown Master') : 'Unknown Master';
+            
+            if (dungeonMaster === 'Unknown Master') {
+              console.log(`Found room with unknown creator: ${doc.id} (${data.roomName || 'Unnamed'})`);
+              deletePromises.push(
+                deleteDoc(doc.ref).then(() => {
+                  deletedCount++;
+                  console.log(`Deleted: ${doc.id} (${data.roomName || 'Unnamed'})`);
+                }).catch(error => {
+                  console.error(`Failed to delete ${doc.id}:`, error);
+                })
+              );
+            }
+          });
+
+          await Promise.all(deletePromises);
+          console.log(`✅ Successfully deleted ${deletedCount} rooms with unknown creators`);
+          return { success: true, deletedCount };
+        } catch (error) {
+          console.error('❌ Error cleaning up unknown rooms:', error);
+          return { success: false, error: error.message };
+        }
+      }
+    };
+
+    console.log('🔧 Testing utilities loaded! Use window.testingUtils in console:');
+    console.log('  - testingUtils.clearLobbyRooms() // Clear rooms shown in available dungeons');
+    console.log('  - testingUtils.clearGameRooms() // Clear active game rooms');
+    console.log('  - testingUtils.clearAllRooms() // Clear everything');
+    console.log('  - testingUtils.listAllRooms() // Show all rooms');
+    console.log('  - testingUtils.createTestRooms(5) // Create test rooms');
+    console.log('  - testingUtils.cleanupUnknownRooms() // Delete rooms with unknown creators');
+
+    // Utility function to check and clean up empty rooms
+    window.checkAndCleanupEmptyRoom = async function(roomId) {
+      try {
+        const roomDoc = await getDoc(doc(db, 'gameRooms', roomId));
+        if (!roomDoc.exists()) return;
+        
+        const roomData = roomDoc.data();
+        const players = roomData.players || [];
+        
+        if (players.length === 0) {
+          // Room is empty - delete it
+          await deleteDoc(doc(db, 'gameRooms', roomId));
+          console.log(`Empty room ${roomId} automatically deleted`);
+          return true; // Room was deleted
+        }
+        
+        return false; // Room still has players
+      } catch (error) {
+        console.error('Error checking empty room:', error);
+        return false;
+      }
+    };
+
+    // Utility function to handle player leaving (can be called from game)
+    window.handlePlayerLeaving = async function(roomId, playerId, playerName) {
+      try {
+        const roomDoc = await getDoc(doc(db, 'gameRooms', roomId));
+        if (!roomDoc.exists()) return;
+        
+        const roomData = roomDoc.data();
+        const remainingPlayers = roomData.players.filter(p => 
+          p.userId !== playerId && p.name !== playerName
+        );
+        
+        if (remainingPlayers.length === 0) {
+          // Room would be empty - delete it
+          await deleteDoc(doc(db, 'gameRooms', roomId));
+          console.log(`Room ${roomId} deleted - last player left`);
+        } else {
+          // Check if leaving player was the host
+          const leavingPlayer = roomData.players.find(p => 
+            p.userId === playerId || p.name === playerName
+          );
+          
+          if (leavingPlayer && leavingPlayer.isHost) {
+            // Transfer host to first remaining player
+            const newHost = remainingPlayers[0];
+            newHost.isHost = true;
+            
+            await updateDoc(doc(db, 'gameRooms', roomId), {
+              players: remainingPlayers,
+              roomCreatedBy: newHost.userId,
+              lastUpdated: new Date().toISOString()
+            });
+            
+            console.log(`Host transferred to ${newHost.name} in room ${roomId}`);
+          } else {
+            // Just remove the player
+            await updateDoc(doc(db, 'gameRooms', roomId), {
+              players: remainingPlayers,
+              lastUpdated: new Date().toISOString()
+            });
+            
+            console.log(`Player ${playerName} removed from room ${roomId}`);
+          }
+        }
+      } catch (error) {
+        console.error('Error handling player leaving:', error);
+      }
+    };
+
+    // 👇 MOCK DATA fallback if Firebase fails (for testing/demo purposes only)
+    const mockRooms = [
+      { 
+        roomName: 'Zombies123', 
+        players: [{ name: 'DarkLord', displayName: 'DarkLord', isHost: true }], 
+        maxPlayers: 2, 
+        hostUid: 'demo-user-123', 
+        status: 'waiting_for_players' 
+      },
+      { 
+        roomName: 'BotWarfare', 
+        players: [
+          { name: 'CyberMaster', displayName: 'CyberMaster', isHost: true },
+          { name: 'Player2', displayName: 'Player2', isHost: false }
+        ], 
+        maxPlayers: 2, 
+        hostUid: 'other-user-456', 
+        status: 'waiting_for_players' 
+      },
+      { 
+        roomName: 'HauntedLobby', 
+        players: [
+          { name: 'GhostKeeper', displayName: 'GhostKeeper', isHost: true },
+          { name: 'Victim1', displayName: 'Victim1', isHost: false },
+          { name: 'Victim2', displayName: 'Victim2', isHost: false }
+        ], 
+        maxPlayers: 4, 
+        hostUid: 'other-user-789', 
+        status: 'waiting_for_players' 
+      },
+      { 
+        roomName: 'CryptRunners', 
+        players: [{ name: 'CryptLord', displayName: 'CryptLord', isHost: true }], 
+        maxPlayers: 2, 
+        hostUid: 'demo-user-123', 
+        status: 'waiting_for_players' 
+      },
+      { 
+        roomName: 'BloodArena', 
+        players: [
+          { name: 'BloodMage', displayName: 'BloodMage', isHost: true },
+          { name: 'Warrior', displayName: 'Warrior', isHost: false }
+        ], 
+        maxPlayers: 3, 
+        hostUid: 'other-user-101', 
+        status: 'waiting_for_players' 
+      }
+    ];
+
+    // Uncomment below to test mock data (if no Firebase connected)
+    // roomListEl.innerHTML = mockRooms.map((room, index) => renderRoom(room, `MOCK${index}`)).filter(html => html !== null).join('');
+
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+    
+    // Mobile-friendly input functions
+    let currentRoomToJoin = null;
+    
+    window.showMobileInput = function(title, callback) {
+      const modal = document.getElementById('mobileInputModal');
+      const titleEl = document.getElementById('inputModalTitle');
+      const input = document.getElementById('playerNameInput');
+      
+      titleEl.textContent = title;
+      input.value = '';
+      input.setAttribute('maxlength', '20');
+      modal.style.display = 'flex';
+      
+      // Focus input after delay for mobile compatibility
+      setTimeout(() => {
+        input.focus();
+      }, 100);
+      
+      window.mobileInputCallback = callback;
+    };
+    
+    window.confirmPlayerName = function() {
+      const input = document.getElementById('playerNameInput');
+      const name = sanitizePlayerName(input.value);
+      const result = validatePlayerName(name);
+      
+      if (result.ok) {
+        const modal = document.getElementById('mobileInputModal');
+        modal.style.display = 'none';
+        
+        if (window.mobileInputCallback) {
+          window.mobileInputCallback(name);
+        }
+      } else {
+        alert(result.reason || 'Please enter a valid name');
+      }
+    };
+    
+    window.cancelPlayerName = function() {
+      const modal = document.getElementById('mobileInputModal');
+      modal.style.display = 'none';
+      window.mobileInputCallback = null;
+      currentRoomToJoin = null;
+    };
+
+    // Allow enter key to confirm input
+    document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        confirmPlayerName();
+      }
+    });
+
+    // Enhanced join room function with smart routing and paywall
+    let lastJoinAttempt = 0;
+    window.joinRoom = async function(roomName) {
+      // Check if user has multiplayer access first
+      const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+      if (!hasAccess) {
+        console.log('🔒 Multiplayer access required for joining rooms');
+        multiplayerPaywall.showAccessDenied('join dungeons');
+        return;
+      }
+
+      // Prevent rapid joining attempts on mobile
+      if (isMobile) {
+        const now = Date.now();
+        if (now - lastJoinAttempt < 2000) {
+          console.warn('Join attempt throttled - too soon after last attempt');
+          return;
+        }
+        lastJoinAttempt = now;
+      }
+      
+      currentRoomToJoin = roomName;
+      
+      // Use mobile-friendly input method
+      if (isMobile) {
+        showMobileInput('Enter your name to join ' + roomName + ':', async function(playerName) {
+          const safe = sanitizePlayerName(playerName);
+          const check = validatePlayerName(safe);
+          if (check.ok) {
+            // Use smart join system with fallback to preset
+            try {
+              const { smartJoinRoom } = await import('./smart-join-system.js');
+              await smartJoinRoom(roomName, safe, {
+                presetType: 'solo', // Fallback to solo if room unavailable
+                aiCount: 1
+              });
+            } catch (error) {
+              console.error('Smart join failed, using legacy join:', error);
+              proceedWithJoin(roomName, safe);
+            }
+          }
+        });
+      } else {
+        // Use traditional prompt for desktop
+        const playerName = prompt('Enter your name to join ' + roomName + ':');
+        const safe = sanitizePlayerName(playerName || '');
+        const check = validatePlayerName(safe);
+        if (check.ok) {
+          // Use smart join system with fallback to preset
+          try {
+            const { smartJoinRoom } = await import('./smart-join-system.js');
+            await smartJoinRoom(roomName, safe, {
+              presetType: 'solo', // Fallback to solo if room unavailable
+              aiCount: 1
+            });
+          } catch (error) {
+            console.error('Smart join failed, using legacy join:', error);
+            proceedWithJoin(roomName, safe);
+          }
+        } else if (playerName !== null && playerName !== undefined && playerName !== '') {
+          alert(check.reason || 'Please enter a valid name');
+        }
+      }
+    };
+    
+    // Function to generate a unique name by appending numbers
+    function generateUniqueName(baseName, existingPlayers) {
+      let uniqueName = baseName;
+      let counter = 2; // Start from 2 since the base name is essentially "1"
+      
+      // Keep checking if the name exists and increment counter
+      while (existingPlayers.some(player => 
+        player.name && player.name.toLowerCase() === uniqueName.toLowerCase()
+      )) {
+        uniqueName = `${baseName} ${counter}`;
+        counter++;
+      }
+      
+      return uniqueName;
+    }
+
+    // Function to get a computer-generated unique horror name
+    async function getUniqueRandomName(roomId, existingPlayers = []) {
+      try {
+        // Get all horror names
+        const horrorNames = [
+          'Dracula', 'Frankenstein', 'Wolfman', 'Mummy', 'Phantom',
+          'Nosferatu', 'Orlok', 'Renfield', 'VanHelsing', 'Harker',
+          'Wednesday', 'Morticia', 'Gomez', 'Lurch', 'Fester',
+          'Carrie', 'Danny', 'Regan', 'Damien', 'Chucky',
+          'Jason', 'Freddy', 'Michael', 'Leatherface', 'Pinhead',
+          'Beetlejuice', 'Pennywise', 'Annabelle', 'Valak', 'Conjuring',
+          'Babadook', 'Sinister', 'Insidious', 'Hereditary', 'Midsommar',
+          'Rosemary', 'Norman', 'Psycho', 'Hannibal', 'Clarice',
+          'Jigsaw', 'Saw', 'Scream', 'Ghostface', 'Sidney',
+          'Laurie', 'Ellen', 'Ash', 'Buffy', 'Blade'
+        ];
+        
+        // Get names already in use from passed players array
+        const usedNames = existingPlayers.map(p => p.name || p.displayName).filter(name => name);
+        
+        // Filter out names already in use (case-insensitive)
+        const availableNames = horrorNames.filter(name => 
+          !usedNames.some(usedName => 
+            usedName.toLowerCase() === name.toLowerCase()
+          )
+        );
+        
+        // If all names are taken, return a random name with number suffix
+        if (availableNames.length === 0) {
+          const baseName = horrorNames[Math.floor(Math.random() * horrorNames.length)];
+          return generateUniqueName(baseName, existingPlayers);
+        }
+        
+        // Return a random available name
+        return availableNames[Math.floor(Math.random() * availableNames.length)];
+        
+      } catch (error) {
+        console.warn('Error getting unique random name:', error);
+        // Fallback to basic random name
+        const horrorNames = ['Dracula', 'Jason', 'Freddy', 'Chucky', 'Ghostface'];
+        return horrorNames[Math.floor(Math.random() * horrorNames.length)];
+      }
+    }
+
+    // Function to get a computer-generated unique horror name
+    async function getUniqueRandomName(roomId, existingPlayers = []) {
+      try {
+        // Get all horror names
+        const horrorNames = [
+          'Dracula', 'Frankenstein', 'Wolfman', 'Mummy', 'Phantom',
+          'Nosferatu', 'Orlok', 'Renfield', 'VanHelsing', 'Harker',
+          'Wednesday', 'Morticia', 'Gomez', 'Lurch', 'Fester',
+          'Carrie', 'Danny', 'Regan', 'Damien', 'Chucky',
+          'Jason', 'Freddy', 'Michael', 'Leatherface', 'Pinhead',
+          'Beetlejuice', 'Pennywise', 'Annabelle', 'Valak', 'Conjuring',
+          'Babadook', 'Sinister', 'Insidious', 'Hereditary', 'Midsommar',
+          'Rosemary', 'Norman', 'Psycho', 'Hannibal', 'Clarice',
+          'Jigsaw', 'Saw', 'Scream', 'Ghostface', 'Sidney',
+          'Laurie', 'Ellen', 'Ash', 'Buffy', 'Blade'
+        ];
+        
+        // Get names already in use from passed players array
+        const usedNames = existingPlayers.map(p => p.name || p.displayName).filter(name => name);
+        
+        // Filter out names already in use (case-insensitive)
+        const availableNames = horrorNames.filter(name => 
+          !usedNames.some(usedName => 
+            usedName.toLowerCase() === name.toLowerCase()
+          )
+        );
+        
+        // If all names are taken, return a random name with number suffix
+        if (availableNames.length === 0) {
+          const baseName = horrorNames[Math.floor(Math.random() * horrorNames.length)];
+          return generateUniqueName(baseName, existingPlayers);
+        }
+        
+        // Return a random available name
+        return availableNames[Math.floor(Math.random() * availableNames.length)];
+        
+      } catch (error) {
+        console.warn('Error getting unique random name:', error);
+        // Fallback to basic random name
+        const horrorNames = ['Dracula', 'Jason', 'Freddy', 'Chucky', 'Ghostface'];
+        return horrorNames[Math.floor(Math.random() * horrorNames.length)];
+      }
+    }
+
+    async function proceedWithJoin(roomName, playerName) {
+        // Check if player already has an active room OR same name exists in target room
+        try {
+          const roomsSnapshot = await getDocs(query(
+            collection(db, 'gameRooms'),
+            where('gameStarted', '==', false)
+          ));
+          
+          let playerExistingRoom = null;
+          let playerHostingRoom = null;
+          let targetRoomPlayers = [];
+          
+          roomsSnapshot.forEach(doc => {
+            const roomData = doc.data();
+            
+            // Check if this is the target room and get its players
+            if (doc.id === roomName) {
+              targetRoomPlayers = roomData.players || [];
+            }
+            
+            // Check if player is hosting any room (by being the host player with this name)
+            if (roomData.players && roomData.players.some(player => 
+              player.name && player.name.toLowerCase() === playerName.toLowerCase() && player.isHost
+            )) {
+              playerHostingRoom = { id: doc.id, ...roomData };
+            }
+            
+            // Check if player has an active room elsewhere (by name, including as non-host)
+            if (roomData.players && roomData.players.some(player => 
+              player.name && player.name.toLowerCase() === playerName.toLowerCase()
+            )) {
+              playerExistingRoom = { id: doc.id, ...roomData };
+            }
+          });
+          
+          // Use computer-generated name if no name provided, otherwise use allocated name
+          let finalPlayerName = playerName;
+          let nameWasGenerated = false;
+          
+          if (!finalPlayerName || finalPlayerName.trim() === '') {
+            // Generate a unique computer name for this player
+            finalPlayerName = await getUniqueRandomName(roomName, targetRoomPlayers);
+            nameWasGenerated = true;
+          } else {
+            // Player provided a name - check for conflict only if necessary
+            const hasNameConflict = targetRoomPlayers.some(player => 
+              player.name && player.name.toLowerCase() === finalPlayerName.toLowerCase()
+            );
+            
+            if (hasNameConflict) {
+              // Only add numbers if there's an actual conflict
+              finalPlayerName = generateUniqueName(finalPlayerName, targetRoomPlayers);
+            }
+          }
+          
+          // Show notification only if there was an actual conflict that required resolution
+          if (!nameWasGenerated && finalPlayerName !== playerName) {
+            console.log(`Name conflict resolved: "${playerName}" changed to "${finalPlayerName}"`);
+            if (isMobile) {
+              // Show brief notification for mobile
+              const notification = document.createElement('div');
+              notification.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                background: rgba(255,165,0,0.9); color: white; padding: 10px 20px;
+                border-radius: 5px; z-index: 9999; font-size: 14px;
+              `;
+              notification.textContent = `Name changed to "${finalPlayerName}" to avoid conflict`;
+              document.body.appendChild(notification);
+              setTimeout(() => notification.remove(), 3000);
+            } else {
+              alert(`Name changed to "${finalPlayerName}" to avoid conflict with existing player.`);
+            }
+          } else if (nameWasGenerated) {
+            console.log(`Computer-generated name assigned: "${finalPlayerName}"`);
+          }
+          
+          // Check if user is already hosting a room
+          if (playerHostingRoom) {
+            // If trying to join their own room, show different message
+            if (playerHostingRoom.id === roomName) {
+              alert(
+                `This is your own dungeon "${roomName}"!\n\n` +
+                `You are already the host. Wait for other players to join.`
+              );
+            } else {
+              alert(
+                `You are currently hosting dungeon "${playerHostingRoom.id}"!\n\n` +
+                `As a host, you cannot join other dungeons while waiting for players.\n\n` +
+                `Please cancel your current dungeon first or wait for players to join.`
+              );
+            }
+            return;
+          }
+          
+          // Check if user is already in a room (by name)
+          if (playerExistingRoom) {
+            alert(
+              `You already have an active dungeon!\n\n` +
+              `Only one dungeon per player is allowed.\n\n` +
+              `Please finish or leave your current dungeon first.`
+            );
+            return;
+          }
+        } catch (error) {
+          console.error('Error checking existing rooms:', error);
+          
+          // Check if it's a "already exists" error
+          if (error.message && (error.message.includes('already exists') || error.message.includes('already in this room'))) {
+            console.warn('Mobile device encountered name/room conflict:', error.message);
+            
+            if (isMobile) {
+              showMobileInput('That name is taken or room is full. Enter a different name for ' + roomName + ':', function(newPlayerName) {
+                if (newPlayerName && newPlayerName.trim()) {
+                  // Add a small delay to avoid rapid-fire attempts
+                  setTimeout(() => {
+                    proceedWithJoin(roomName, newPlayerName.trim());
+                  }, 500);
+                }
+              });
+              return;
+            } else {
+              alert(error.message + '\n\nPlease try a different name or refresh the page.');
+              return;
+            }
+          }
+          
+          // Check for room-specific errors
+          if (error.message && error.message.includes('Room not found')) {
+            console.warn('Room disappeared, redirecting back to room list');
+            alert('The dungeon is no longer available. Please select another one.');
+            window.location.href = 'available_rooms.html';
+            return;
+          }
+        }
+        
+        // Redirect to game with room info
+        const gameUrl = `game.html?roomId=${encodeURIComponent(roomName)}&player=${encodeURIComponent(finalPlayerName)}`;
+        window.location.href = gameUrl;
+    }
+
+    // Cancel room function with smart host transfer
+    window.cancelRoom = async function(roomName) {
+      // First ask for player name to verify ownership
+      let playerName;
+      if (isMobile) {
+        return new Promise((resolve) => {
+          showMobileInput('Enter your name to cancel ' + roomName + ':', async function(name) {
+            if (name && name.trim()) {
+              await proceedWithCancel(roomName, name.trim());
+            }
+            resolve();
+          });
+        });
+      } else {
+        playerName = prompt('Enter your name to cancel ' + roomName + ':');
+        if (playerName && playerName.trim()) {
+          await proceedWithCancel(roomName, playerName.trim());
+        }
+      }
+    };
+    
+    async function proceedWithCancel(roomName, playerName) {
+      try {
+        // Get the room data to check for ownership and other players
+        const roomsSnapshot = await getDocs(query(
+          collection(db, 'gameRooms'),
+          where('gameStarted', '==', false)
+        ));
+        
+        let targetRoom = null;
+        let targetRoomDoc = null;
+        
+        roomsSnapshot.forEach(doc => {
+          const roomData = doc.data();
+          if (doc.id === roomName) {
+            targetRoom = roomData;
+            targetRoomDoc = doc;
+          }
+        });
+        
+        if (!targetRoom) {
+          alert('Room not found!');
+          return;
+        }
+        
+        // Verify ownership - check if the player is the host of this room
+        const playerInRoom = targetRoom.players.find(p => 
+          p.name && p.name.toLowerCase() === playerName.toLowerCase()
+        );
+        
+        if (!playerInRoom) {
+          alert(`You (${playerName}) are not in dungeon "${roomName}"!`);
+          return;
+        }
+        
+        if (!playerInRoom.isHost) {
+          alert(`You are not the host of dungeon "${roomName}"! Only the host can cancel the room.`);
+          return;
+        }
+        
+        const otherPlayers = targetRoom.players ? targetRoom.players.filter(p => 
+          p.name && p.name.toLowerCase() !== playerName.toLowerCase()
+        ) : [];
+        
+        if (otherPlayers.length > 0) {
+          // There are other players - transfer host status instead of deleting
+          const confirmTransfer = confirm(
+            `There are ${otherPlayers.length} other player(s) in "${roomName}".\n\n` +
+            `Do you want to leave and transfer host status to "${otherPlayers[0].name}"?\n\n` +
+            `The dungeon will remain open for others to join.`
+          );
+          
+          if (confirmTransfer) {
+            // Transfer host status to the first other player
+            const newHost = otherPlayers[0];
+            newHost.isHost = true;
+            
+            // Remove current user from players list
+            const updatedPlayers = targetRoom.players.filter(p => 
+              p.name && p.name.toLowerCase() !== playerName.toLowerCase()
+            );
+            
+            // Double-check if room would be empty after transfer
+            if (updatedPlayers.length === 0) {
+              // Room would be empty - delete it instead
+              await deleteDoc(doc(db, 'gameRooms', targetRoomDoc.id));
+              alert(`All players left. Dungeon "${roomName}" has been closed.`);
+              console.log('Room deleted - no remaining players after host left');
+            } else {
+              // Update room in Firebase with new host
+              await updateDoc(doc(db, 'gameRooms', targetRoomDoc.id), {
+                players: updatedPlayers,
+                roomCreatedBy: newHost.userId,
+                lastUpdated: new Date().toISOString()
+              });
+              
+              alert(`Host status transferred to "${newHost.name}". Dungeon "${roomName}" remains open.`);
+              console.log(`Host transferred from current user to ${newHost.name}`);
+            }
+          }
+        } else {
+          // No other players - delete the room entirely
+          const confirmDelete = confirm(`Are you sure you want to cancel the dungeon "${roomName}"? This will remove it permanently.`);
+          
+          if (confirmDelete) {
+            // Delete the room from Firebase
+            await deleteDoc(doc(db, 'gameRooms', targetRoomDoc.id));
+            
+            alert(`Dungeon "${roomName}" has been cancelled.`);
+            console.log('Room deleted:', roomName);
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error cancelling room:', error);
+        
+        // Fallback to simple UI removal if Firebase fails
+        if (confirm(`Error connecting to server. Remove "${roomName}" from local display?`)) {
+          const roomCards = document.querySelectorAll('.room-card');
+          roomCards.forEach(card => {
+            const cardRoomName = card.querySelector('.room-name').textContent;
+            if (cardRoomName === roomName) {
+              card.remove();
+            }
+          });
+          alert(`Dungeon "${roomName}" removed from display.`);
+        }
+      }
+    };
+
+    // Initialize paywall system and check access
+    async function initializePaywallSystem() {
+      try {
+        // Wait a moment for the paywall system to initialize
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+        console.log('🔍 Multiplayer access check result:', hasAccess);
+        
+        if (hasAccess) {
+          console.log('✅ User has multiplayer access - enabling UI');
+          multiplayerPaywall.enableMultiplayerUI();
+        } else {
+          console.log('🔒 User does not have multiplayer access - disabling UI');
+          multiplayerPaywall.disableMultiplayerUI();
+        }
+      } catch (error) {
+        console.error('❌ Error initializing paywall system:', error);
+        // On error, assume no access for security
+        multiplayerPaywall.disableMultiplayerUI();
+      }
+    }
+
+    // Initialize paywall system after a short delay to ensure DOM is ready
+    setTimeout(initializePaywallSystem, 1000);
+
+    // Add error handling for Firebase connection
+    onSnapshot(roomsRef, (snapshot) => {
+      updateRoomList(snapshot);
+      // Re-check paywall status after room list updates
+      setTimeout(async () => {
+        const hasAccess = await multiplayerPaywall.hasMultiplayerAccess();
+        if (hasAccess) {
+          multiplayerPaywall.enableMultiplayerUI();
+        } else {
+          multiplayerPaywall.disableMultiplayerUI();
+        }
+      }, 100);
+    }, (error) => {
+      console.error('Firebase connection error:', error);
+      // Show error message instead of misleading mock data
+      roomListEl.innerHTML = '<div style="text-align: center; color: #ff4444; padding: 20px;">Failed to load dungeons. Please refresh the page.</div>';
+    });
+
+  </script>
+
+  <!-- Firebase Compat fallback for older mobile browsers -->
+  <script>
+    window.initFirebaseCompat = function() {
+      try {
+        const firebaseConfig = {
+          apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+          authDomain: "horropoly.firebaseapp.com",
+          projectId: "horropoly",
+          storageBucket: "horropoly.firebasestorage.app",
+          messagingSenderId: "582020770053",
+          appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Override the modern Firebase functions with compat versions
+        window.db = db;
+        
+        // Listen to room updates with compat API
+        db.collection("rooms").onSnapshot(function(snapshot) {
+          const validRooms = [];
+          snapshot.forEach(function(doc) {
+            const data = doc.data();
+            if (data.status === 'waiting_for_players' && 
+                data.players && 
+                data.players.length > 0 && 
+                data.roomName) {
+              validRooms.push({ docs: [{ data: () => data }], forEach: (cb) => cb({ data: () => data }) });
+            }
+          });
+          
+          const mockSnapshot = {
+            docs: validRooms.map(r => r.docs[0]),
+            forEach: function(callback) {
+              this.docs.forEach(callback);
+            }
+          };
+          
+          if (window.updateRoomList) {
+            window.updateRoomList(mockSnapshot);
+          }
+        }, function(error) {
+          console.warn('Firebase compat connection error:', error);
+          // Use mock data as final fallback
+          const mockRooms = [
+            { 
+              roomName: 'Zombies123', 
+              players: [{ name: 'DarkLord', displayName: 'DarkLord', isHost: true }], 
+              maxPlayers: 2, 
+              hostUid: 'demo-user-123', 
+              status: 'waiting_for_players' 
+            },
+            { 
+              roomName: 'BotWarfare', 
+              players: [
+                { name: 'CyberMaster', displayName: 'CyberMaster', isHost: true },
+                { name: 'Player2', displayName: 'Player2', isHost: false }
+              ], 
+              maxPlayers: 2, 
+              hostUid: 'other-user-456', 
+              status: 'waiting_for_players' 
+            },
+            { 
+              roomName: 'HauntedLobby', 
+              players: [
+                { name: 'GhostKeeper', displayName: 'GhostKeeper', isHost: true },
+                { name: 'Victim1', displayName: 'Victim1', isHost: false },
+                { name: 'Victim2', displayName: 'Victim2', isHost: false }
+              ], 
+              maxPlayers: 4, 
+              hostUid: 'other-user-789', 
+              status: 'waiting_for_players' 
+            }
+          ];
+          
+          if (window.roomListEl) {
+            // Show error message instead of misleading mock data
+            window.roomListEl.innerHTML = '<div style="text-align: center; color: #ff4444; padding: 20px;">Firebase compatibility mode failed. Please use a modern browser.</div>';
+          }
+        });
+        
+      } catch (error) {
+        console.error('Firebase compat initialization failed:', error);
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multiplayer Tokens & Colors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background-color: #2a2a2a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.warning {
+            background-color: #ff9800;
+        }
+        .button.warning:hover {
+            background-color: #e68900;
+        }
+        .button.danger {
+            background-color: #f44336;
+        }
+        .button.danger:hover {
+            background-color: #da190b;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            margin-right: 10px;
+            width: 200px;
+        }
+        .output {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .player-preview {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #444;
+            border-radius: 4px;
+        }
+        .token-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd43b; }
+        .info { color: #74c0fc; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Test Multiplayer Tokens & Colors</h1>
+    
+    <div class="section">
+        <h3>🎯 Issues Being Fixed</h3>
+        <ul>
+            <li><strong>Wrong Token Assignment:</strong> Players getting incorrect tokens and colors</li>
+            <li><strong>Game Not Starting:</strong> Auto-start not triggering when room is full</li>
+            <li><strong>Player Identity Confusion:</strong> Players being treated as existing when they're new</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>🎨 Token & Color Assignments (Up to 4 Players)</h3>
+        <div id="tokenPreview">
+            <div class="player-preview">
+                <div class="token-preview" style="background-color: #ff0000;">T1</div>
+                <span>Player 1: Red (t1.png)</span>
+            </div>
+            <div class="player-preview">
+                <div class="token-preview" style="background-color: #0000ff;">T2</div>
+                <span>Player 2: Blue (t2.png)</span>
+            </div>
+            <div class="player-preview">
+                <div class="token-preview" style="background-color: #00ff00;">T3</div>
+                <span>Player 3: Green (t3.png)</span>
+            </div>
+            <div class="player-preview">
+                <div class="token-preview" style="background-color: #ffff00; color: #000;">T4</div>
+                <span>Player 4: Yellow (t4.png)</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🔧 Room Management</h3>
+        <div class="input-group">
+            <input type="text" id="roomId" placeholder="Enter Room ID" value="INFERNAL_PIT">
+            <button class="button" onclick="checkRoomTokens()">Check Room Tokens</button>
+            <button class="button warning" onclick="fixRoomTokens()">Fix Room Tokens</button>
+        </div>
+        <div class="input-group">
+            <button class="button" onclick="forceStartGame()">Force Start Game</button>
+            <button class="button danger" onclick="resetRoom()">Reset Room</button>
+            <button class="button" onclick="clearOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🧪 Test Player Creation</h3>
+        <div class="input-group">
+            <input type="text" id="testPlayerName" placeholder="Player Name" value="TestPlayer">
+            <button class="button" onclick="testPlayerCreation()">Test Create Player</button>
+        </div>
+        <p><small>This tests the enhanced player creation with proper token/color assignment.</small></p>
+    </div>
+
+    <div id="output" class="output">
+        <div class="success">🎨 Multiplayer Token & Color Test Page Ready</div>
+        <div class="info">📋 Use the buttons above to test and fix token assignments</div>
+    </div>
+
+    <script type="module">
+        import './fix-multiplayer-tokens-colors.js';
+        
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        window.log = log;
+        
+        window.clearOutput = function() {
+            output.innerHTML = '<div class="success">🎨 Output cleared</div>';
+        };
+        
+        window.checkRoomTokens = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            log(`🔍 Checking room tokens: ${roomId}`, 'info');
+            try {
+                const roomData = await window.MultiplayerTokenFix.checkRoomStatusDetailed(roomId);
+                if (roomData) {
+                    log(`✅ Room found: ${roomData.players.length}/${roomData.maxPlayers} players`, 'success');
+                    roomData.players.forEach((player, index) => {
+                        log(`  Player ${index + 1}: ${player.name} - Token ${player.tokenIndex} (${player.colorName})`, 'info');
+                    });
+                } else {
+                    log('❌ Room not found', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.fixRoomTokens = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            log(`🔧 Fixing room tokens: ${roomId}`, 'warning');
+            try {
+                const result = await window.fixRoomTokens(roomId);
+                log(`✅ Room tokens fixed. Players: ${result.length}`, 'success');
+                result.forEach((player, index) => {
+                    log(`  Fixed Player ${index + 1}: ${player.name} - Token ${player.tokenIndex} (${player.colorName})`, 'success');
+                });
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.forceStartGame = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            if (!confirm(`Force start game in room ${roomId}?`)) {
+                return;
+            }
+            
+            log(`🚀 Force starting game: ${roomId}`, 'warning');
+            try {
+                const { getDb } = await import('./firebase-init.js');
+                const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js');
+                
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                
+                await updateDoc(roomRef, {
+                    gameStarted: true,
+                    gameStartedAt: new Date().toISOString(),
+                    lastActivity: Date.now()
+                });
+                
+                log('✅ Game force started successfully', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.resetRoom = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            if (!confirm(`Reset room ${roomId}? This will clear all players and stop the game.`)) {
+                return;
+            }
+            
+            log(`🔄 Resetting room: ${roomId}`, 'warning');
+            try {
+                const { getDb } = await import('./firebase-init.js');
+                const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js');
+                
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                
+                await updateDoc(roomRef, {
+                    players: [],
+                    gameStarted: false,
+                    currentTurn: 0,
+                    lastActivity: Date.now(),
+                    lastReset: new Date().toISOString()
+                });
+                
+                log('✅ Room reset successfully', 'success');
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testPlayerCreation = function() {
+            const playerName = document.getElementById('testPlayerName').value.trim();
+            if (!playerName) {
+                log('❌ Please enter a player name', 'error');
+                return;
+            }
+            
+            log(`🧪 Testing player creation: ${playerName}`, 'info');
+            
+            // Simulate existing players
+            const existingPlayers = [
+                { name: 'Player1', tokenIndex: 0, color: '#ff0000', colorName: 'Red' },
+                { name: 'Player2', tokenIndex: 1, color: '#0000ff', colorName: 'Blue' }
+            ];
+            
+            const newPlayer = window.MultiplayerTokenFix.createPlayerWithProperAssignment(
+                playerName, existingPlayers, false
+            );
+            
+            log(`✅ Test player created:`, 'success');
+            log(`  Name: ${newPlayer.name}`, 'info');
+            log(`  Token: ${newPlayer.tokenIndex} (${newPlayer.tokenImage})`, 'info');
+            log(`  Color: ${newPlayer.colorName} (${newPlayer.color})`, 'info');
+            log(`  User ID: ${newPlayer.userId}`, 'info');
+        };
+        
+        // Override console.log to show in UI
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args.length > 0 && typeof args[0] === 'string') {
+                const message = args[0];
+                if (message.includes('🎨') || message.includes('🔧') || message.includes('✅') || 
+                    message.includes('❌') || message.includes('🚀') || message.includes('🔍')) {
+                    
+                    let type = 'info';
+                    if (message.includes('❌')) type = 'error';
+                    else if (message.includes('✅')) type = 'success';
+                    else if (message.includes('⚠️') || message.includes('🔧')) type = 'warning';
+                    
+                    const div = document.createElement('div');
+                    div.className = type;
+                    div.textContent = message;
+                    output.appendChild(div);
+                    output.scrollTop = output.scrollHeight;
+                }
+            }
+        };
+        
+        log('🎨 Multiplayer Token & Color Test Page Loaded', 'success');
+        log('💡 Start by checking your room tokens to see current assignments', 'info');
+    </script>
+</body>
+</html>

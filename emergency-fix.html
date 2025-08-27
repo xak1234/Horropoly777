@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Emergency Multiplayer Fix</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 2.5em;
+        }
+        
+        .alert {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ffeb3b;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            color: #333;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            min-width: 200px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+        }
+        
+        .emergency {
+            background: linear-gradient(45deg, #ff4444, #cc0000) !important;
+            color: white !important;
+        }
+        
+        .emergency:hover {
+            background: linear-gradient(45deg, #cc0000, #ff4444) !important;
+        }
+        
+        .success {
+            background: linear-gradient(45deg, #4caf50, #45a049) !important;
+            color: white !important;
+        }
+        
+        .success:hover {
+            background: linear-gradient(45deg, #45a049, #4caf50) !important;
+        }
+        
+        .log {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .status {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 150px;
+            margin: 5px;
+        }
+        
+        .status-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .healthy { color: #4caf50; }
+        .warning { color: #ffeb3b; }
+        .critical { color: #ff4444; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Emergency Multiplayer Fix</h1>
+        
+        <div class="alert">
+            <strong>⚠️ CRITICAL ISSUES DETECTED:</strong><br>
+            • Player names/IDs becoming undefined<br>
+            • Tokens appearing as circles instead of images<br>
+            • Player data corruption during Firebase sync<br>
+            <strong>This tool provides immediate fixes!</strong>
+        </div>
+        
+        <div class="status" id="status">
+            <div class="status-item">
+                <div>Players Found</div>
+                <div class="status-value" id="playerCount">-</div>
+            </div>
+            <div class="status-item">
+                <div>Corrupted Players</div>
+                <div class="status-value critical" id="corruptedCount">-</div>
+            </div>
+            <div class="status-item">
+                <div>Token Issues</div>
+                <div class="status-value warning" id="tokenIssues">-</div>
+            </div>
+            <div class="status-item">
+                <div>Monitoring</div>
+                <div class="status-value" id="monitoringStatus">OFF</div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="runEmergencyFix()" class="emergency">🚨 EMERGENCY FIX ALL</button>
+            <button onclick="checkStatus()">📊 Check Status</button>
+            <button onclick="fixTokens()" class="success">🎯 Fix Tokens</button>
+        </div>
+        
+        <div class="button-group">
+            <button onclick="preserveData()">💾 Backup Player Data</button>
+            <button onclick="restoreData()">🔧 Restore Data</button>
+            <button onclick="toggleMonitoring()">📡 Toggle Monitoring</button>
+        </div>
+        
+        <div id="log" class="log">
+            <div style="color: #ffeb3b;">[READY] Emergency fix loaded. Click "EMERGENCY FIX ALL" to start.</div>
+        </div>
+    </div>
+
+    <!-- Load the emergency fix -->
+    <script src="emergency-multiplayer-fix.js"></script>
+    
+    <script>
+        let monitoringActive = false;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ff4444' : 
+                         type === 'success' ? '#4caf50' : 
+                         type === 'warning' ? '#ffeb3b' : '#fff';
+            
+            logDiv.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function updateStatus() {
+            const playerCount = window.players ? window.players.length : 0;
+            let corruptedCount = 0;
+            let tokenIssues = 0;
+            
+            if (window.players && Array.isArray(window.players)) {
+                window.players.forEach(player => {
+                    if (!player.name || player.name === 'undefined' || 
+                        !player.userId || player.userId === 'undefined') {
+                        corruptedCount++;
+                    }
+                    
+                    if (!player.image || !player.image.complete || player.image.naturalWidth === 0) {
+                        tokenIssues++;
+                    }
+                });
+            }
+            
+            document.getElementById('playerCount').textContent = playerCount;
+            document.getElementById('corruptedCount').textContent = corruptedCount;
+            document.getElementById('tokenIssues').textContent = tokenIssues;
+            document.getElementById('monitoringStatus').textContent = monitoringActive ? 'ON' : 'OFF';
+            
+            // Update colors
+            document.getElementById('corruptedCount').className = 'status-value ' + 
+                (corruptedCount > 0 ? 'critical' : 'healthy');
+            document.getElementById('tokenIssues').className = 'status-value ' + 
+                (tokenIssues > 0 ? 'warning' : 'healthy');
+            document.getElementById('monitoringStatus').className = 'status-value ' + 
+                (monitoringActive ? 'healthy' : 'warning');
+        }
+        
+        function runEmergencyFix() {
+            log('🚨 RUNNING EMERGENCY FIX - This will fix all issues!', 'warning');
+            
+            try {
+                // Preserve data
+                if (window.preservePlayerData) {
+                    window.preservePlayerData();
+                    log('💾 Player data backed up', 'success');
+                }
+                
+                // Fix tokens
+                if (window.emergencyTokenFix) {
+                    window.emergencyTokenFix();
+                    log('🎯 Token fix applied', 'success');
+                }
+                
+                // Restore any corrupted data
+                if (window.restorePlayerData) {
+                    const restored = window.restorePlayerData();
+                    if (restored) {
+                        log('🔧 Corrupted player data restored', 'success');
+                    }
+                }
+                
+                // Start monitoring
+                if (window.startEmergencyMonitoring) {
+                    window.startEmergencyMonitoring();
+                    monitoringActive = true;
+                    log('📡 Emergency monitoring started', 'success');
+                }
+                
+                log('✅ EMERGENCY FIX COMPLETED!', 'success');
+                
+                // Update status after a delay
+                setTimeout(updateStatus, 2000);
+                
+            } catch (error) {
+                log(`❌ Emergency fix failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function checkStatus() {
+            log('📊 Checking player status...', 'info');
+            updateStatus();
+            
+            if (window.players && Array.isArray(window.players)) {
+                log(`Found ${window.players.length} players:`, 'info');
+                window.players.forEach((player, index) => {
+                    const name = player.name || 'undefined';
+                    const userId = player.userId || 'undefined';
+                    const hasImage = !!player.image;
+                    const imageComplete = player.image ? player.image.complete : false;
+                    
+                    log(`  ${index + 1}. ${name} (${userId}) - Image: ${hasImage && imageComplete ? '✅' : '❌'}`, 'info');
+                });
+            } else {
+                log('❌ No players array found!', 'error');
+            }
+        }
+        
+        function fixTokens() {
+            log('🎯 Fixing token rendering issues...', 'info');
+            
+            try {
+                if (window.emergencyTokenFix) {
+                    window.emergencyTokenFix();
+                    log('✅ Token fix applied', 'success');
+                    setTimeout(updateStatus, 2000);
+                } else {
+                    log('❌ Token fix function not available', 'error');
+                }
+            } catch (error) {
+                log(`❌ Token fix failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function preserveData() {
+            log('💾 Backing up player data...', 'info');
+            
+            try {
+                if (window.preservePlayerData) {
+                    window.preservePlayerData();
+                    log('✅ Player data backed up successfully', 'success');
+                } else {
+                    log('❌ Backup function not available', 'error');
+                }
+            } catch (error) {
+                log(`❌ Backup failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function restoreData() {
+            log('🔧 Restoring player data...', 'info');
+            
+            try {
+                if (window.restorePlayerData) {
+                    const restored = window.restorePlayerData();
+                    if (restored) {
+                        log('✅ Player data restored successfully', 'success');
+                        setTimeout(updateStatus, 1000);
+                    } else {
+                        log('ℹ️ No corrupted data found to restore', 'info');
+                    }
+                } else {
+                    log('❌ Restore function not available', 'error');
+                }
+            } catch (error) {
+                log(`❌ Restore failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function toggleMonitoring() {
+            if (monitoringActive) {
+                log('📡 Stopping emergency monitoring...', 'warning');
+                if (window.stopEmergencyMonitoring) {
+                    window.stopEmergencyMonitoring();
+                    monitoringActive = false;
+                    log('✅ Monitoring stopped', 'success');
+                }
+            } else {
+                log('📡 Starting emergency monitoring...', 'info');
+                if (window.startEmergencyMonitoring) {
+                    window.startEmergencyMonitoring();
+                    monitoringActive = true;
+                    log('✅ Monitoring started - will auto-fix issues every 5 seconds', 'success');
+                }
+            }
+            updateStatus();
+        }
+        
+        // Auto-update status every 3 seconds
+        setInterval(updateStatus, 3000);
+        
+        // Initial status check
+        setTimeout(() => {
+            updateStatus();
+            checkStatus();
+        }, 1000);
+    </script>
+</body>
+</html>

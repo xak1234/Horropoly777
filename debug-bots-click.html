@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug BOTS Click</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: url('assets/images/front.jpg') center/cover no-repeat fixed #000;
+      color: #eee;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .debug-panel {
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #444;
+      border-radius: 10px;
+      padding: 20px 30px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      max-width: 500px;
+      width: 100%;
+    }
+    .bots-label {
+      text-align: center;
+      display: block;
+      color: #ffff00;
+      font-size: 16px;
+      cursor: pointer;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      padding: 10px;
+      border: 1px solid #ffff00;
+      border-radius: 5px;
+      margin: 10px 0;
+    }
+    .bots-label:hover {
+      text-shadow: 0 0 10px #ffff00;
+      background: rgba(255, 255, 0, 0.1);
+    }
+    .log-area {
+      background: #000;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+<div class="debug-panel">
+  <h1>Debug BOTS Click</h1>
+  <p>Testing if clicks are being registered on the BOTS label</p>
+  
+  <label class="bots-label" id="bots-label">BOTS:</label>
+  
+  <div class="log-area" id="log-area">
+    <div>Debug logs will appear here...</div>
+  </div>
+  
+  <button onclick="clearLogs()" style="background: #333; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+    Clear Logs
+  </button>
+  
+  <button onclick="testClick()" style="background: #666; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; margin-left: 10px;">
+    Test Click Programmatically
+  </button>
+</div>
+
+<script>
+function log(message) {
+  console.log(message);
+  const logArea = document.getElementById('log-area');
+  const timestamp = new Date().toLocaleTimeString();
+  logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+  logArea.scrollTop = logArea.scrollHeight;
+}
+
+log('🚀 Debug page loaded');
+
+// Test 1: Check if element exists
+const botsLabel = document.getElementById('bots-label');
+log(`Element found: ${botsLabel ? 'YES' : 'NO'}`);
+if (botsLabel) {
+  log(`Element tag: ${botsLabel.tagName}`);
+  log(`Element id: ${botsLabel.id}`);
+  log(`Element text: "${botsLabel.textContent}"`);
+}
+
+// Test 2: Add multiple event listeners to see which ones work
+if (botsLabel) {
+  // Method 1: addEventListener
+  botsLabel.addEventListener('click', function(e) {
+    log('✅ addEventListener click detected');
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  
+  // Method 2: onclick
+  botsLabel.onclick = function(e) {
+    log('✅ onclick click detected');
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  // Method 3: mousedown
+  botsLabel.addEventListener('mousedown', function(e) {
+    log('✅ mousedown detected');
+  });
+  
+  // Method 4: mouseup
+  botsLabel.addEventListener('mouseup', function(e) {
+    log('✅ mouseup detected');
+  });
+  
+  // Method 5: touchstart (for mobile)
+  botsLabel.addEventListener('touchstart', function(e) {
+    log('✅ touchstart detected');
+  });
+  
+  log('📝 All event listeners added');
+} else {
+  log('❌ Cannot add event listeners - element not found');
+}
+
+// Test 3: Check if there are any other elements with similar IDs
+function checkForSimilarElements() {
+  log('🔍 Checking for similar elements...');
+  
+  // Check for any label elements
+  const allLabels = document.querySelectorAll('label');
+  log(`Found ${allLabels.length} label elements`);
+  
+  allLabels.forEach((label, index) => {
+    log(`Label ${index}: id="${label.id}", text="${label.textContent}"`);
+  });
+  
+  // Check for elements containing "BOTS"
+  const botsElements = document.querySelectorAll('*');
+  const botsContaining = [];
+  botsElements.forEach(el => {
+    if (el.textContent && el.textContent.includes('BOTS')) {
+      botsContaining.push(el);
+    }
+  });
+  log(`Found ${botsContaining.length} elements containing "BOTS"`);
+}
+
+// Test 4: Programmatic click test
+function testClick() {
+  log('🧪 Testing programmatic click...');
+  if (botsLabel) {
+    botsLabel.click();
+    log('✅ Programmatic click executed');
+  } else {
+    log('❌ Cannot execute programmatic click - element not found');
+  }
+}
+
+// Test 5: Clear logs
+function clearLogs() {
+  document.getElementById('log-area').innerHTML = '<div>Logs cleared...</div>';
+}
+
+// Run initial checks
+setTimeout(() => {
+  checkForSimilarElements();
+  log('✅ Initial checks complete');
+}, 100);
+
+log('🎯 Ready for testing - click on BOTS label above');
+</script>
+</body>
+</html> 

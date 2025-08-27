@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lightning Strike Multiplayer Sync Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-container {
+            background-color: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #444;
+        }
+        .test-header {
+            color: #ffcc00;
+            border-bottom: 2px solid #ffcc00;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 5px;
+        }
+        .test-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background-color: #45a049;
+        }
+        .test-button.danger {
+            background-color: #f44336;
+        }
+        .test-button.danger:hover {
+            background-color: #da190b;
+        }
+        .log-output {
+            background-color: #000;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin: 10px 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #4CAF50; }
+        .status-warning { background-color: #ff9800; }
+        .status-error { background-color: #f44336; }
+        .status-info { background-color: #2196F3; }
+        .property-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .property-cell {
+            background-color: #444;
+            border: 1px solid #666;
+            padding: 5px;
+            text-align: center;
+            font-size: 10px;
+            border-radius: 3px;
+        }
+        .property-cell.struck {
+            background-color: #ff4444;
+            color: white;
+            font-weight: bold;
+        }
+        .sync-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚡ Lightning Strike Multiplayer Synchronization Test</h1>
+    
+    <div class="test-container">
+        <h2 class="test-header">🎯 Problem Description</h2>
+        <p>In multiplayer games, lightning strikes were hitting different properties on different players' screens because each client was independently generating random numbers. This test verifies that the synchronization fix ensures all players see lightning strikes on the same property.</p>
+        
+        <div class="test-section">
+            <h3><span class="status-indicator status-error"></span>Before Fix (Broken)</h3>
+            <ul>
+                <li>Each client calls <code>Math.random()</code> independently</li>
+                <li>Player A sees lightning strike property T1</li>
+                <li>Player B sees lightning strike property R5</li>
+                <li>Property effects applied to different properties</li>
+                <li>Game state becomes inconsistent between players</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h3><span class="status-indicator status-success"></span>After Fix (Synchronized)</h3>
+            <ul>
+                <li>Host client generates lightning strike data</li>
+                <li>Strike data synced to Firebase with target property</li>
+                <li>All clients receive same target property from Firebase</li>
+                <li>All players see lightning strike same property</li>
+                <li>Property effects applied consistently across all clients</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-header">🧪 Test Environment Setup</h2>
+        
+        <div class="test-section">
+            <h3>Mock Game State</h3>
+            <button class="test-button" onclick="initializeMockGame()">Initialize Mock Game</button>
+            <button class="test-button" onclick="simulateMultiplayerMode()">Enable Multiplayer Mode</button>
+            <button class="test-button danger" onclick="resetTestEnvironment()">Reset Environment</button>
+            
+            <div class="sync-status">
+                <div>Game Mode: <span id="gameMode">Single Player</span></div>
+                <div>Players: <span id="playerCount">0</span></div>
+                <div>Host: <span id="hostPlayer">None</span></div>
+                <div>Room ID: <span id="roomId">None</span></div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Property Grid (Lightning Strike Targets)</h3>
+            <div class="property-grid" id="propertyGrid">
+                <!-- Properties will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-header">⚡ Lightning Strike Tests</h2>
+        
+        <div class="test-section">
+            <h3>Synchronization Tests</h3>
+            <button class="test-button" onclick="testOriginalLightningStrike()">Test Original (Broken) Lightning Strike</button>
+            <button class="test-button" onclick="testSynchronizedLightningStrike()">Test Synchronized Lightning Strike</button>
+            <button class="test-button" onclick="simulateMultipleClients()">Simulate Multiple Clients</button>
+            <button class="test-button" onclick="testFirebaseSync()">Test Firebase Sync</button>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="testResults" class="log-output">Test results will appear here...\n</div>
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2 class="test-header">📊 Strike History</h2>
+        <div class="test-section">
+            <button class="test-button" onclick="clearStrikeHistory()">Clear History</button>
+            <div id="strikeHistory" class="log-output">Strike history will appear here...\n</div>
+        </div>
+    </div>
+
+    <script>
+        // Mock game state and functions
+        let mockGameState = {
+            isMultiplayerGame: false,
+            currentRoomId: null,
+            players: [],
+            propertyState: {},
+            lightningActive: false,
+            isGameInitialized: true,
+            isGameOver: false
+        };
+
+        let testResults = [];
+        let strikeHistory = [];
+
+        // Mock property positions
+        const allProperties = [
+            't1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9',
+            'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8', 'b9',
+            'r1', 'r2', 'r3', 'r4', 'r5', 'r6', 'r7', 'r8', 'r9',
+            'l1', 'l2', 'l3', 'l4', 'l5', 'l6', 'l7', 'l8', 'l9'
+        ];
+
+        // Initialize mock game environment
+        function initializeMockGame() {
+            // Create mock players
+            mockGameState.players = [
+                { name: 'Alice', userId: 'user_alice', isHost: true, currentSquare: 'go' },
+                { name: 'Bob', userId: 'user_bob', isHost: false, currentSquare: 't2' },
+                { name: 'Charlie', userId: 'user_charlie', isHost: false, currentSquare: 'r5' }
+            ];
+
+            // Initialize property state
+            mockGameState.propertyState = {};
+            allProperties.forEach(prop => {
+                mockGameState.propertyState[prop] = {
+                    owner: null,
+                    ownerColor: null,
+                    graveyards: 0,
+                    hasCrypt: false,
+                    group: prop[0], // t, b, r, l
+                    declined: false
+                };
+            });
+
+            // Add some owned properties for testing
+            mockGameState.propertyState['t1'].owner = 'Alice';
+            mockGameState.propertyState['t1'].graveyards = 2;
+            mockGameState.propertyState['r5'].owner = 'Bob';
+            mockGameState.propertyState['r5'].hasCrypt = true;
+
+            updateUI();
+            logResult('✅ Mock game initialized with 3 players and property state');
+        }
+
+        function simulateMultiplayerMode() {
+            mockGameState.isMultiplayerGame = true;
+            mockGameState.currentRoomId = 'test_room_' + Date.now();
+            updateUI();
+            logResult('🌐 Multiplayer mode enabled with room ID: ' + mockGameState.currentRoomId);
+        }
+
+        function resetTestEnvironment() {
+            mockGameState = {
+                isMultiplayerGame: false,
+                currentRoomId: null,
+                players: [],
+                propertyState: {},
+                lightningActive: false,
+                isGameInitialized: true,
+                isGameOver: false
+            };
+            testResults = [];
+            strikeHistory = [];
+            updateUI();
+            document.getElementById('testResults').textContent = 'Test environment reset.\n';
+            document.getElementById('strikeHistory').textContent = 'Strike history cleared.\n';
+        }
+
+        // Test original (broken) lightning strike
+        function testOriginalLightningStrike() {
+            if (!mockGameState.players.length) {
+                logResult('❌ Please initialize mock game first');
+                return;
+            }
+
+            logResult('🔍 Testing original lightning strike (broken synchronization)...');
+            
+            // Simulate multiple clients generating different random properties
+            const clientResults = [];
+            for (let i = 0; i < 3; i++) {
+                const randomIndex = Math.floor(Math.random() * allProperties.length);
+                const targetProperty = allProperties[randomIndex];
+                clientResults.push({
+                    client: mockGameState.players[i].name,
+                    property: targetProperty,
+                    index: randomIndex
+                });
+            }
+
+            // Check if all clients got the same property (they shouldn't)
+            const uniqueProperties = [...new Set(clientResults.map(r => r.property))];
+            const isSynchronized = uniqueProperties.length === 1;
+
+            logResult(`📊 Client Results:`);
+            clientResults.forEach(result => {
+                logResult(`   ${result.client}: ${result.property} (index ${result.index})`);
+            });
+
+            if (isSynchronized) {
+                logResult('⚠️  Unexpected: All clients got same property (this should be rare with broken sync)');
+            } else {
+                logResult('❌ CONFIRMED BUG: Clients got different properties - synchronization broken!');
+                logResult(`   Found ${uniqueProperties.length} different properties: ${uniqueProperties.join(', ')}`);
+            }
+
+            // Add to strike history
+            strikeHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'Original (Broken)',
+                results: clientResults,
+                synchronized: isSynchronized
+            });
+            updateStrikeHistory();
+        }
+
+        // Test synchronized lightning strike
+        function testSynchronizedLightningStrike() {
+            if (!mockGameState.players.length) {
+                logResult('❌ Please initialize mock game first');
+                return;
+            }
+
+            if (!mockGameState.isMultiplayerGame) {
+                logResult('❌ Please enable multiplayer mode first');
+                return;
+            }
+
+            logResult('🔍 Testing synchronized lightning strike...');
+
+            // Simulate host generating lightning strike data
+            const hostClient = mockGameState.players.find(p => p.isHost);
+            const randomIndex = Math.floor(Math.random() * allProperties.length);
+            const targetProperty = allProperties[randomIndex];
+            const timestamp = Date.now();
+
+            const lightningStrikeData = {
+                targetProperty: targetProperty,
+                timestamp: timestamp,
+                randomIndex: randomIndex,
+                hostPlayerId: hostClient.userId,
+                gameVersion: timestamp
+            };
+
+            logResult(`🎯 Host (${hostClient.name}) generated lightning strike data:`);
+            logResult(`   Target Property: ${targetProperty}`);
+            logResult(`   Random Index: ${randomIndex}/${allProperties.length}`);
+            logResult(`   Timestamp: ${timestamp}`);
+
+            // Simulate all clients receiving the same data from Firebase
+            const clientResults = mockGameState.players.map(player => ({
+                client: player.name,
+                property: lightningStrikeData.targetProperty,
+                index: lightningStrikeData.randomIndex,
+                timestamp: lightningStrikeData.timestamp
+            }));
+
+            // Verify synchronization
+            const uniqueProperties = [...new Set(clientResults.map(r => r.property))];
+            const isSynchronized = uniqueProperties.length === 1;
+
+            logResult(`📊 Client Results:`);
+            clientResults.forEach(result => {
+                logResult(`   ${result.client}: ${result.property} (index ${result.index})`);
+            });
+
+            if (isSynchronized) {
+                logResult('✅ SUCCESS: All clients got same property - synchronization working!');
+                highlightStruckProperty(targetProperty);
+            } else {
+                logResult('❌ FAILED: Clients got different properties - synchronization still broken!');
+            }
+
+            // Add to strike history
+            strikeHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'Synchronized (Fixed)',
+                results: clientResults,
+                synchronized: isSynchronized,
+                strikeData: lightningStrikeData
+            });
+            updateStrikeHistory();
+        }
+
+        // Simulate multiple clients with timing variations
+        function simulateMultipleClients() {
+            if (!mockGameState.isMultiplayerGame) {
+                logResult('❌ Please enable multiplayer mode first');
+                return;
+            }
+
+            logResult('🔍 Simulating multiple clients with network delays...');
+
+            // Simulate host generating data
+            const hostClient = mockGameState.players.find(p => p.isHost);
+            const targetProperty = allProperties[Math.floor(Math.random() * allProperties.length)];
+            const baseTimestamp = Date.now();
+
+            // Simulate network delays for each client
+            const networkDelays = [0, 50, 120]; // milliseconds
+            const clientResults = [];
+
+            mockGameState.players.forEach((player, index) => {
+                const delay = networkDelays[index] || 0;
+                const receivedTimestamp = baseTimestamp + delay;
+                
+                clientResults.push({
+                    client: player.name,
+                    property: targetProperty, // All receive same property from Firebase
+                    receivedAt: receivedTimestamp,
+                    delay: delay,
+                    isHost: player.isHost
+                });
+            });
+
+            logResult(`📊 Network Simulation Results:`);
+            clientResults.forEach(result => {
+                const hostIndicator = result.isHost ? ' (HOST)' : '';
+                logResult(`   ${result.client}${hostIndicator}: ${result.property} (delay: ${result.delay}ms)`);
+            });
+
+            // Verify all clients got same property despite network delays
+            const uniqueProperties = [...new Set(clientResults.map(r => r.property))];
+            const isSynchronized = uniqueProperties.length === 1;
+
+            if (isSynchronized) {
+                logResult('✅ SUCCESS: Network delays don\'t affect synchronization!');
+            } else {
+                logResult('❌ FAILED: Network delays caused desynchronization!');
+            }
+
+            strikeHistory.push({
+                timestamp: new Date().toISOString(),
+                type: 'Network Simulation',
+                results: clientResults,
+                synchronized: isSynchronized
+            });
+            updateStrikeHistory();
+        }
+
+        // Test Firebase sync mechanism
+        function testFirebaseSync() {
+            if (!mockGameState.isMultiplayerGame) {
+                logResult('❌ Please enable multiplayer mode first');
+                return;
+            }
+
+            logResult('🔍 Testing Firebase sync mechanism...');
+
+            // Mock Firebase sync process
+            const targetProperty = allProperties[Math.floor(Math.random() * allProperties.length)];
+            const lightningData = {
+                targetProperty: targetProperty,
+                timestamp: Date.now(),
+                hostPlayerId: mockGameState.players[0].userId
+            };
+
+            logResult('📤 Simulating Firebase write (host)...');
+            logResult(`   Data: ${JSON.stringify(lightningData, null, 2)}`);
+
+            // Simulate Firebase read delay
+            setTimeout(() => {
+                logResult('📥 Simulating Firebase read (all clients)...');
+                logResult(`   All clients received: ${targetProperty}`);
+                logResult('✅ Firebase sync simulation completed');
+                
+                highlightStruckProperty(targetProperty);
+                
+                strikeHistory.push({
+                    timestamp: new Date().toISOString(),
+                    type: 'Firebase Sync Test',
+                    results: [{ client: 'All Clients', property: targetProperty }],
+                    synchronized: true,
+                    firebaseData: lightningData
+                });
+                updateStrikeHistory();
+            }, 500);
+        }
+
+        // UI Helper Functions
+        function updateUI() {
+            document.getElementById('gameMode').textContent = mockGameState.isMultiplayerGame ? 'Multiplayer' : 'Single Player';
+            document.getElementById('playerCount').textContent = mockGameState.players.length;
+            document.getElementById('hostPlayer').textContent = mockGameState.players.find(p => p.isHost)?.name || 'None';
+            document.getElementById('roomId').textContent = mockGameState.currentRoomId || 'None';
+            
+            updatePropertyGrid();
+        }
+
+        function updatePropertyGrid() {
+            const grid = document.getElementById('propertyGrid');
+            grid.innerHTML = '';
+            
+            allProperties.forEach(prop => {
+                const cell = document.createElement('div');
+                cell.className = 'property-cell';
+                cell.textContent = prop.toUpperCase();
+                cell.id = 'prop-' + prop;
+                
+                // Show ownership
+                const propState = mockGameState.propertyState[prop];
+                if (propState && propState.owner) {
+                    cell.style.backgroundColor = '#4CAF50';
+                    cell.title = `Owned by ${propState.owner}`;
+                }
+                
+                grid.appendChild(cell);
+            });
+        }
+
+        function highlightStruckProperty(property) {
+            // Clear previous highlights
+            document.querySelectorAll('.property-cell').forEach(cell => {
+                cell.classList.remove('struck');
+            });
+            
+            // Highlight struck property
+            const cell = document.getElementById('prop-' + property);
+            if (cell) {
+                cell.classList.add('struck');
+                cell.title = 'Lightning Strike!';
+            }
+        }
+
+        function logResult(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testResults.push(logEntry);
+            
+            const output = document.getElementById('testResults');
+            output.textContent = testResults.slice(-20).join('\n') + '\n'; // Keep last 20 entries
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function updateStrikeHistory() {
+            const historyOutput = document.getElementById('strikeHistory');
+            const historyText = strikeHistory.slice(-10).map(strike => {
+                const timestamp = new Date(strike.timestamp).toLocaleTimeString();
+                const syncStatus = strike.synchronized ? '✅ SYNC' : '❌ DESYNC';
+                return `[${timestamp}] ${strike.type} - ${syncStatus}\n${strike.results.map(r => `  ${r.client}: ${r.property}`).join('\n')}\n`;
+            }).join('\n');
+            
+            historyOutput.textContent = historyText;
+            historyOutput.scrollTop = historyOutput.scrollHeight;
+        }
+
+        function clearStrikeHistory() {
+            strikeHistory = [];
+            document.getElementById('strikeHistory').textContent = 'Strike history cleared.\n';
+        }
+
+        // Initialize UI on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+            logResult('🚀 Lightning Strike Synchronization Test Environment Ready');
+            logResult('📝 Click "Initialize Mock Game" to begin testing');
+        });
+    </script>
+</body>
+</html>

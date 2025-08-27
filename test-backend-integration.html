@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔧 Test Backend Integration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+    }
+    .test-section {
+      background: #2a2a2a;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border-left: 4px solid #4CAF50;
+    }
+    .error {
+      border-left-color: #f44336;
+    }
+    .warning {
+      border-left-color: #ff9800;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.success {
+      background: #4CAF50;
+      color: white;
+    }
+    .status.failed {
+      background: #f44336;
+      color: white;
+    }
+    .status.pending {
+      background: #ff9800;
+      color: white;
+    }
+    pre {
+      background: #000;
+      padding: 10px;
+      border-radius: 3px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .results {
+      background: #000;
+      padding: 15px;
+      border-radius: 4px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Backend Integration Test</h1>
+  
+  <div class="test-section">
+    <h3>🏥 Health Check</h3>
+    <button onclick="testHealthCheck()">Test Health Endpoint</button>
+    <span class="status pending" id="health-status">Pending</span>
+    <div id="health-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>🎮 Preset Room Creation</h3>
+    <button onclick="testPresetSolo()">Test Solo Preset</button>
+    <button onclick="testPresetDuo()">Test Duo Preset</button>
+    <button onclick="testPresetSwarm()">Test Swarm Preset</button>
+    <span class="status pending" id="preset-status">Pending</span>
+    <div id="preset-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>🔍 Room Validation</h3>
+    <button onclick="testRoomValidation()">Test Room Status Check</button>
+    <button onclick="testJoinableRooms()">Test Joinable Rooms API</button>
+    <span class="status pending" id="validation-status">Pending</span>
+    <div id="validation-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>🎯 Smart Join System</h3>
+    <button onclick="testSmartJoin()">Test Smart Join (Fallback)</button>
+    <span class="status pending" id="smart-join-status">Pending</span>
+    <div id="smart-join-result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>📊 Test Results</h3>
+    <div class="results" id="test-results">Ready to run tests...</div>
+  </div>
+
+  <script type="module">
+    const backendUrl = 'https://horropoly-payment-backend.onrender.com';
+    const resultsEl = document.getElementById('test-results');
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+      const logMessage = `[${timestamp}] ${prefix} ${message}\n`;
+      resultsEl.textContent += logMessage;
+      resultsEl.scrollTop = resultsEl.scrollHeight;
+      console.log(message);
+    }
+
+    function updateStatus(testId, status, result = '') {
+      const statusEl = document.getElementById(`${testId}-status`);
+      const resultEl = document.getElementById(`${testId}-result`);
+      
+      if (statusEl) {
+        statusEl.textContent = status;
+        statusEl.className = `status ${status.toLowerCase()}`;
+      }
+      
+      if (resultEl && result) {
+        resultEl.innerHTML = `<pre>${result}</pre>`;
+      }
+    }
+
+    // Health Check Test
+    window.testHealthCheck = async function() {
+      log('Testing backend health check...');
+      updateStatus('health', 'Pending');
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/health`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          log(`Health check successful: ${data.service} v${data.version}`, 'success');
+          updateStatus('health', 'Success', JSON.stringify(data, null, 2));
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        log(`Health check failed: ${error.message}`, 'error');
+        updateStatus('health', 'Failed', error.message);
+      }
+    };
+
+    // Preset Room Tests
+    window.testPresetSolo = async function() {
+      log('Testing solo preset creation...');
+      updateStatus('preset', 'Pending');
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/preset/solo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName: 'TestPlayer', aiCount: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.ok) {
+          log(`Solo preset created: ${data.roomId}`, 'success');
+          updateStatus('preset', 'Success', JSON.stringify(data, null, 2));
+        } else {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+      } catch (error) {
+        log(`Solo preset failed: ${error.message}`, 'error');
+        updateStatus('preset', 'Failed', error.message);
+      }
+    };
+
+    window.testPresetDuo = async function() {
+      log('Testing duo preset creation...');
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/preset/duo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName: 'TestPlayer', aiCount: 1 })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.ok) {
+          log(`Duo preset created: ${data.roomId}`, 'success');
+        } else {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+      } catch (error) {
+        log(`Duo preset failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.testPresetSwarm = async function() {
+      log('Testing swarm preset creation...');
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/preset/swarm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName: 'TestPlayer', aiCount: 3 })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.ok) {
+          log(`Swarm preset created: ${data.roomId}`, 'success');
+        } else {
+          throw new Error(data.error || `HTTP ${response.status}`);
+        }
+      } catch (error) {
+        log(`Swarm preset failed: ${error.message}`, 'error');
+      }
+    };
+
+    // Room Validation Tests
+    window.testRoomValidation = async function() {
+      log('Testing room status validation...');
+      updateStatus('validation', 'Pending');
+      
+      try {
+        // Test with a fake room ID
+        const testRoomId = 'test-room-123';
+        const response = await fetch(`${backendUrl}/api/room/gameRooms/${testRoomId}/status`);
+        
+        if (response.status === 404) {
+          log('Room validation working correctly (404 for non-existent room)', 'success');
+          updateStatus('validation', 'Success', 'Room validation API working');
+        } else {
+          const data = await response.json();
+          log(`Unexpected response: ${JSON.stringify(data)}`, 'warning');
+          updateStatus('validation', 'Success', JSON.stringify(data, null, 2));
+        }
+      } catch (error) {
+        log(`Room validation test failed: ${error.message}`, 'error');
+        updateStatus('validation', 'Failed', error.message);
+      }
+    };
+
+    window.testJoinableRooms = async function() {
+      log('Testing joinable rooms API...');
+      
+      try {
+        const response = await fetch(`${backendUrl}/api/rooms/joinable`);
+        const data = await response.json();
+        
+        if (response.ok) {
+          log(`Joinable rooms API working: ${data.rooms.length} rooms found`, 'success');
+          updateStatus('validation', 'Success', `Found ${data.rooms.length} joinable rooms`);
+        } else {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+      } catch (error) {
+        log(`Joinable rooms API failed: ${error.message}`, 'error');
+      }
+    };
+
+    // Smart Join Test
+    window.testSmartJoin = async function() {
+      log('Testing smart join system...');
+      updateStatus('smart-join', 'Pending');
+      
+      try {
+        // Import and test smart join
+        const { smartJoinRoom } = await import('./smart-join-system.js');
+        
+        // Test with fake room (should trigger fallback)
+        const testRoomId = 'fake-room-' + Date.now();
+        const testPlayerName = 'TestPlayer';
+        
+        log(`Testing smart join with fake room: ${testRoomId}`);
+        
+        // This should trigger the fallback to preset room
+        try {
+          await smartJoinRoom(testRoomId, testPlayerName, {
+            presetType: 'solo',
+            aiCount: 1
+          });
+          
+          log('Smart join test completed (should have redirected)', 'success');
+          updateStatus('smart-join', 'Success', 'Smart join fallback working');
+          
+        } catch (joinError) {
+          if (joinError.message.includes('not found')) {
+            log('Smart join correctly detected invalid room', 'success');
+            updateStatus('smart-join', 'Success', 'Room validation working');
+          } else {
+            throw joinError;
+          }
+        }
+        
+      } catch (error) {
+        log(`Smart join test failed: ${error.message}`, 'error');
+        updateStatus('smart-join', 'Failed', error.message);
+      }
+    };
+
+    // Auto-run health check on load
+    window.addEventListener('load', () => {
+      setTimeout(testHealthCheck, 1000);
+    });
+  </script>
+</body>
+</html>

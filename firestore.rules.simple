@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===== PAYMENT COLLECTIONS =====
+    
+    // Payments collection - allow access based on userId in document
+    match /payments/{userId} {
+      allow read, write: if 
+        // Allow if the document userId matches the path userId
+        resource.data.userId == userId ||
+        // Allow if creating new document with matching userId
+        (request.resource != null && request.resource.data.userId == userId);
+    }
+    
+    // Payment devices collection - allow access based on userId
+    match /paymentDevices/{deviceId} {
+      allow read, write: if 
+        // Allow if device belongs to user
+        resource.data.userId == request.resource.data.userId ||
+        // Allow if deviceId contains userId
+        deviceId.matches('.*' + request.resource.data.userId + '.*');
+    }
+    
+    // Payment sessions collection - allow access based on userId
+    match /paymentSessions/{sessionId} {
+      allow read, write: if 
+        resource.data.userId == request.resource.data.userId;
+    }
+    
+    // Failed payments collection - allow access based on userId
+    match /failedPayments/{paymentId} {
+      allow read, write: if 
+        resource.data.userId == request.resource.data.userId;
+    }
+    
+    // ===== GAME COLLECTIONS =====
+    
+    // Game rooms collection - allow read/write for all (since no auth)
+    match /gameRooms/{roomId} {
+      allow read, write: if true;
+    }
+    
+    // Lobby rooms collection - allow read/write for all
+    match /rooms/{roomId} {
+      allow read, write: if true;
+    }
+    
+    // ===== SECURITY RULES =====
+    
+    // Basic validation for all documents
+    match /{document=**} {
+      // Prevent excessive data size
+      allow write: if request.resource.size < 1 * 1024 * 1024; // 1MB limit
+    }
+    
+    // ===== PAYMENT VALIDATION =====
+    
+    // Payment data validation
+    match /payments/{userId} {
+      allow write: if 
+        // Ensure payment data is valid
+        request.resource.data.keys().hasAll(['userId', 'status', 'timestamp']) &&
+        // Status must be valid
+        request.resource.data.status in ['pending', 'completed', 'failed', 'refunded'] &&
+        // Amount must be positive (if present)
+        (request.resource.data.amount == null || request.resource.data.amount > 0) &&
+        // Currency must be valid (if present)
+        (request.resource.data.currency == null || 
+         request.resource.data.currency in ['usd', 'gbp', 'eur']) &&
+        // Timestamp must be valid
+        request.resource.data.timestamp is timestamp;
+    }
+    
+    // Device fingerprint validation
+    match /paymentDevices/{deviceId} {
+      allow write: if 
+        // Ensure device data is valid
+        request.resource.data.keys().hasAll(['userId', 'firstUsed']) &&
+        // Hash must be reasonable length (if present)
+        (request.resource.data.deviceFingerprint == null ||
+         (request.resource.data.deviceFingerprint.hash is string &&
+          request.resource.data.deviceFingerprint.hash.size() >= 8 &&
+          request.resource.data.deviceFingerprint.hash.size() <= 64));
+    }
+  }
+} 

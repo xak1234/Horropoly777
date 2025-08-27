@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horropoly Payment Test</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .test-container {
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff6666;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            max-width: 500px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.paid {
+            background: rgba(0,255,0,0.2);
+            border: 1px solid #00ff00;
+        }
+        .status.unpaid {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid #ff0000;
+        }
+        button {
+            background: #ff6666;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #ff4444;
+        }
+        .reset-btn {
+            background: #666;
+        }
+        .reset-btn:hover {
+            background: #555;
+        }
+        .log {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid #666;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔓 Horropoly Payment Test</h1>
+        
+        <div id="paymentStatus" class="status unpaid">
+            <strong>Payment Status:</strong> <span id="statusText">Checking...</span>
+        </div>
+        
+        <div id="testButtons">
+            <button onclick="testPayment()">Test Payment (£1.99)</button>
+            <button onclick="simulatePayment()" class="reset-btn">Simulate Payment Success</button>
+            <button onclick="resetPayment()" class="reset-btn">Reset Payment Status</button>
+            <button onclick="checkFirebase()" class="reset-btn">Check Firebase</button>
+        </div>
+        
+        <div class="log" id="log">
+            <div>🚀 Payment test page loaded</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initPaymentSystem, hasUserPaid, verifyAndRecordPayment } from './payment-verification.js';
+        
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updatePaymentStatus() {
+            const statusDiv = document.getElementById('paymentStatus');
+            const statusText = document.getElementById('statusText');
+            
+            hasUserPaid().then(paid => {
+                if (paid) {
+                    statusDiv.className = 'status paid';
+                    statusText.textContent = 'Paid - Multiplayer Unlocked!';
+                } else {
+                    statusDiv.className = 'status unpaid';
+                    statusText.textContent = 'Not Paid - Multiplayer Locked';
+                }
+            });
+        }
+
+        async function testPayment() {
+            try {
+                log('🔄 Initiating payment test...');
+                
+                const res = await fetch('https://horropoly-payment-backend.onrender.com/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const { id: sessionId } = await res.json();
+                log('✅ Payment session created: ' + sessionId);
+                
+                const stripe = Stripe("pk_live_51RjCVsGxBiUMSOnWHJ3Gzj15I5SH5nTrgmun9MZBAbQpWmOEQi8gzZ0YrWNfNeqIlQMW8UZoWSsvM1O3K2l37OTe00eHPYkD6V");
+                
+                log('🔄 Redirecting to Stripe checkout...');
+                const result = await stripe.redirectToCheckout({ sessionId });
+                
+                if (result.error) {
+                    log('❌ Payment failed: ' + result.error.message);
+                }
+            } catch (err) {
+                log('❌ Payment test failed: ' + err.message);
+                console.error("Payment test error:", err);
+            }
+        }
+
+        async function simulatePayment() {
+            localStorage.setItem('horropoly_paid', 'true');
+            updatePaymentStatus();
+            log('✅ Payment status simulated successfully');
+        }
+
+        function resetPayment() {
+            localStorage.removeItem('horropoly_paid');
+            localStorage.removeItem('horropoly_session_id');
+            updatePaymentStatus();
+            log('🔄 Payment status reset');
+        }
+
+        async function checkFirebase() {
+            log('🔄 Checking Firebase connection...');
+            try {
+                const sessionId = localStorage.getItem('horropoly_session_id');
+                if (sessionId) {
+                    log('📋 Found sessionId: ' + sessionId);
+                    const verified = await verifyAndRecordPayment(sessionId);
+                    if (verified) {
+                        log('✅ Payment verified in Firebase');
+                        updatePaymentStatus();
+                    } else {
+                        log('❌ Payment verification failed');
+                    }
+                } else {
+                    log('❌ No sessionId found in localStorage');
+                }
+            } catch (error) {
+                log('❌ Firebase check failed: ' + error.message);
+            }
+        }
+
+        // Set up payment success callback
+        window.onPaymentSuccess = function() {
+            log('🎉 Payment success callback triggered!');
+            updatePaymentStatus();
+        };
+
+        // Initialize payment system
+        initPaymentSystem();
+        
+        // Initial status check
+        updatePaymentStatus();
+        
+        // Make functions globally available
+        window.testPayment = testPayment;
+        window.simulatePayment = simulatePayment;
+        window.resetPayment = resetPayment;
+        window.checkFirebase = checkFirebase;
+    </script>
+</body>
+</html> 

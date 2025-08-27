@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horropoly Mapper (Token at Go Position)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #eee;
+    }
+    #game-container {
+      position: relative;
+      display: inline-block;
+      margin-top: 20px;
+    }
+    #board-img {
+      display: block;
+      width: 800px;
+      height: auto;
+    }
+    img.token {
+      position: absolute;
+      width: 48px;
+      height: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    #loader {
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Horropoly Mapper (Token at Go Position)</h1>
+  <div id="loader">Loading board and player token…</div>
+  <div id="game-container">
+    <!-- Use absolute path to ensure the board image is found -->
+    <img id="board-img" src="/board.png" alt="Board">
+  </div>
+
+  <script type="module">
+    async function initMapper() {
+      const loader = document.getElementById('loader');
+      const boardImg = document.getElementById('board-img');
+      const container = document.getElementById('game-container');
+
+      boardImg.onload = async () => {
+        loader.style.display = 'none';
+        try {
+          // Compute scale ratios
+          const scaleX = boardImg.clientWidth / boardImg.naturalWidth;
+          const scaleY = boardImg.clientHeight / boardImg.naturalHeight;
+
+          // Load JSON positions from root
+          const positions = await fetch('/positions_updated.json')
+            .then(res => res.ok ? res.json() : Promise.reject('positions_updated.json not found'));
+
+          // Get 'go' square coordinates
+          const goPos = positions.find(p => p.name === 'go');
+          if (!goPos) {
+            loader.textContent = "Error: 'go' position missing in JSON.";
+            console.error("Position 'go' not defined in positions_updated.json");
+            return;
+          }
+
+          // Create token using t1.png at Go
+          const tokenEl = document.createElement('img');
+          tokenEl.className = 'token';
+          tokenEl.src = '/assets/tokens/t1.png';
+          tokenEl.alt = 'Player token t1 at Go';
+
+          // Position token at scaled coords
+          const x = goPos.x * scaleX;
+          const y = goPos.y * scaleY;
+          tokenEl.style.left = `${x}px`;
+          tokenEl.style.top = `${y}px`;
+          container.appendChild(tokenEl);
+        } catch (err) {
+          loader.textContent = 'Error loading elements: ' + err;
+          console.error('Mapper initialization error:', err);
+        }
+      };
+
+      boardImg.onerror = () => {
+        loader.textContent = 'Error: Failed to load /board.png';
+        console.error('Board image load failed: /board.png');
+      };
+    }
+    window.addEventListener('DOMContentLoaded', initMapper);
+  </script>
+</body>
+</html>

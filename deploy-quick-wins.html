@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🚀 Deploy Room Optimization Quick Wins</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+      line-height: 1.6;
+    }
+    .section {
+      background: #2a2a2a;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+    .section.warning {
+      border-left-color: #ff9800;
+    }
+    .section.error {
+      border-left-color: #f44336;
+    }
+    .section.info {
+      border-left-color: #2196F3;
+    }
+    h1, h2, h3 {
+      color: #4CAF50;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin: 8px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button:disabled {
+      background: #666;
+      cursor: not-allowed;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.pending {
+      background: #ff9800;
+      color: white;
+    }
+    .status.completed {
+      background: #4CAF50;
+      color: white;
+    }
+    .status.failed {
+      background: #f44336;
+      color: white;
+    }
+    pre {
+      background: #000;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .code {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+    .progress {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    .progress-item {
+      flex: 1;
+      background: #333;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .logs {
+      background: #000;
+      padding: 15px;
+      border-radius: 4px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 Room Optimization Quick Wins Deployment</h1>
+  
+  <div class="section info">
+    <h2>📋 Deployment Checklist</h2>
+    <div class="progress">
+      <div class="progress-item">
+        <div>1. Firestore Indexes</div>
+        <span class="status pending" id="status-indexes">Pending</span>
+      </div>
+      <div class="progress-item">
+        <div>2. Room Migration</div>
+        <span class="status pending" id="status-migration">Pending</span>
+      </div>
+      <div class="progress-item">
+        <div>3. Stale Cleanup</div>
+        <span class="status pending" id="status-cleanup">Pending</span>
+      </div>
+      <div class="progress-item">
+        <div>4. Validation</div>
+        <span class="status pending" id="status-validation">Pending</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🔥 1. Firestore Composite Indexes</h2>
+    <p>Required for optimized queries with <code>where() + orderBy()</code> combinations.</p>
+    
+    <h3>Option A: Firebase CLI (Recommended)</h3>
+    <pre>npm install -g firebase-tools
+firebase login
+firebase deploy --only firestore:indexes</pre>
+    
+    <h3>Option B: Auto-create via Query</h3>
+    <button onclick="triggerIndexCreation()">Trigger Index Creation</button>
+    <p><small>This will run queries that prompt Firestore to create missing indexes.</small></p>
+    
+    <h3>Option C: Manual Console</h3>
+    <p>Go to <a href="https://console.firebase.google.com" target="_blank">Firebase Console</a> → Firestore → Indexes</p>
+  </div>
+
+  <div class="section">
+    <h2>🕒 2. Stale Room Management</h2>
+    <p>Auto-mark rooms as <code>isOpen=false</code> when stale or started.</p>
+    
+    <button onclick="setupStaleManagement()">Setup Auto-Stale Marking</button>
+    <button onclick="markStaleRoomsNow()">Mark Stale Rooms Now</button>
+    
+    <div id="stale-stats" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="section">
+    <h2>🔒 3. Visibility Security</h2>
+    <p>Add <code>visibility</code> field to control room listing access.</p>
+    
+    <button onclick="migrateVisibility()">Migrate Room Visibility</button>
+    <button onclick="showVisibilityStats()">Show Visibility Stats</button>
+    
+    <div id="visibility-stats" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="section">
+    <h2>🎯 4. Smart Join System</h2>
+    <p>Enhanced join buttons with preset fallback and room validation.</p>
+    
+    <button onclick="testSmartJoin()">Test Smart Join</button>
+    <button onclick="setupSmartButtons()">Setup Smart Buttons</button>
+    
+    <div id="join-test-results" style="margin-top: 10px;"></div>
+  </div>
+
+  <div class="section">
+    <h2>🧪 5. Full Deployment</h2>
+    <p>Run all optimizations in sequence.</p>
+    
+    <button onclick="deployAllOptimizations()" id="deploy-all-btn">🚀 Deploy All Optimizations</button>
+    <button onclick="validateDeployment()">✅ Validate Deployment</button>
+  </div>
+
+  <div class="section">
+    <h2>📊 Deployment Logs</h2>
+    <div class="logs" id="deployment-logs">Ready to deploy optimizations...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { migrateRoomsForOptimization, getRoomStats, cleanupStaleRooms } from './room-optimization-utils.js';
+    import { markStaleRooms, setupAutoStaleMarking } from './room-staleness-manager.js';
+    import { migrateRoomVisibility, getRoomsByVisibility, VISIBILITY_LEVELS } from './room-visibility-security.js';
+    import { fetchJoinableRooms } from './rooms-query.js';
+    import { validateIndexes } from './deploy-firestore-indexes.js';
+    import { smartJoinRoom, setupSmartJoinButtons } from './smart-join-system.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwc9JDb49JYp1RBnT1cuw-qfcVQORqlsg",
+      authDomain: "horropoly.firebaseapp.com",
+      projectId: "horropoly",
+      storageBucket: "horropoly.firebasestorage.app",
+      messagingSenderId: "582020770053",
+      appId: "1:582020770053:web:875b64a83ce557da01ef6c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const logsEl = document.getElementById('deployment-logs');
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : type === 'success' ? '✅' : 'ℹ️';
+      const logMessage = `[${timestamp}] ${prefix} ${message}\n`;
+      logsEl.textContent += logMessage;
+      logsEl.scrollTop = logsEl.scrollHeight;
+      console.log(message);
+    }
+
+    function updateStatus(step, status) {
+      const statusEl = document.getElementById(`status-${step}`);
+      if (statusEl) {
+        statusEl.textContent = status;
+        statusEl.className = `status ${status.toLowerCase()}`;
+      }
+    }
+
+    // 1. Firestore Indexes
+    window.triggerIndexCreation = async function() {
+      log('Triggering index creation by running optimized queries...');
+      try {
+        const result = await fetchJoinableRooms(app);
+        log(`Query completed successfully: ${result.rooms.length} rooms found`);
+        log('Check Firebase Console for index creation prompts');
+        updateStatus('indexes', 'Completed');
+      } catch (error) {
+        log(`Index creation trigger failed: ${error.message}`, 'error');
+        if (error.message.includes('index')) {
+          log('This is expected! Click the Firebase Console link to create indexes', 'warning');
+          updateStatus('indexes', 'Pending');
+        }
+      }
+    };
+
+    // 2. Stale Management
+    window.setupStaleManagement = async function() {
+      log('Setting up automatic stale room marking...');
+      try {
+        const cleanup = setupAutoStaleMarking(app, 5); // Every 5 minutes
+        log('Auto-stale marking setup complete (runs every 5 minutes)');
+        
+        // Store cleanup function globally
+        window.staleCleanup = cleanup;
+        
+        updateStatus('cleanup', 'Completed');
+      } catch (error) {
+        log(`Stale management setup failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.markStaleRoomsNow = async function() {
+      log('Marking stale rooms now...');
+      try {
+        const result = await markStaleRooms(app);
+        log(`Marked ${result.markedCount} rooms as stale`);
+        
+        // Update stats
+        const stats = await getRoomStats(app);
+        if (stats) {
+          document.getElementById('stale-stats').innerHTML = `
+            <strong>Room Stats:</strong> ${stats.total} total, ${stats.withCapacity} joinable, ${stats.stale} stale
+          `;
+        }
+      } catch (error) {
+        log(`Stale marking failed: ${error.message}`, 'error');
+      }
+    };
+
+    // 3. Visibility Security
+    window.migrateVisibility = async function() {
+      log('Migrating room visibility settings...');
+      try {
+        const result = await migrateRoomVisibility(app);
+        log(`Migrated visibility for ${result.migratedCount} rooms`);
+        updateStatus('migration', 'Completed');
+      } catch (error) {
+        log(`Visibility migration failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.showVisibilityStats = async function() {
+      log('Getting visibility statistics...');
+      try {
+        const publicRooms = await getRoomsByVisibility(app, VISIBILITY_LEVELS.PUBLIC);
+        const privateRooms = await getRoomsByVisibility(app, VISIBILITY_LEVELS.PRIVATE);
+        
+        document.getElementById('visibility-stats').innerHTML = `
+          <strong>Visibility Stats:</strong> ${publicRooms.length} public, ${privateRooms.length} private
+        `;
+        
+        log(`Visibility stats: ${publicRooms.length} public, ${privateRooms.length} private rooms`);
+      } catch (error) {
+        log(`Visibility stats failed: ${error.message}`, 'error');
+      }
+    };
+
+    // 4. Smart Join System
+    window.testSmartJoin = async function() {
+      log('Testing smart join system...');
+      try {
+        // Test with a fake room ID to trigger fallback
+        const testRoomId = 'test-room-' + Date.now();
+        const testPlayerName = 'TestPlayer';
+        
+        log(`Testing smart join with room: ${testRoomId}`);
+        
+        // This should trigger the fallback to preset room
+        await smartJoinRoom(testRoomId, testPlayerName, {
+          presetType: 'solo',
+          aiCount: 1
+        });
+        
+        log('Smart join test completed (should have created preset room)');
+        
+      } catch (error) {
+        log(`Smart join test failed: ${error.message}`, 'error');
+      }
+    };
+
+    window.setupSmartButtons = function() {
+      log('Setting up smart join buttons...');
+      try {
+        setupSmartJoinButtons();
+        log('Smart join buttons configured successfully');
+        
+        document.getElementById('join-test-results').innerHTML = `
+          <div style="color: #4CAF50; margin-top: 10px;">
+            ✅ Smart join buttons are now active on this page
+          </div>
+        `;
+      } catch (error) {
+        log(`Smart button setup failed: ${error.message}`, 'error');
+      }
+    };
+
+    // 5. Full Deployment
+    window.deployAllOptimizations = async function() {
+      const deployBtn = document.getElementById('deploy-all-btn');
+      deployBtn.disabled = true;
+      deployBtn.textContent = '🔄 Deploying...';
+      
+      log('🚀 Starting full optimization deployment...');
+      
+      try {
+        // Step 1: Migrate room data
+        log('Step 1: Migrating room data...');
+        const migrationResult = await migrateRoomsForOptimization(app);
+        if (migrationResult.success) {
+          log(`✅ Migration: ${migrationResult.migratedCount} rooms updated`);
+          updateStatus('migration', 'Completed');
+        }
+
+        // Step 2: Setup stale management
+        log('Step 2: Setting up stale management...');
+        const staleCleanup = setupAutoStaleMarking(app, 5);
+        window.staleCleanup = staleCleanup;
+        log('✅ Auto-stale marking configured');
+        updateStatus('cleanup', 'Completed');
+
+        // Step 3: Migrate visibility
+        log('Step 3: Migrating visibility settings...');
+        const visibilityResult = await migrateRoomVisibility(app);
+        if (visibilityResult.success) {
+          log(`✅ Visibility: ${visibilityResult.migratedCount} rooms updated`);
+        }
+
+        // Step 4: Test optimized queries
+        log('Step 4: Testing optimized queries...');
+        const queryResult = await fetchJoinableRooms(app);
+        log(`✅ Query test: ${queryResult.rooms.length} rooms found`);
+
+        // Step 5: Setup smart buttons
+        log('Step 5: Setting up smart join system...');
+        setupSmartJoinButtons();
+        log('✅ Smart join buttons configured');
+
+        log('🎉 Full deployment completed successfully!');
+        updateStatus('validation', 'Completed');
+        
+        deployBtn.textContent = '✅ Deployment Complete';
+        
+      } catch (error) {
+        log(`❌ Deployment failed: ${error.message}`, 'error');
+        deployBtn.disabled = false;
+        deployBtn.textContent = '🚀 Deploy All Optimizations';
+      }
+    };
+
+    window.validateDeployment = async function() {
+      log('🔍 Validating deployment...');
+      
+      try {
+        // Test query performance
+        const startTime = performance.now();
+        const result = await fetchJoinableRooms(app);
+        const endTime = performance.now();
+        const duration = Math.round(endTime - startTime);
+        
+        log(`Query performance: ${duration}ms for ${result.rooms.length} rooms`);
+        
+        if (duration < 1000) {
+          log('🚀 Excellent performance! Optimizations working well.');
+        } else if (duration < 3000) {
+          log('⚠️ Moderate performance. Indexes may still be building.');
+        } else {
+          log('❌ Slow performance. Check index status in Firebase Console.');
+        }
+        
+        // Get room stats
+        const stats = await getRoomStats(app);
+        if (stats) {
+          log(`Room stats: ${stats.total} total, ${stats.withCapacity} joinable, ${stats.recent} recent`);
+        }
+        
+        updateStatus('validation', 'Completed');
+        
+      } catch (error) {
+        log(`Validation failed: ${error.message}`, 'error');
+        updateStatus('validation', 'Failed');
+      }
+    };
+
+    // Auto-load initial stats
+    window.addEventListener('load', async () => {
+      setTimeout(async () => {
+        try {
+          const stats = await getRoomStats(app);
+          if (stats) {
+            log(`Initial stats: ${stats.total} total rooms, ${stats.withCapacity} joinable`);
+          }
+        } catch (error) {
+          log(`Failed to load initial stats: ${error.message}`, 'warning');
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

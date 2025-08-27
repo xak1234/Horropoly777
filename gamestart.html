@@ -1,0 +1,2829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Horropoly v3.5</title>
+    <script>
+      (function(){
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('autostart') === '1'){
+          const style = document.createElement('style');
+          style.textContent = '#intro-screen{display:none !important;}';
+          document.head.appendChild(style);
+        }
+      })();
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111 url('assets/images/backdrop.png') center center / cover no-repeat fixed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #eee;
+            overflow-x: hidden;
+            touch-action: pan-x pan-y;
+        }
+        #intro-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            text-align: center;
+            background-image: url('assets/images/front.jpg');
+            background-size: cover;
+            background-position: center;
+            padding-bottom: 50px;
+        } 
+        #intro-screen h1 {
+            display: none;
+        }
+        
+        /* Window box for player selection */
+        .player-selection-window {
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #666;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+            position: relative;
+            cursor: move;
+            user-select: none;
+            transition: border-color 0.2s;
+        }
+        
+        .player-selection-window:hover {
+            border-color: #888;
+        }
+        
+        .player-selection-window.dragging {
+            position: fixed;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+        
+        /* Horropoly title with pulsing effect */
+        .horropoly-title {
+            display: block !important; /* Override the display: none rule */
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff6666;
+            text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+            margin-top: 0;
+            margin-bottom: 10px;
+            animation: titlePulse 2.5s ease-in-out infinite;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes titlePulse {
+            0% {
+                color: #ff6666;
+                text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+                transform: scale(1);
+            }
+            50% {
+                color: #ff9999;
+                text-shadow: 0 0 20px rgba(255, 102, 102, 1), 0 0 30px rgba(255, 102, 102, 0.6);
+                transform: scale(1.05);
+            }
+            100% {
+                color: #ff6666;
+                text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+                transform: scale(1);
+            }
+        }
+        
+        #player-setup {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        #player-setup input {
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: none;
+            color: red;
+            font-weight: bold;
+        }
+        
+        /* Game mode buttons with glowing effects */
+        .game-mode-selection {
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .mode-button {
+            padding: 15px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Play vs AI button - Red glow */
+        #vs-ai-btn {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+            animation: redGlow 2s ease-in-out infinite alternate;
+        }
+        
+        #vs-ai-btn:hover {
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        /* Play vs Human button - Green glow */
+        #vs-human-btn {
+            background: linear-gradient(45deg, #44ff44, #00cc00);
+            color: white;
+            box-shadow: 0 0 20px rgba(68, 255, 68, 0.6);
+            animation: greenGlow 2s ease-in-out infinite alternate;
+        }
+        
+        #vs-human-btn:hover {
+            box-shadow: 0 0 30px rgba(68, 255, 68, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes redGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(255, 68, 68, 0.9);
+            }
+        }
+        
+        @keyframes greenGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(68, 255, 68, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(68, 255, 68, 0.9);
+            }
+        }
+        #game-container {
+            margin-top: 180px;
+            border: 2px solid #444;
+            background: transparent;
+            display: none; /* Hidden by default */
+            position: relative;
+            overflow: hidden;
+            touch-action: pan-x pan-y;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            height: auto;
+            max-width: 1000px;
+            touch-action: none;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+        }
+        #info-panel {
+            position: fixed;
+            top: 20px;
+            right: 260px;
+            width: 216px; /* Reduced width by 10% */
+            padding: 8px; /* Reduced padding */
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #666;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            cursor: move;
+            user-select: none;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s, height 0.3s ease;
+            text-align: center;
+            overflow: hidden;
+            word-wrap: break-word;
+            display: none; /* Hidden by default */
+        }
+        #info-panel:hover {
+            border-color: #888;
+        }
+        /* Minimized state styling */
+        #info-panel.minimized {
+            height: 40px;
+            min-height: 40px;
+            overflow: hidden;
+        }
+        /* Allow minimized panel to expand for property decisions */
+        #info-panel.minimized.property-decision {
+            height: auto;
+            min-height: auto;
+            overflow: visible;
+        }
+        #info-panel.minimized #info-panel-content {
+            display: none;
+        }
+        .player-info {
+            display: block; /* Changed to block since we only show steal cards and properties now */
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            overflow: visible; /* Allow content to be fully visible */
+            word-wrap: break-word;
+            min-height: auto; /* Let content determine height */
+        }
+        
+        /* Player info content for steal cards */
+        .player-info .player-info-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+        
+        /* General span reset */
+        .player-info span {
+            display: inline;
+            overflow: visible;
+            white-space: normal;
+            text-align: left;
+        }
+        
+        /* Dice section styles */
+        .dice-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 3px 0;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            /* Mobile touch improvements */
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .dice-section:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .dice-section.touch-feedback {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.95);
+        }
+
+        /* DESKTOP/WEB VIEW - Increased font sizes for better readability */
+        .player-info .player-name {
+            font-size: 26px !important;
+        }
+        
+        .player-info span.player-name {
+            font-size: 26px !important;
+        }
+        
+        span[class="player-name"] {
+            font-size: 26px !important;
+        }
+        
+        /* Money display - increased sizes */
+        .player-info span[id^="player-money"] {
+            font-size: 30px !important;
+        }
+        
+        span[id*="player-money"] {
+            font-size: 30px !important;
+        }
+        
+        /* HIGH SPECIFICITY OVERRIDES */
+        #info-panel .player-info .player-name {
+            font-size: 26px !important;
+        }
+        
+        #info-panel .player-info span[id*="player-money"] {
+            font-size: 30px !important;
+        }
+        
+        /* Color star indicators */
+        .player-info span[style*="color:"][style*="font-size: 18px"][style*="★"] {
+            font-size: 24px !important;
+        }
+        
+        .player-info span[style*="display: inline-block"][style*="font-size: 18px"] {
+            font-size: 24px !important;
+        }
+        
+        /* Steal card indicators */
+        .player-info span[style*="color: #00ff00"][style*="font-size: 16px"] {
+            font-size: 20px !important;
+        }
+        
+        /* Token images - larger for desktop */
+        .player-info img {
+            width: 28px !important;
+            height: 28px !important;
+            margin-right: 8px !important;
+        }
+        .die {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s;
+        }
+        .die.animate {
+            animation: roll 0.5s;
+        }
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .turn-info {
+            text-align: center;
+            margin: 6px 0;
+            font-size: 0.9em;
+            color: #ffd700;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .go-square-glow {
+            box-shadow: 0 0 20px 10px #fff; /* White glow */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        #dice-roll-info {
+            font-size: 0.8em;
+            margin: 4px 0;
+            text-align: center;
+        }
+        
+
+
+        /* Circular Hand with Static effect styles */
+        .hand-container {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 3;
+            display: none;
+            overflow: hidden;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            background: 
+                radial-gradient(circle at 20% 80%, transparent 20%, rgba(120, 119, 240, 0.2) 21%, rgba(120, 119, 240, 0.2) 29%, transparent 30%, transparent),
+                radial-gradient(circle at 80% 20%, transparent 20%, rgba(255, 119, 120, 0.2) 21%, rgba(255, 119, 120, 0.2) 29%, transparent 30%, transparent),
+                radial-gradient(circle at 40% 40%, transparent 20%, rgba(120, 255, 119, 0.2) 21%, rgba(120, 255, 119, 0.2) 29%, transparent 30%, transparent);
+            background-size: 3px 3px, 4px 4px, 5px 5px;
+            animation: tvStatic 0.1s infinite linear;
+        }
+        .hand-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            animation: handImageAppear 20s ease-in-out;
+            opacity: 0;
+            border-radius: 50%;
+            filter: brightness(1.2) contrast(1.1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes tvStatic {
+            0% {
+                background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;
+            }
+            25% {
+                background-position: 1px 1px, -1px 0px, 1px -1px, 1px 0px, 0px 1px;
+            }
+            50% {
+                background-position: -1px 0px, 1px -1px, 0px 1px, -1px 1px, 1px 0px;
+            }
+            75% {
+                background-position: 1px -1px, 0px 1px, -1px 0px, 0px -1px, -1px -1px;
+            }
+            100% {
+                background-position: 0px 1px, -1px -1px, 1px 0px, 1px 1px, 0px 0px;
+            }
+        }
+
+        @keyframes handImageAppear {
+            0% { opacity: 0; }
+            5% { opacity: 0; }
+            10% { opacity: 1; filter: brightness(1.3) contrast(1.2); }
+            15% { opacity: 0; }
+            20% { opacity: 0; }
+            25% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            35% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            40% { opacity: 0; }
+            50% { opacity: 0; }
+            55% { opacity: 1; filter: brightness(1.4) contrast(1.3); }
+            70% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            75% { opacity: 0; }
+            85% { opacity: 0; }
+            88% { opacity: 1; filter: brightness(1.1) contrast(1.0); }
+            95% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            100% { opacity: 0; }
+        }
+
+        /* Music toggle switch styles */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        
+        .switch input:checked + .slider span {
+            transform: translateX(20px);
+        }
+        
+        .switch .slider {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .switch:hover .slider {
+            background-color: #777;
+        }
+        
+        .switch input:checked:hover + .slider {
+            background-color: #45a049;
+        }
+
+        /* Add pulsing animations */
+        @keyframes tokenPulse {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.1);
+                filter: brightness(1.2);
+            }
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes dicePulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+
+        @keyframes dicePulseRed {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.9);
+                background-color: rgba(255, 0, 0, 0.3);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                background-color: rgba(255, 0, 0, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                background-color: rgba(255, 0, 0, 0.3);
+            }
+        }
+
+        .token-pulse {
+            animation: tokenPulse 2s ease-in-out infinite;
+        }
+
+        /* Rent flash animation */
+        @keyframes rentFlash {
+            0% {
+                color: red;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+                transform: scale(1);
+            }
+            25% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 1);
+                transform: scale(1.1);
+            }
+            50% {
+                color: #ffffff;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+                transform: scale(1.2);
+            }
+            75% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 1);
+                transform: scale(1.1);
+            }
+            100% {
+                color: red;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+                transform: scale(1);
+            }
+        }
+
+        .rent-flash {
+            animation: rentFlash 0.8s ease-in-out 3;
+            display: inline-block;
+        }
+
+        /* Money flash animations */
+        @keyframes moneyFlashGreen {
+            0% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+                transform: scale(1);
+            }
+            25% {
+                color: #66ff66;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                transform: scale(1.15);
+            }
+            50% {
+                color: #00ff00;
+                text-shadow: 0 0 20px rgba(0, 255, 0, 1);
+                transform: scale(1.3);
+            }
+            75% {
+                color: #66ff66;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                transform: scale(1.15);
+            }
+            100% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes moneyFlashRed {
+            0% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+                transform: scale(1);
+            }
+            25% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+                transform: scale(1.15);
+            }
+            50% {
+                color: #ff0000;
+                text-shadow: 0 0 20px rgba(255, 0, 0, 1);
+                transform: scale(1.3);
+            }
+            75% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+                transform: scale(1.15);
+            }
+            100% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        .money-flash-green {
+            animation: moneyFlashGreen 0.6s ease-in-out 2;
+            display: inline-block;
+        }
+
+        .money-flash-red {
+            animation: moneyFlashRed 0.6s ease-in-out 2;
+            display: inline-block;
+        }
+
+        /* Money pulse animations */
+        @keyframes moneyPulseGreen {
+            0% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(0, 255, 0, 0);
+            }
+            50% {
+                transform: scale(1.3);
+                color: #00ff00;
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+                font-weight: bold;
+            }
+            100% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(0, 255, 0, 0);
+            }
+        }
+
+        @keyframes moneyPulseRed {
+            0% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(255, 0, 0, 0);
+            }
+            50% {
+                transform: scale(1.3);
+                color: #ff0000;
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+                font-weight: bold;
+            }
+            100% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+
+        .money-pulse-green {
+            animation: moneyPulseGreen 1s ease-out;
+        }
+
+        .money-pulse-red {
+            animation: moneyPulseRed 1s ease-out;
+        }
+
+        /* Mobile-specific styling for Player Info title */
+        @media (max-width: 768px) {
+            #info-panel-header span {
+                font-size: 9px !important; /* 50% of 18px */
+                letter-spacing: 0.5px !important; /* Proportionally reduced */
+            }
+            
+            /* Fix minimize button overlap on mobile */
+            #info-panel.minimized #info-panel-header {
+                padding-right: 18px !important; /* Extra space for button on mobile */
+            }
+            
+            #info-panel.minimized #minimized-content {
+                padding-right: 25px !important; /* Even more padding for mobile */
+                padding-left: 8px !important; /* Reduce left padding to compensate */
+            }
+            
+            #info-panel.minimized #minimize-info-panel {
+                right: 4px !important; /* Move button slightly left on mobile */
+                font-size: 16px !important; /* Smaller for better space usage */
+                min-width: 16px !important;
+                height: 40px !important;
+                padding: 8px 4px !important;
+            }
+        }
+
+        .dice-pulse {
+            animation: dicePulse 1.2s ease-in-out infinite !important;
+            background-color: rgba(255, 0, 0, 0.1) !important;
+        }
+
+        @keyframes dicePulseBlue {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 128, 255, 0.9);
+                background-color: rgba(0, 128, 255, 0.3);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(0, 128, 255, 0);
+                background-color: rgba(0, 128, 255, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 128, 255, 0);
+                background-color: rgba(0, 128, 255, 0.3);
+            }
+        }
+
+        .dice-section.dice-pulse-red {
+            animation: dicePulseRed 1.2s ease-in-out infinite !important;
+            text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+            background-color: rgba(255, 0, 0, 0.3) !important;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+        }
+
+        .dice-pulse-blue {
+            animation: dicePulseBlue 1.2s ease-in-out infinite !important;
+            text-shadow: 0 0 3px rgba(0, 128, 255, 0.8) !important;
+        }
+
+        /* Add multiplayer UI styles */
+        .multiplayer-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .room-list {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .room-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-secondary {
+            background-color: #666;
+        }
+
+        .button-secondary:hover {
+            background-color: #777;
+        }
+
+        #room-code {
+            font-family: monospace;
+            font-size: 24px;
+            color: #4CAF50;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .player-list {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+        }
+
+        .player-list-item {
+            padding: 5px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .host-badge {
+            background: #4CAF50;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+
+        /* Add game mode selection styles */
+        .game-mode-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mode-button {
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .mode-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mode-button.selected {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .ai-options {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .multiplayer-controls {
+            display: none;
+        }
+
+        /* Desktop/Web view styles - compact to match image */
+        @media (min-width: 1025px) {
+            #property-info-content button {
+                font-size: 9px !important;
+                padding: 3px 6px !important;
+                min-height: 20px !important;
+                min-width: 50px !important;
+                margin: 1px !important;
+            }
+            
+            /* Ensure buttons are on the same line */
+            #property-info-content div[style*="display: flex"] {
+                gap: 3px !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            /* Very compact property info content */
+            #property-info-content {
+                font-size: 10px !important;
+                padding: 4px !important;
+                margin-top: 4px !important;
+            }
+            
+            /* Much smaller player info for compact view */
+            .player-info {
+                margin-bottom: 3px !important;
+                padding: 3px 5px !important;
+                font-size: 9px !important;
+            }
+            
+            .player-info img {
+                width: 12px !important;
+                height: 12px !important;
+                margin-right: 2px !important;
+            }
+            
+            /* Very compact dice section */
+            .dice-section {
+                gap: 1px !important;
+                margin: 0px 0 !important;
+            }
+            
+            .die {
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 13px !important;
+            }
+            
+
+            
+            /* Very compact switches container */
+            .switches-container {
+                gap: 0.125rem !important;
+                padding: 0.125rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+            
+            #music-toggle, #restart-toggle {
+                font-size: 0.4375rem !important;
+                padding: 0.125rem 0.25rem !important;
+                min-width: 0.875rem !important;
+                height: 1rem !important;
+            }
+            
+            /* Compact text elements */
+            .turn-info {
+                font-size: 10px !important;
+                margin: 3px 0 !important;
+            }
+            
+            #dice-roll-info {
+                font-size: 9px !important;
+                margin: 2px 0 !important;
+            }
+            
+            /* Compact development buttons */
+            button[onclick*="handlePropertyDevelopment"] {
+                font-size: 8px !important;
+                padding: 4px 6px !important;
+                min-height: 22px !important;
+            }
+            
+            /* Compact header */
+            #info-panel-header {
+                margin-bottom: 4px !important;
+                padding: 3px !important;
+            }
+            
+            #info-panel-header span {
+                font-size: 12px !important;
+            }
+            
+            /* Smaller minimize button */
+            #minimize-info-panel {
+                font-size: 14px !important;
+                padding: 4px 2px !important;
+                min-width: 16px !important;
+                height: 24px !important;
+            }
+            
+            /* Compact Game Advisory section */
+            #advisory-panel {
+                font-size: 9px !important;
+                padding: 3px !important;
+                margin: 3px 0 !important;
+            }
+            
+            /* Compact property details */
+            .player-info + div[style*="padding"] {
+                padding: 2px 4px !important;
+                margin-bottom: 2px !important;
+                font-size: 8px !important;
+            }
+            
+            /* Mobile-specific font overrides for Player Info Web modal - ULTRA COMPACT */
+            
+            /* Mobile player names - SMALLER FONTS */
+            .player-info .player-name {
+                font-size: 0.625rem !important;     /* Reduced from 12px */
+            }
+            
+            .player-info span.player-name {
+                font-size: 0.625rem !important;     /* Reduced from 12px */
+            }
+            
+            span[class="player-name"] {
+                font-size: 0.625rem !important;     /* Reduced from 12px */
+            }
+            
+            /* Target inline styles directly */
+            .player-info span[style*="font-size: 18px"] {
+                font-size: 0.625rem !important;     /* Override inline font-size */
+            }
+            
+            /* Mobile money display - SMALLER FONTS */
+            .player-info span[id*="player-money"] {
+                font-size: 0.75rem !important;     /* Reduced from 14px */
+            }
+            
+            #info-panel .player-info .player-name {
+                font-size: 0.625rem !important;     /* Reduced from 12px */
+            }
+            
+            #info-panel .player-info span[id*="player-money"] {
+                font-size: 12px !important;     /* Reduced from 14px */
+            }
+            
+            /* Target inline money styles */
+            .player-info span[style*="font-size: 22px"] {
+                font-size: 12px !important;     /* Override inline font-size */
+            }
+
+            .player-info span[style*="font-size: 14px"] {
+                font-size: 9px !important;      /* Override inline font-size */
+            }
+            
+            /* Mobile token images - SMALLER */
+            .player-info img {
+                width: 10px !important;         /* Reduced from 16px */
+                height: 10px !important;
+                margin-right: 2px !important;   /* Reduced margin */
+            }
+            
+            /* Mobile color indicators and steal cards - SMALLER */
+            .player-info span[style*="color:"][style*="★"] {
+                font-size: 10px !important;     /* Reduced from 14px */
+            }
+            
+            .player-info span[style*="color: #00ff00"] {
+                font-size: 9px !important;      /* Reduced from 12px */
+            }
+            
+            /* Fallback for any other inline font-size elements */
+            .player-info span[style*="font-size"] {
+                font-size: 10px !important;
+            }
+        }
+
+        /* Tablet and smaller desktop styles */
+        @media (max-width: 1024px) {
+            #info-panel {
+                right: 10px;
+                max-width: calc(100vw - 280px);
+            }
+            
+            /* Tablet-specific purchase and decline button styles */
+            #property-info-content button {
+                font-size: 10px !important;
+                padding: 5px 10px !important;
+                min-height: 28px !important;
+                min-width: 60px !important;
+                margin: 3px !important;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            /* Ensure buttons are on the same line on tablet */
+            #property-info-content div[style*="display: flex"] {
+                gap: 6px !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
+            }
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 600px), (max-device-width: 600px) {
+            #game-container {
+                margin-top: 160px;  /* Decreased from 260px to move board higher */
+                width: 100vw;
+                height: calc(100vh - 40px);
+                border: none;
+                overflow: hidden;
+                background: transparent;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            #info-panel {
+                position: fixed;
+                top: 5px;
+                right: 5px;
+                left: auto;
+                width: 220px;
+                font-size: 10px;
+                padding: 5px;
+                z-index: 1001;
+                max-width: 90vw;
+                box-sizing: border-box;
+            }
+            
+            canvas {
+                max-width: 1000px;
+                width: 100%;
+                height: auto;
+                transform-origin: center center;
+                margin: 0 auto;
+            }
+            
+            .switches-container {
+                max-width: 6.25rem;
+                gap: 0.25rem;
+                padding: 0.0625rem;
+            }
+            
+            #music-toggle, #restart-toggle {
+                font-size: 0.375rem;
+                min-width: 1rem;
+                height: 1rem;
+                line-height: 0.5rem;
+                padding: 0.0625rem 0.25rem;
+            }
+            
+            .switches-container span {
+                font-size: 0.375rem;
+                margin-left: 0.0625rem;
+            }
+            
+            .dice-section {
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 2px !important;
+                max-width: 80px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+            
+            /* Smaller minimize button for mobile non-minimized state */
+            #minimize-info-panel {
+                font-size: 12px !important;
+                padding: 6px 2px !important;
+                min-width: 14px !important;
+                height: 28px !important;
+            }
+            
+            .die {
+                width: 20px !important;
+                height: 20px !important;
+                font-size: 10px !important;
+                border-radius: 3px !important;
+            }
+            
+            button {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                min-height: 36px !important;
+            }
+            
+            #property-info-content button {
+                font-size: 9px !important;
+                padding: 4px 8px !important;
+                min-height: 24px !important;
+                min-width: 50px !important;
+                margin: 2px !important;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            /* Ensure buttons are on the same line */
+            #property-info-content div[style*="display: flex"] {
+                gap: 4px !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            .turn-info {
+                font-size: 11px !important;
+                margin: 4px 0 !important;
+            }
+            
+            #dice-roll-info {
+                font-size: 10px !important;
+                margin: 3px 0 !important;
+            }
+            
+
+            
+            /* Mobile-specific purchase and decline button styles */
+            #property-info-content button {
+                font-size: 9px !important;
+                padding: 4px 8px !important;
+                min-height: 24px !important;
+                min-width: 50px !important;
+                margin: 2px !important;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            }
+            
+            /* Ensure buttons are on the same line */
+            #property-info-content div[style*="display: flex"] {
+                gap: 4px !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            #userids-panel {
+                display: none !important;
+            }
+
+            /* Mobile-specific dice pulse animations */
+            @keyframes dicePulseRed {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 15px rgba(255, 0, 0, 0.9);
+                    background-color: rgba(255, 0, 0, 0.4);
+                }
+                50% {
+                    transform: scale(1.05);
+                    box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+                    background-color: rgba(255, 0, 0, 0.6);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 15px rgba(255, 0, 0, 0.9);
+                    background-color: rgba(255, 0, 0, 0.4);
+                }
+            }
+
+            @keyframes dicePulseBlue {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 128, 255, 0.9);
+                    background-color: rgba(0, 128, 255, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(0, 128, 255, 0);
+                    background-color: rgba(0, 128, 255, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 128, 255, 0);
+                    background-color: rgba(0, 128, 255, 0.3);
+                }
+            }
+
+            .dice-pulse {
+                animation: dicePulse 1.2s ease-in-out infinite !important;
+                background-color: rgba(255, 0, 0, 0.1) !important;
+            }
+
+            .dice-pulse-red {
+                animation: dicePulseRed 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+                background-color: rgba(255, 0, 0, 0.3) !important;
+            }
+
+            .dice-pulse-blue {
+                animation: dicePulseBlue 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 128, 255, 0.8) !important;
+            }
+
+            /* Dynamic player color dice pulse animations */
+            .dice-pulse-player-red {
+                animation: dicePulsePlayerRed 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+            }
+
+            .dice-pulse-player-blue {
+                animation: dicePulsePlayerBlue 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 0, 255, 0.8) !important;
+            }
+
+            .dice-pulse-player-green {
+                animation: dicePulsePlayerGreen 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.8) !important;
+            }
+
+            .dice-pulse-player-yellow {
+                animation: dicePulsePlayerYellow 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 255, 0, 0.8) !important;
+            }
+
+            .dice-pulse-player-purple {
+                animation: dicePulsePlayerPurple 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(128, 0, 128, 0.8) !important;
+            }
+
+            @keyframes dicePulsePlayerRed {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.9);
+                    background-color: rgba(255, 0, 0, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                    background-color: rgba(255, 0, 0, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                    background-color: rgba(255, 0, 0, 0.3);
+                }
+            }
+
+            @keyframes dicePulsePlayerBlue {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 0, 255, 0.9);
+                    background-color: rgba(0, 0, 255, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(0, 0, 255, 0);
+                    background-color: rgba(0, 0, 255, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 0, 255, 0);
+                    background-color: rgba(0, 0, 255, 0.3);
+                }
+            }
+
+            @keyframes dicePulsePlayerGreen {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.9);
+                    background-color: rgba(0, 255, 0, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(0, 255, 0, 0);
+                    background-color: rgba(0, 255, 0, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+                    background-color: rgba(0, 255, 0, 0.3);
+                }
+            }
+
+            @keyframes dicePulsePlayerYellow {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 255, 0, 0.9);
+                    background-color: rgba(255, 255, 0, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(255, 255, 0, 0);
+                    background-color: rgba(255, 255, 0, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 255, 0, 0);
+                    background-color: rgba(255, 255, 0, 0.3);
+                }
+            }
+
+            @keyframes dicePulsePlayerPurple {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(128, 0, 128, 0.9);
+                    background-color: rgba(128, 0, 128, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(128, 0, 128, 0);
+                    background-color: rgba(128, 0, 128, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(128, 0, 128, 0);
+                    background-color: rgba(128, 0, 128, 0.3);
+                }
+            }
+
+            @keyframes dicePulse {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                }
+            }
+
+            /* Add mobile-specific property click detection */
+            .property-click-area {
+                position: absolute;
+                width: 60px;  /* Larger touch target */
+                height: 60px;
+                transform: translate(-50%, -50%);
+                background: transparent;
+                border-radius: 50%;
+                pointer-events: auto;
+                touch-action: manipulation;
+                z-index: 100;
+            }
+
+            .property-click-area:active {
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* Touch feedback */
+        .touch-feedback {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(0.95);
+            transition: all 0.1s ease;
+        }
+
+        /* Pan indicator */
+        .pan-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1002;
+            display: none;
+        }
+
+        .switches-container {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.1875rem;
+            margin-bottom: 0.1875rem;
+            padding: 0.0625rem;
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 0.125rem;
+            max-width: 3.4375rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #music-toggle, #restart-toggle {
+            background: linear-gradient(135deg, #666 0%, #555 100%); 
+            color: white; 
+            border: 0.125rem solid #999; 
+            border-radius: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            cursor: pointer; 
+            font-size: 0.609375rem;
+            font-weight: bold; 
+            transition: all 0.3s ease;
+            min-width: 3.515625rem;
+            text-align: center;
+            height: 1.59375rem;
+            line-height: 0.75rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #music-toggle:hover, #restart-toggle:hover {
+            transform: translateY(-0.0625rem);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        #restart-toggle {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            border-color: #b71c1c;
+        }
+        
+        #restart-toggle {
+            background: #f44336; 
+            border: 0.0625rem solid #d32f2f;
+        }
+        
+        .switches-container span {
+            font-size: 0.4375rem;
+            margin-left: 0.125rem;
+        }
+
+        .player-info span[style*="color: black"] {
+            background-color: transparent;
+            color: black;
+        }
+
+        /* Special styling for demon card properties */
+        .demon-card-property {
+            background-color: #ff0000 !important;
+            color: #000000 !important;
+            padding: 1px 4px;
+            border-radius: 3px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 600px), (max-device-width: 600px) {
+            .demon-card-property {
+                padding: 1px 2px;
+                font-size: 9px !important;
+            }
+        }
+
+        .t8-glow {
+            box-shadow: 0 0 20px 10px #ff0000; /* Red glow */
+            animation: t8Flash 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        @keyframes t8Flash {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 0, 0, 0.8); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        /* Bottom Player Information Display Styles */
+        #bottom-player-display {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #666;
+            padding: 8px 16px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+            /* Safe area support for modern mobile devices */
+            padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+            padding-left: calc(16px + env(safe-area-inset-left, 0px));
+            padding-right: calc(16px + env(safe-area-inset-right, 0px));
+            /* Ensure it's always visible above mobile browser UI */
+            min-height: 60px;
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        #bottom-player-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 4px;
+        }
+
+        .bottom-player-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            margin-bottom: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 1.2;
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+
+        .bottom-player-item.current-player {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .bottom-player-star {
+            font-weight: bold;
+            text-shadow: 0 0 4px currentColor;
+            flex-shrink: 0;
+        }
+
+        .bottom-player-name {
+            font-weight: bold;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .bottom-player-money {
+            font-weight: bold;
+            color: #90EE90;
+            flex-shrink: 0;
+        }
+
+        .bottom-player-properties {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: #ddd;
+            font-size: 11px;
+        }
+
+        /* Mobile styles for bottom player display */
+        @media (max-width: 768px) {
+            #bottom-player-display {
+                padding: 4px 8px;
+                padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+                padding-left: calc(8px + env(safe-area-inset-left, 0px));
+                padding-right: calc(8px + env(safe-area-inset-right, 0px));
+                min-height: 80px;
+                max-height: 35vh;
+                /* Ensure visibility above mobile browser UI */
+                transform: translateZ(0); /* Force hardware acceleration */
+                will-change: transform;
+            }
+
+            #bottom-player-content {
+                gap: 4px;
+            }
+
+            .bottom-player-item {
+                width: 100%;
+                padding: 6px 10px;
+                gap: 6px;
+                min-height: 40px; /* Better touch targets for mobile */
+                align-items: center;
+                flex-wrap: nowrap;
+                overflow: hidden;
+            }
+
+            .bottom-player-name, .bottom-player-money {
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .bottom-player-star {
+                font-size: 10px;
+                flex-shrink: 0;
+            }
+            
+            .bottom-player-properties {
+                font-size: 9px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        /* Very small mobile screens */
+        @media (max-width: 480px) {
+            #bottom-player-display {
+                padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+                min-height: 90px;
+                max-height: 40vh;
+            }
+            
+            .bottom-player-item {
+                width: 100%;
+                gap: 4px;
+                padding: 5px 8px;
+                min-height: 36px;
+                font-size: 10px;
+            }
+
+            .bottom-player-name, .bottom-player-money {
+                font-size: 10px;
+            }
+            
+            .bottom-player-star {
+                font-size: 9px;
+            }
+            
+            .bottom-player-properties {
+                font-size: 8px;
+            }
+        }
+        
+        /* Landscape mobile devices */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #bottom-player-display {
+                max-height: 45vh;
+                min-height: 50px;
+                padding: 2px 8px;
+                padding-bottom: calc(2px + env(safe-area-inset-bottom, 0px));
+            }
+            
+            .bottom-player-item {
+                min-height: 32px;
+                padding: 3px 6px;
+                gap: 3px;
+            }
+            
+            .bottom-player-name, .bottom-player-money {
+                font-size: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio element for rain sound -->
+    <audio id="rainSound" src="assets/sounds/rain.mp3" preload="auto"></audio>
+
+    <div id="intro-screen">
+        <div class="player-selection-window">
+            <h1 class="horropoly-title">Horropoly</h1>
+            
+            <div id="player-setup">
+                <input id="player1-name" type="text" value="Player1" />
+            </div>
+            
+            <div class="game-mode-selection">
+                <button id="vs-ai-btn" class="mode-button">Play vs AI</button>
+                <button id="vs-human-btn" class="mode-button">Play vs Human</button>
+            </div>
+
+            <div id="ai-options" class="ai-options">
+                <div style="margin-bottom:10px;">
+                    <label for="human-player-count" style="margin-right:6px;">Humans:</label>
+                    <select id="human-player-count" style="padding:6px; border-radius:4px;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label for="ai-player-count" style="margin-right:6px;">AI Bots:</label>
+                    <select id="ai-player-count" style="padding:6px; border-radius:4px;">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <button id="start-ai-game-btn">Start Game</button>
+            </div>
+
+            <div class="multiplayer-controls">
+                <div class="button-group">
+                    <button id="create-room-btn" class="button-secondary">Create Room</button>
+                    <button id="join-room-btn" class="button-secondary">Join Room</button>
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="max-players" style="margin-right:6px;">Players:</label>
+                    <select id="max-players" style="padding:6px; border-radius:4px;">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <input id="room-id-input" type="text" placeholder="Enter room code" style="display: none;" />
+                <div id="room-code"></div>
+                <div id="room-list" class="room-list" style="display: none;"></div>
+                <div id="player-list" class="player-list" style="display: none;"></div>
+                <button id="start-game-btn" style="display: none;">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lobby-container" style="display:none; text-align:center; padding:20px;">
+        <h2>Multiplayer Lobby</h2>
+        <input id="display-name" placeholder="Your name" maxlength="20" />
+        <div>
+            <input id="room-name" placeholder="Room name" maxlength="20" />
+            <select id="min-players">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <button id="create-room">Create</button>
+        </div>
+        <button id="refresh-rooms">Refresh Rooms</button>
+        <ul id="available-rooms"></ul>
+        <ul id="room-players"></ul>
+    </div>
+
+    <div id="game-container">
+
+        
+        <!-- Add hand effect container -->
+        <div id="hand-effect" class="hand-container">
+            <img src="assets/images/face1.jpg" alt="Face" class="hand-image" />
+        </div>
+    </div>
+
+    <!-- Bottom Player Information Display -->
+    <div id="bottom-player-display" style="display: none;">
+        <div id="bottom-player-content">
+            <!-- Players will be populated here -->
+        </div>
+    </div>
+
+    <!-- Mobile pan indicator -->
+    <div id="pan-indicator" class="pan-indicator">
+         Swipe to pan board 👉
+    </div>
+
+    <!-- Player UserIDs Panel -->
+    <div id="userids-panel" style="display: none; position: fixed; top: 20px; right: 20px; width: 220px; padding: 10px; background: rgba(0, 0, 0, 0.95); border: 2px solid #4CAF50; border-radius: 8px; color: #fff; font-family: 'Courier New', Courier, monospace; z-index: 999; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);">
+        <div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; text-align: center; font-size: 14px;">Player UserIDs</div>
+        <div id="userids-content" style="font-size: 11px;">
+            <div style="text-align: center; color: #999;">Loading...</div>
+        </div>
+    </div>
+
+    <div id="info-panel" style="display: none; z-index: 1001;">
+        <!-- Header with minimize button -->
+        <div id="info-panel-header" style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px; padding: 5px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; cursor: move; position: relative;">
+            <span style="flex: 1; text-align: center; font-weight: bold; color: #fff; font-size: 18px; letter-spacing: 1px; text-shadow: 0 0 8px #ffd700, 0 0 2px #fff;">Player Info Web</span>
+            <button id="minimize-info-panel" onclick="toggleInfoPanelMinimize()" style="
+                position: absolute;
+                right: 6px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 5px;
+                padding: 8.44px 3.38px;
+                cursor: pointer;
+                font-size: 13.5px;
+                transition: all 0.2s ease;
+                min-width: 16.88px;
+                height: 33.75px;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">−</button>
+        </div>
+        
+        <!-- Content container that will be hidden when minimized -->
+        <div id="info-panel-content">
+        <div class="switches-container" style="display: flex; align-items: center; justify-content: center; gap: 0.25rem; margin-bottom: 0.375rem; padding: 0.25rem; background: rgba(0, 0, 0, 0.3); border-radius: 0.25rem; border: 0.0625rem solid rgba(255, 255, 255, 0.2);">
+            <div class="music-toggle" style="display: flex; align-items: center; flex: 1;">
+                <button id="music-toggle" style="
+                    background: linear-gradient(135deg, #666 0%, #555 100%); 
+                    color: white; 
+                    border: 0.125rem solid #999; 
+                    border-radius: 0.375rem; 
+                    padding: 0.09375rem 0.1875rem; 
+                    cursor: pointer; 
+                    font-size: 0.46875rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    height: 0.84375rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔇</button>
+            </div>
+            <div class="info-toggle" style="display: flex; align-items: center; flex: 1;">
+                <button id="info-toggle" onclick="showHorrorInstructions()" title="Game Instructions & Rules" style="
+                    background: linear-gradient(135deg, #4a0080 0%, #6a00a0 100%); 
+                    color: white; 
+                    border: 0.125rem solid #8a2be2; 
+                    border-radius: 0.375rem; 
+                    padding: 0.09375rem 0.1875rem; 
+                    cursor: pointer; 
+                    font-size: 0.46875rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    height: 0.84375rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">ℹ️</button>
+            </div>
+            <div class="analyze-toggle" style="display: flex; align-items: center; flex: 1;">
+                <button id="analyze-toggle" onclick="showAIAnalysis()" title="AI Analysis" style="
+                    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); 
+                    color: white; 
+                    border: 0.125rem solid #4CAF50; 
+                    border-radius: 0.375rem; 
+                    padding: 0.09375rem 0.1875rem; 
+                    cursor: pointer; 
+                    font-size: 0.46875rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    height: 0.84375rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔍</button>
+            </div>
+            <div class="restart-toggle" style="display: flex; align-items: center; flex: 1;">
+                <button id="restart-toggle" onclick="confirmRestart()" style="
+                    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); 
+                    color: white; 
+                    border: 0.125rem solid #b71c1c; 
+                    border-radius: 0.375rem; 
+                    padding: 0.09375rem 0.1875rem; 
+                    cursor: pointer; 
+                    font-size: 0.46875rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    width: 100%;
+                    height: 0.84375rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔄</button>
+            </div>
+        </div>
+        <div id="advisory-panel" style="margin-bottom: 15px; padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; font-size: 14px;">
+            <div id="advisory-title" style="font-weight: bold; margin-bottom: 5px; color: #ffd700;">Game Advisory</div>
+            <div id="advisory-content" style="color: #fff; min-height: 40px;">Welcome to Horropoly!</div>
+        </div>
+        <div id="dice-content"></div>
+        <div id="player-info-content" style="display: none !important;"></div>
+
+        <div id="ai-analysis-modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 20px; border-radius: 10px; z-index: 1000; border: 2px solid #666; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 300px; text-align: center;">
+            <div id="ai-analysis-content" style="color: #fff; margin-bottom: 15px;"></div>
+            <button onclick="hideAIAnalysis()" style="background: #f44336; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Close</button>
+        </div>
+        <div id="property-info-content"></div>
+        <div id="player-scores"></div>
+        <div class="dice-section" id="dice-section">
+            <div class="die" id="die1">?</div>
+            <div class="die" id="die2">?</div>
+        </div>
+        <h3 id="turn-info" class="turn-info"></h3>
+        <p id="dice-roll-info"></p>
+        </div>
+    </div>
+
+    <div id="record-export" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; z-index: 1000; border: 2px solid #666; box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center;">
+        <h3 style="color: white; margin-bottom: 15px;">Eye Positions Recorded!</h3>
+        <textarea id="eye-positions-json" rows="4" cols="40" readonly style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #666; border-radius: 5px; font-family: monospace;"></textarea>
+        <br>
+        <div style="margin-top: 15px;">
+            <button id="save-eyes-btn" style="background-color: #4CAF50; min-width: 120px;">Save</button>
+            <button id="cancel-eyes-btn" style="margin-left: 10px; background-color: #f44336; min-width: 120px;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // Define toggleInfoPanelMinimize function to be available immediately
+        window.toggleInfoPanelMinimize = function toggleInfoPanelMinimize() {
+            console.log('toggleInfoPanelMinimize called!');
+            
+            const infoPanel = document.getElementById('info-panel');
+            const infoPanelContent = document.getElementById('info-panel-content');
+            const minimizeButton = document.getElementById('minimize-info-panel');
+            
+            console.log('Elements found:', { infoPanel, infoPanelContent, minimizeButton });
+            
+            if (!infoPanel || !infoPanelContent || !minimizeButton) {
+                console.error('Info panel elements not found', { infoPanel, infoPanelContent, minimizeButton });
+                return;
+            }
+            
+            const isMinimized = infoPanel.classList.contains('minimized');
+            
+            if (isMinimized) {
+                console.log('📱 Restoring info panel to full window');
+                
+                // Remove minimized class and property-decision class
+                infoPanel.classList.remove('minimized', 'property-decision');
+                infoPanelContent.style.display = 'block';
+                minimizeButton.textContent = '−';
+                minimizeButton.title = 'Minimize';
+                infoPanel.style.height = 'auto';
+                infoPanel.style.minHeight = 'auto';
+                
+                // Reset auto-expand flag when manually restored
+                wasAutoExpanded = false;
+                
+                // Restore other players' info when manually expanded
+                showOtherPlayersAfterActions();
+                
+                // Restore dice section to original location
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection && (diceSection.getAttribute('data-original-parent') || diceSection.getAttribute('data-original-parent-id'))) {
+                    const storedParentId = diceSection.getAttribute('data-original-parent-id') || 'dice-content';
+                    const originalParent = document.getElementById(storedParentId);
+                    if (originalParent) {
+                        console.log('📱 Restoring dice to original location:', storedParentId);
+                        diceSection.style.cssText = ''; // Reset styling
+                        diceSection.removeAttribute('data-original-parent');
+                        diceSection.removeAttribute('data-original-parent-id');
+                        originalParent.appendChild(diceSection);
+                        
+                        // Re-enable dice section for normal mode
+                        setTimeout(() => {
+                            if (typeof enableDiceSection === 'function') {
+                                enableDiceSection();
+                            }
+                        }, 50);
+                    } else {
+                        console.error('📱 Original parent not found for dice restoration:', storedParentId);
+                    }
+                }
+                
+                // Restore property info content to original location
+                const propertyInfoContent = document.getElementById('property-info-content');
+                if (propertyInfoContent && propertyInfoContent.getAttribute('data-original-parent')) {
+                    const originalParent = document.getElementById(propertyInfoContent.getAttribute('data-original-parent'));
+                    if (originalParent) {
+                        // Restore original styling
+                        const originalStyle = propertyInfoContent.getAttribute('data-original-style');
+                        propertyInfoContent.style.cssText = originalStyle || '';
+                        propertyInfoContent.removeAttribute('data-original-style');
+                        propertyInfoContent.removeAttribute('data-original-parent');
+                        
+                        // Restore button styling
+                        const buttons = propertyInfoContent.querySelectorAll('button');
+                        buttons.forEach(button => {
+                            const originalButtonStyle = button.getAttribute('data-original-style');
+                            button.style.cssText = originalButtonStyle || '';
+                            button.removeAttribute('data-original-style');
+                        });
+                        
+                        originalParent.appendChild(propertyInfoContent);
+                    }
+                }
+                
+                // Restore game advisory panel if it was hidden
+                const hiddenAdvisory = document.querySelector('#advisory-panel[data-hidden-minimized="true"]');
+                if (hiddenAdvisory) {
+                    hiddenAdvisory.style.display = '';
+                    hiddenAdvisory.removeAttribute('data-hidden-minimized');
+                }
+                
+                // Remove minimized content if it exists
+                const minimizedContent = document.getElementById('minimized-content');
+                if (minimizedContent) {
+                    minimizedContent.remove();
+                }
+                
+                // Update the info panel to show full content
+                setTimeout(() => {
+                    console.log('📱 Calling updateInfoPanel after restore');
+                    
+                    // Check game state before updating
+                    console.log('📱 Game state check:', {
+                        players: typeof players !== 'undefined' && Array.isArray(players) ? players.length : 'not array',
+                        currentPlayerIndex: typeof currentPlayerIndex !== 'undefined' ? currentPlayerIndex : 'undefined',
+                        currentPlayer: typeof players !== 'undefined' && players && players[currentPlayerIndex] ? players[currentPlayerIndex].name : 'none'
+                    });
+                    
+                    if (typeof updateInfoPanel === 'function') {
+                        updateInfoPanel();
+                    }
+                    
+                    // Force refresh all content sections
+                    const playerInfoContent = document.getElementById('player-info-content');
+                    const propertyInfoContent = document.getElementById('property-info-content');
+                    const diceContent = document.getElementById('dice-content');
+                    
+                    console.log('📱 Content elements found:', {
+                        playerInfoContent: !!playerInfoContent,
+                        propertyInfoContent: !!propertyInfoContent,
+                        diceContent: !!diceContent
+                    });
+                    
+                    // Ensure all sections are visible
+                    if (playerInfoContent) playerInfoContent.style.display = 'block';
+                    if (propertyInfoContent) propertyInfoContent.style.display = 'block';
+                    if (diceContent) diceContent.style.display = 'block';
+                    
+                    // If game state is not ready, try again later
+                    if (typeof players === 'undefined' || !Array.isArray(players) || players.length === 0) {
+                        console.log('📱 Game state not ready, retrying in 500ms');
+                        setTimeout(() => {
+                            console.log('📱 Retry updateInfoPanel call');
+                            if (typeof updateInfoPanel === 'function') {
+                                updateInfoPanel();
+                            }
+                        }, 500);
+                    } else {
+                        // Force a second update to ensure content is populated
+                        setTimeout(() => {
+                            console.log('📱 Second updateInfoPanel call');
+                            if (typeof updateInfoPanel === 'function') {
+                                updateInfoPanel();
+                            }
+                        }, 200);
+                    }
+                }, 100);
+            } else {
+                // Minimize the panel - show only essential info
+                infoPanel.classList.add('minimized');
+                infoPanelContent.style.display = 'none';
+                minimizeButton.textContent = '+';
+                minimizeButton.title = 'Restore';
+                
+                // Create minimized content with only player info, funds, token, properties, and dice
+                const minimizedContent = document.createElement('div');
+                minimizedContent.id = 'minimized-content';
+                minimizedContent.style.cssText = `
+                    padding: 5px 20px 5px 10px;
+                    color: #fff;
+                    font-size: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    height: auto;
+                    overflow: visible;
+                `;
+                
+                // Get current player info (if game is loaded)
+                let currentPlayer = null;
+                
+                // Try to get player data from global variables first
+                if (typeof players !== 'undefined' && typeof currentPlayerIndex !== 'undefined' && players[currentPlayerIndex]) {
+                    currentPlayer = players[currentPlayerIndex];
+                } else {
+                    // Fallback: try to extract player info from existing info panel content
+                    const infoPanelContent = document.getElementById('info-panel-content');
+                    if (infoPanelContent && infoPanelContent.innerHTML.trim()) {
+                        // Look for the current player's highlighted info div
+                        const highlightedPlayerDiv = infoPanelContent.querySelector('.player-info[style*="background"]');
+                        const firstPlayerDiv = highlightedPlayerDiv || infoPanelContent.querySelector('.player-info');
+                        
+                        if (firstPlayerDiv) {
+                            // Extract player name and money from the existing content
+                            const nameSpan = firstPlayerDiv.querySelector('.player-name');
+                            const moneySpan = firstPlayerDiv.querySelector('.player-money span') || firstPlayerDiv.querySelector('.player-money');
+                            
+                            if (nameSpan && moneySpan) {
+                                currentPlayer = {
+                                    name: nameSpan.textContent.trim(),
+                                    money: moneySpan.textContent.replace('£', '').trim(),
+                                    color: nameSpan.style.color || '#fff'
+                                };
+                            }
+                        }
+                    }
+                    
+                    // Additional fallback: check if there's any player data in the DOM
+                    if (!currentPlayer) {
+                        const anyPlayerName = document.querySelector('.player-name');
+                        const anyPlayerMoney = document.querySelector('.player-money');
+                        if (anyPlayerName && anyPlayerMoney) {
+                            currentPlayer = {
+                                name: anyPlayerName.textContent.trim(),
+                                money: anyPlayerMoney.textContent.replace('£', '').trim(),
+                                color: anyPlayerName.style.color || '#fff'
+                            };
+                        }
+                    }
+                }
+                
+                if (currentPlayer) {
+                    // Player name, funds, and steal cards in one row
+                    const playerBasics = document.createElement('div');
+                    playerBasics.style.cssText = 'display: flex; align-items: center; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 5px);';
+                    
+                    let stealCardsDisplay = '';
+                    if (currentPlayer.stealCards && currentPlayer.stealCards > 0) {
+                        stealCardsDisplay = `<span style="color: #00ff00; font-size: 10px; font-weight: bold; text-shadow: 0 0 4px #00ff00;">🃏 ${currentPlayer.stealCards}</span>`;
+                    }
+                    
+                    playerBasics.innerHTML = `
+                        <span style="font-weight: bold; color: ${currentPlayer.color || '#fff'};">
+                            <span style="color: ${currentPlayer.color || '#fff'}; margin-right: 4px;">★</span>${currentPlayer.name}
+                        </span>
+                        <span style="color: #90EE90;">£${currentPlayer.money}</span>
+                        ${stealCardsDisplay}
+                    `;
+                    minimizedContent.appendChild(playerBasics);
+                    
+                    // Token section (if visible)
+                    if (currentPlayer.token) {
+                        const tokenDiv = document.createElement('div');
+                        tokenDiv.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+                        tokenDiv.innerHTML = `
+                            <span style="font-size: 10px;">Token:</span>
+                            <img src="${currentPlayer.token}" style="width: 16px; height: 16px; border-radius: 50%;">
+                        `;
+                        minimizedContent.appendChild(tokenDiv);
+                    }
+                    
+                    // Extract steal cards from DOM if not in currentPlayer object
+                    if (!currentPlayer.stealCards) {
+                        const stealCardElement = infoPanelContent?.querySelector('.player-info .player-info-left span[style*="color: #00ff00"]');
+                        if (stealCardElement && stealCardElement.textContent.includes('🃏')) {
+                            const stealCardsFromDOM = stealCardElement.textContent.replace('🃏', '').trim();
+                            playerBasics.innerHTML = playerBasics.innerHTML.replace('</span>', `</span><span style="color: #00ff00; font-size: 10px; font-weight: bold; text-shadow: 0 0 4px #00ff00;">🃏 ${stealCardsFromDOM}</span>`);
+                        }
+                    }
+                    
+                    // Properties owned (detailed compact format)
+                    if (currentPlayer.properties && currentPlayer.properties.length > 0) {
+                        const propertiesDiv = document.createElement('div');
+                        propertiesDiv.style.cssText = 'font-size: 9px; line-height: 1.1; max-height: 40px; overflow-y: auto;';
+                        
+                        let propertiesText = currentPlayer.properties.map(prop => {
+                            // Simplified property name
+                            let propName = prop.replace(/\d+/g, '').replace(/^\s+|\s+$/g, '');
+                            if (propName.length > 8) propName = propName.substring(0, 8) + '...';
+                            return propName;
+                        }).join(', ');
+                        
+                        if (propertiesText.length > 60) {
+                            propertiesText = propertiesText.substring(0, 57) + '...';
+                        }
+                        
+                        propertiesDiv.innerHTML = `<span style="color: #ccc;">Properties (${currentPlayer.properties.length}): ${propertiesText}</span>`;
+                        minimizedContent.appendChild(propertiesDiv);
+                    } else {
+                        // Try to extract properties from DOM
+                        const propertyDisplay = infoPanelContent?.querySelector('#property-display');
+                        if (propertyDisplay && propertyDisplay.innerHTML.trim()) {
+                            const propertiesDiv = document.createElement('div');
+                            propertiesDiv.style.cssText = 'font-size: 9px; line-height: 1.1; max-height: 40px; overflow-y: auto;';
+                            
+                            // Extract property dots/indicators
+                            const propertyDots = propertyDisplay.querySelectorAll('span[style*="background"]');
+                            if (propertyDots.length > 0) {
+                                const propertyColors = Array.from(propertyDots).map((dot, index) => {
+                                    const bgColor = dot.style.background || dot.style.backgroundColor;
+                                    return `<span style="display: inline-block; width: 8px; height: 8px; background: ${bgColor}; border-radius: 50%; margin-right: 2px;"></span>`;
+                                }).join('');
+                                
+                                propertiesDiv.innerHTML = `<span style="color: #ccc;">Properties (${propertyDots.length}): ${propertyColors}</span>`;
+                                minimizedContent.appendChild(propertiesDiv);
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback if game data not available
+                    const fallbackDiv = document.createElement('div');
+                    fallbackDiv.style.cssText = 'text-align: center; color: #ccc;';
+                    fallbackDiv.textContent = 'Game data not available';
+                    minimizedContent.appendChild(fallbackDiv);
+                }
+                
+                // Add dice section (move original, don't clone to preserve events)
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection) {
+                    // Store original parent to restore later
+                    diceSection.setAttribute('data-original-parent', 'dice-content');
+                    diceSection.style.cssText = 'margin-top: 5px; transform: scale(0.8); transform-origin: left center;';
+                    minimizedContent.appendChild(diceSection);
+                }
+                
+                // Hide game advisory panel when minimized
+                const advisoryPanel = document.getElementById('advisory-panel');
+                if (advisoryPanel) {
+                    advisoryPanel.style.display = 'none';
+                    advisoryPanel.setAttribute('data-hidden-minimized', 'true');
+                }
+                
+                // Add property purchase/decision buttons if they're currently visible
+                const propertyInfoContent = document.getElementById('property-info-content');
+                if (propertyInfoContent && propertyInfoContent.innerHTML.trim()) {
+                    // Store original parent reference
+                    propertyInfoContent.setAttribute('data-original-parent', 'info-panel-content');
+                    
+                    // Apply minimized styling to property info content
+                    const originalStyle = propertyInfoContent.style.cssText;
+                    propertyInfoContent.setAttribute('data-original-style', originalStyle);
+                    propertyInfoContent.style.cssText = 'margin-top: 5px; font-size: 10px;';
+                    
+                    // Scale down buttons in the property info content
+                    const buttons = propertyInfoContent.querySelectorAll('button');
+                    buttons.forEach(button => {
+                        button.setAttribute('data-original-style', button.style.cssText);
+                        button.style.cssText = 'font-size: 8px !important; padding: 2px 6px !important; min-height: 18px !important; margin: 1px !important;';
+                    });
+                    
+                    minimizedContent.appendChild(propertyInfoContent);
+                }
+                
+                // Insert after header
+                const header = document.getElementById('info-panel-header');
+                if (header) {
+                    header.insertAdjacentElement('afterend', minimizedContent);
+                }
+                
+                // Adjust panel height to fit content
+                infoPanel.style.height = 'auto';
+                infoPanel.style.minHeight = 'auto';
+            }
+        }
+        
+        // Function to check if action buttons requiring user input are present
+        function hasActionButtons() {
+            const propertyInfoContent = document.getElementById('property-info-content');
+            if (!propertyInfoContent || !propertyInfoContent.innerHTML.trim()) {
+                return false;
+            }
+            
+            // Check for buttons that require user interaction (purchase, pay rent, etc.)
+            const actionButtons = propertyInfoContent.querySelectorAll('button');
+            const actionKeywords = ['buy', 'purchase', 'pay', 'decide', 'auction', 'mortgage', 'unmortgage', 'build', 'trade'];
+            
+            for (let button of actionButtons) {
+                const buttonText = button.textContent.toLowerCase();
+                if (actionKeywords.some(keyword => buttonText.includes(keyword))) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        // Track if panel was auto-expanded to know when to auto-minimize
+        let wasAutoExpanded = false;
+        
+        // Function to detect mobile devices
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Function to hide other players' info during auto-expanded purchase actions
+        function hideOtherPlayersForActions() {
+            if (!wasAutoExpanded) return;
+            
+            const infoPanelContent = document.getElementById('info-panel-content');
+            if (!infoPanelContent) return;
+            
+            // Hide all player info except for property purchase content
+            const playerInfos = infoPanelContent.querySelectorAll('.player-info');
+            playerInfos.forEach(playerInfo => {
+                // Only hide if it's not the current player's highlighted info
+                if (!playerInfo.style.background || !playerInfo.style.background.includes('rgba')) {
+                    playerInfo.style.display = 'none';
+                    playerInfo.setAttribute('data-hidden-action', 'true');
+                }
+            });
+            
+            // Also hide property display to save space
+            const propertyDisplay = infoPanelContent.querySelector('#property-display');
+            if (propertyDisplay) {
+                propertyDisplay.style.display = 'none';
+                propertyDisplay.setAttribute('data-hidden-action', 'true');
+            }
+            
+            // Hide game advisory panel during actions
+            const advisoryPanel = infoPanelContent.querySelector('#advisory-panel');
+            if (advisoryPanel) {
+                advisoryPanel.style.display = 'none';
+                advisoryPanel.setAttribute('data-hidden-action', 'true');
+            }
+            
+            console.log('Hidden other players info for action view');
+        }
+        
+        // Function to restore other players' info after actions
+        function showOtherPlayersAfterActions() {
+            const infoPanelContent = document.getElementById('info-panel-content');
+            if (!infoPanelContent) return;
+            
+            // Restore all hidden elements
+            const hiddenElements = infoPanelContent.querySelectorAll('[data-hidden-action="true"]');
+            hiddenElements.forEach(element => {
+                element.style.display = '';
+                element.removeAttribute('data-hidden-action');
+            });
+            
+            console.log('Restored other players info after action completed');
+        }
+        
+        // Function to auto-expand minimized panel when action buttons appear
+        function autoExpandForActions() {
+            const infoPanel = document.getElementById('info-panel');
+            if (!infoPanel) return;
+            
+            const isMinimized = infoPanel.classList.contains('minimized');
+            if (isMinimized && hasActionButtons()) {
+                console.log('Auto-expanding minimized panel for action buttons');
+                wasAutoExpanded = true;
+                toggleInfoPanelMinimize();
+                
+                // Small delay to ensure panel is expanded before hiding other players
+                setTimeout(() => {
+                    hideOtherPlayersForActions();
+                }, 150);
+            }
+        }
+        
+        // Function to auto-minimize panel when action buttons are removed
+        function autoMinimizeAfterAction() {
+            const infoPanel = document.getElementById('info-panel');
+            if (!infoPanel) return;
+            
+            const isMinimized = infoPanel.classList.contains('minimized');
+            if (!isMinimized && wasAutoExpanded && !hasActionButtons()) {
+                console.log('Auto-minimizing panel after action completed');
+                
+                // Restore other players' info before minimizing
+                showOtherPlayersAfterActions();
+                
+                wasAutoExpanded = false;
+                toggleInfoPanelMinimize();
+            }
+        }
+        
+        // Monitor for changes to property-info-content to auto-expand/minimize when needed
+        function setupAutoExpandObserver() {
+            const propertyInfoContent = document.getElementById('property-info-content');
+            if (!propertyInfoContent) return;
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        // Small delay to ensure DOM is fully updated
+                        setTimeout(() => {
+                            autoExpandForActions(); // Check if we need to expand
+                            autoMinimizeAfterAction(); // Check if we need to minimize
+                        }, 100);
+                    }
+                });
+            });
+            
+            observer.observe(propertyInfoContent, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('Auto-expand/minimize observer set up for property actions');
+        }
+        
+        // Make the function globally accessible (already done above)
+        // window.toggleInfoPanelMinimize = toggleInfoPanelMinimize; // Already assigned above
+        window.autoExpandForActions = autoExpandForActions;
+        
+        // Debug: confirm function is defined
+        console.log('toggleInfoPanelMinimize function defined:', typeof window.toggleInfoPanelMinimize);
+
+        // Make player selection window draggable
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize rain sound loop
+            const rainSound = document.getElementById('rainSound');
+            if (rainSound) {
+                rainSound.volume = 0.3; // Set volume to 30%
+                
+                function playRainSound() {
+                    rainSound.currentTime = 0; // Reset to start
+                    rainSound.play().catch(function(error) {
+                        console.log("Rain sound playback failed:", error);
+                    });
+                }
+                
+                // Play rain sound every 15 seconds
+                playRainSound(); // Play immediately
+                setInterval(playRainSound, 15000); // Then every 15 seconds
+            }
+            
+            // Set up auto-expand observer for minimize panel
+            setupAutoExpandObserver();
+            // Check for AI game auto-start from lobby
+            const aiGameSetup = sessionStorage.getItem('aiGameSetup');
+            if (aiGameSetup) {
+                try {
+                    const setup = JSON.parse(aiGameSetup);
+                    if (setup.autoStart) {
+                        // Set player name and start AI game immediately
+                        document.getElementById('player1-name').value = setup.playerName;
+                        
+                        // Clear the session storage
+                        sessionStorage.removeItem('aiGameSetup');
+                        
+                        // Import and start the AI game
+                        import('./game.js').then(gameModule => {
+                            if (gameModule.startAIGame) {
+                                gameModule.startAIGame(setup.playerName, setup.totalPlayers);
+                            }
+                        }).catch(error => {
+                            console.error('Failed to start AI game:', error);
+                            // Fallback: show AI options and let user start manually
+                            document.getElementById('vs-ai-btn').click();
+                            document.getElementById('ai-player-count').value = setup.totalPlayers;
+                        });
+                        
+                        return; // Exit early, don't set up dragging since game will start
+                    }
+                } catch (error) {
+                    console.error('Failed to parse AI game setup:', error);
+                    sessionStorage.removeItem('aiGameSetup');
+                }
+            }
+            const playerWindow = document.querySelector('.player-selection-window');
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            
+            playerWindow.addEventListener('mousedown', function(e) {
+                // Don't drag if clicking on input fields or buttons
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                
+                isDragging = true;
+                playerWindow.classList.add('dragging');
+                
+                const rect = playerWindow.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                // Convert to fixed positioning
+                playerWindow.style.position = 'fixed';
+                playerWindow.style.left = rect.left + 'px';
+                playerWindow.style.top = rect.top + 'px';
+                playerWindow.style.margin = '0';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const newX = e.clientX - dragOffset.x;
+                const newY = e.clientY - dragOffset.y;
+                
+                // Keep window within viewport bounds
+                const maxX = window.innerWidth - playerWindow.offsetWidth;
+                const maxY = window.innerHeight - playerWindow.offsetHeight;
+                
+                playerWindow.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                playerWindow.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    playerWindow.classList.remove('dragging');
+                }
+            });
+            
+            // Touch support for mobile
+            playerWindow.addEventListener('touchstart', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                
+                const touch = e.touches[0];
+                isDragging = true;
+                playerWindow.classList.add('dragging');
+                
+                const rect = playerWindow.getBoundingClientRect();
+                dragOffset.x = touch.clientX - rect.left;
+                dragOffset.y = touch.clientY - rect.top;
+                
+                playerWindow.style.position = 'fixed';
+                playerWindow.style.left = rect.left + 'px';
+                playerWindow.style.top = rect.top + 'px';
+                playerWindow.style.margin = '0';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                
+                const touch = e.touches[0];
+                const newX = touch.clientX - dragOffset.x;
+                const newY = touch.clientY - dragOffset.y;
+                
+                const maxX = window.innerWidth - playerWindow.offsetWidth;
+                const maxY = window.innerHeight - playerWindow.offsetHeight;
+                
+                playerWindow.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                playerWindow.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchend', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    playerWindow.classList.remove('dragging');
+                }
+            });
+        });
+
+        // Add this at the beginning of your script section
+        function styleDemonProperties() {
+            const propertySpans = document.querySelectorAll('.player-info span[style*="color: black"]');
+            propertySpans.forEach(span => {
+                if (span.textContent.includes('Demon')) {
+                    span.classList.add('demon-card-property');
+                }
+            });
+        }
+
+        // Call this function whenever the player info is updated
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.target.id === 'player-info-content') {
+                    styleDemonProperties();
+                }
+            });
+        });
+
+        // Start observing the player-info-content for changes
+        observer.observe(document.getElementById('info-panel'), {
+            childList: true,
+            subtree: true
+        });
+    </script>
+
+    <script>
+    // Optimized Horror Instructions Modal for Game Interface
+    // Enhanced Mobile Instructions System Integration
+    function showHorrorInstructions() {
+        console.log('🩸 showHorrorInstructions called (gamestart)');
+        
+        // Check if the mobile instructions system is already loaded
+        if (window.enhancedInstructionsLoaded && window.showHorrorInstructionsOriginal) {
+            console.log('🩸 Mobile instructions already loaded, calling function');
+            window.showHorrorInstructionsOriginal();
+            return;
+        }
+        
+        // Load the enhanced mobile instructions system
+        if (!window.enhancedInstructionsLoaded) {
+            console.log('🩸 Loading mobile instructions system...');
+            const script = document.createElement('script');
+            script.src = 'mobile-instructions.js';
+            script.onload = function() {
+                window.enhancedInstructionsLoaded = true;
+                // Store the original function with a different name to avoid conflicts
+                window.showHorrorInstructionsOriginal = window.showHorrorInstructions;
+                console.log('🩸 Mobile instructions loaded successfully');
+                // Call the function from the loaded script
+                if (window.showHorrorInstructionsOriginal && typeof window.showHorrorInstructionsOriginal === 'function') {
+                    window.showHorrorInstructionsOriginal();
+                } else {
+                    console.error('showHorrorInstructions function not available after loading');
+                }
+            };
+            script.onerror = function() {
+                console.error('Failed to load mobile-instructions.js');
+                alert('Failed to load instructions. Please refresh the page and try again.');
+            };
+            document.head.appendChild(script);
+            return;
+        }
+        
+        console.error('Mobile instructions system not properly loaded');
+    }
+    
+    function showHorrorInstructionsOld() {
+        createOptimizedInstructionsModal();
+    }
+    
+    function createOptimizedInstructionsModal() {
+        // Remove any existing modal
+        const existingModal = document.getElementById('game-instructions-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.id = 'game-instructions-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: linear-gradient(135deg, #1a0033 0%, #330066 50%, #1a0033 100%);
+            border: 3px solid #8b0000;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.8);
+            color: #fff;
+            position: relative;
+        `;
+        
+        modalContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #8b0000; padding-bottom: 10px;">
+                <h2 style="margin: 0; color: #ff0000; text-shadow: 0 0 10px #ff0000; font-size: 20px;">🎭 HORROPOLY RULES</h2>
+                <button onclick="closeGameInstructions()" style="
+                    background: #8b0000;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 30px;
+                    height: 30px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: bold;
+                " title="Close">✕</button>
+            </div>
+            
+            <div style="columns: 2; column-gap: 20px; font-size: 14px; line-height: 1.4;">
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">💰 RENT SYSTEM</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>Unimproved:</strong> Base rent</li>
+                        <li><strong>1 House:</strong> 5x base rent</li>
+                        <li><strong>2 Houses:</strong> 15x base rent</li>
+                        <li><strong>3 Houses:</strong> 45x base rent</li>
+                        <li><strong>4 Houses:</strong> 80x base rent</li>
+                        <li><strong>Hotel:</strong> 100x base rent</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🃏 STEAL CARDS</h3>
+                    <p style="margin: 0 0 8px 0;">Draw from the deck when landing on card spaces:</p>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>Property Steal:</strong> Take any property from another player</li>
+                        <li><strong>Money Steal:</strong> Take £200 from another player</li>
+                        <li><strong>Teleport:</strong> Move to any square instantly</li>
+                        <li><strong>Immunity:</strong> Skip next rent payment</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🎯 BASIC RULES</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>GO Bonus:</strong> Collect £250 when passing GO</li>
+                        <li><strong>Yin-Yang:</strong> Teleport to any square</li>
+                        <li><strong>Bankruptcy:</strong> Properties become available to all players</li>
+                        <li><strong>Win Condition:</strong> Last player standing wins</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🏠 BUILDING RULES</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li>Must own all properties in a color group</li>
+                        <li>Build evenly (max 1 house difference)</li>
+                        <li>Hotels replace 4 houses</li>
+                        <li>Sell buildings at half price</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #8b0000;">
+                <button onclick="closeGameInstructions()" style="
+                    background: linear-gradient(45deg, #8b0000, #ff0000);
+                    color: white;
+                    border: none;
+                    padding: 8px 20px;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 14px;
+                ">Got it! 🎮</button>
+            </div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Add mobile-specific styles
+        if (window.innerWidth <= 768) {
+            modalContent.style.cssText += `
+                max-width: 95vw;
+                padding: 15px;
+                font-size: 13px;
+            `;
+            modalContent.innerHTML = modalContent.innerHTML.replace('columns: 2;', 'columns: 1;');
+        }
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeGameInstructions();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGameInstructions();
+            }
+        });
+    }
+    
+    function closeGameInstructions() {
+        const modal = document.getElementById('game-instructions-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+    </script>
+    
+    <!-- Robust Firebase with optional auth for local testing -->
+    <script type="module">
+      import { setupFirebaseWithOptionalAuth, testOptionalAuthSetup } from "./firebase-auth-optional.js";
+      
+      // Initialize immediately (before DOMContentLoaded to beat old system)
+      (async () => {
+        console.log("🎮 Initializing Firebase with optional auth for gamestart...");
+        
+        try {
+          const success = await setupFirebaseWithOptionalAuth();
+          
+          if (success) {
+            console.log("✅ Firebase optional auth system ready for game");
+            // Test the setup
+            testOptionalAuthSetup();
+          } else {
+            console.log("⚠️ Firebase optional auth failed, old system will handle initialization");
+          }
+          
+        } catch (error) {
+          console.error("❌ Firebase optional auth setup failed:", error);
+        }
+      })();
+    </script>
+
+    <script src="panzoom.min.js"></script>
+    <script src="restart.js"></script>
+    <script type="module" src="lobby.js"></script>
+    <script src="game.js" type="module"></script>
+</body>
+</html>

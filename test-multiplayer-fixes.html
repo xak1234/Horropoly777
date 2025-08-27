@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multiplayer Rendering Fixes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background-color: #2a2a2a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.warning {
+            background-color: #ff9800;
+        }
+        .button.warning:hover {
+            background-color: #e68900;
+        }
+        .button.danger {
+            background-color: #f44336;
+        }
+        .button.danger:hover {
+            background-color: #da190b;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            margin-right: 10px;
+            width: 200px;
+        }
+        .output {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .fix-status {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .fix-status.fixed {
+            background-color: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4CAF50;
+        }
+        .fix-status.pending {
+            background-color: rgba(255, 152, 0, 0.2);
+            border-left: 4px solid #ff9800;
+        }
+        .fix-status.testing {
+            background-color: rgba(33, 150, 243, 0.2);
+            border-left: 4px solid #2196F3;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd43b; }
+        .info { color: #74c0fc; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Multiplayer Rendering Fixes</h1>
+    
+    <div class="section">
+        <h3>🎯 Issues Fixed</h3>
+        <div class="fix-status fixed">
+            <strong>✅ Token Rendering:</strong> Fixed tokens falling back to colored circles instead of images
+        </div>
+        <div class="fix-status fixed">
+            <strong>✅ Firebase Array Conversion:</strong> Enhanced validation to preserve player data
+        </div>
+        <div class="fix-status fixed">
+            <strong>✅ Turn Logic:</strong> Added strict validation to prevent wrong-turn development prompts
+        </div>
+        <div class="fix-status fixed">
+            <strong>✅ Position Sync:</strong> Enhanced player position synchronization between clients
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🧪 Test Functions</h3>
+        <div class="input-group">
+            <input type="text" id="roomId" placeholder="Enter Room ID" value="XCXFRANKENSTEIN_LAB">
+            <button class="button" onclick="testRoomData()">Test Room Data</button>
+            <button class="button" onclick="testTokenLoading()">Test Token Loading</button>
+        </div>
+        <div class="input-group">
+            <button class="button" onclick="testArrayConversion()">Test Array Conversion</button>
+            <button class="button" onclick="testTurnValidation()">Test Turn Validation</button>
+            <button class="button" onclick="clearOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🎮 Game State Testing</h3>
+        <div class="input-group">
+            <input type="text" id="playerName1" placeholder="Player 1 Name" value="Laurie">
+            <input type="text" id="playerName2" placeholder="Player 2 Name" value="Gomez">
+            <button class="button" onclick="simulateMultiplayerState()">Simulate Multiplayer State</button>
+        </div>
+        <div class="input-group">
+            <button class="button warning" onclick="testFirebaseConversion()">Test Firebase Conversion</button>
+            <button class="button warning" onclick="testTokenAssignment()">Test Token Assignment</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🔍 Debug Information</h3>
+        <div class="input-group">
+            <button class="button" onclick="checkGameState()">Check Current Game State</button>
+            <button class="button" onclick="checkPlayerTokens()">Check Player Tokens</button>
+            <button class="button" onclick="checkTurnState()">Check Turn State</button>
+        </div>
+    </div>
+
+    <div id="output" class="output">
+        <div class="success">🔧 Multiplayer Rendering Fix Test Page Ready</div>
+        <div class="info">📋 Use the buttons above to test the implemented fixes</div>
+    </div>
+
+    <script type="module">
+        import './fix-multiplayer-rendering-issues.js';
+        
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        window.log = log;
+        
+        window.clearOutput = function() {
+            output.innerHTML = '<div class="success">🔧 Output cleared</div>';
+        };
+        
+        window.testRoomData = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            log(`🔍 Testing room data: ${roomId}`, 'info');
+            try {
+                const { getDb } = await import('./firebase-init.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js');
+                
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                const roomDoc = await getDoc(roomRef);
+                
+                if (!roomDoc.exists()) {
+                    log('❌ Room not found', 'error');
+                    return;
+                }
+                
+                const roomData = roomDoc.data();
+                log(`✅ Room found: ${roomData.players?.length || 0} players`, 'success');
+                
+                if (roomData.players) {
+                    roomData.players.forEach((player, index) => {
+                        log(`  Player ${index + 1}: ${player.name} - Token: ${player.tokenImage} - Color: ${player.color}`, 'info');
+                    });
+                }
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testTokenLoading = function() {
+            log('🎨 Testing token loading system', 'info');
+            
+            const testPlayers = [
+                { name: 'TestPlayer1', tokenImage: 'assets/images/t1.png', tokenIndex: 0 },
+                { name: 'TestPlayer2', tokenImage: 'assets/images/t2.png', tokenIndex: 1 },
+                { name: 'TestPlayer3', tokenImage: undefined, tokenIndex: 2 }
+            ];
+            
+            const fixedPlayers = window.MultiplayerRenderingFix.ensurePlayerTokenImages(testPlayers);
+            
+            log(`✅ Token loading test completed`, 'success');
+            fixedPlayers.forEach((player, index) => {
+                log(`  Player ${index + 1}: ${player.name} - Token: ${player.tokenImage} - Color: ${player.color}`, 'info');
+            });
+        };
+        
+        window.testArrayConversion = function() {
+            log('🔄 Testing Firebase array conversion', 'info');
+            
+            // Test object with numeric keys (Firebase array-like)
+            const testObject = {
+                '0': { name: 'Player1', userId: 'user123', money: 1500 },
+                '1': { name: 'Player2', userId: 'user456', money: 1500 }
+            };
+            
+            const converted = window.MultiplayerRenderingFix.fixedConvertObjectToArray(testObject);
+            
+            log(`✅ Array conversion test completed: ${converted.length} players`, 'success');
+            converted.forEach((player, index) => {
+                log(`  Player ${index + 1}: ${player.name} (${player.userId})`, 'info');
+            });
+        };
+        
+        window.testTurnValidation = function() {
+            log('🎯 Testing turn validation', 'info');
+            
+            const testCases = [
+                { current: 'Laurie', local: 'Laurie', expected: true },
+                { current: 'Laurie', local: 'Gomez', expected: false },
+                { current: 'Gomez', local: 'Gomez', expected: true }
+            ];
+            
+            testCases.forEach((test, index) => {
+                const result = window.MultiplayerRenderingFix.validatePlayerTurn(test.current, test.local, 'test action');
+                const status = result === test.expected ? '✅' : '❌';
+                log(`  Test ${index + 1}: ${status} Current: ${test.current}, Local: ${test.local}, Result: ${result}`, 
+                    result === test.expected ? 'success' : 'error');
+            });
+        };
+        
+        window.simulateMultiplayerState = function() {
+            const player1 = document.getElementById('playerName1').value.trim();
+            const player2 = document.getElementById('playerName2').value.trim();
+            
+            if (!player1 || !player2) {
+                log('❌ Please enter both player names', 'error');
+                return;
+            }
+            
+            log(`🎮 Simulating multiplayer state: ${player1} vs ${player2}`, 'info');
+            
+            const simulatedPlayers = [
+                {
+                    name: player1,
+                    userId: 'user_123',
+                    tokenImage: 'assets/images/t1.png',
+                    tokenIndex: 0,
+                    color: '#ff0000',
+                    colorName: 'Red',
+                    currentSquare: 'go',
+                    money: 1500
+                },
+                {
+                    name: player2,
+                    userId: 'user_456',
+                    tokenImage: 'assets/images/t2.png',
+                    tokenIndex: 1,
+                    color: '#0000ff',
+                    colorName: 'Blue',
+                    currentSquare: 'go',
+                    money: 1500
+                }
+            ];
+            
+            const fixedPlayers = window.MultiplayerRenderingFix.ensurePlayerTokenImages(simulatedPlayers);
+            
+            log(`✅ Multiplayer state simulation completed`, 'success');
+            fixedPlayers.forEach((player, index) => {
+                log(`  Player ${index + 1}: ${player.name} - ${player.colorName} - ${player.tokenImage}`, 'info');
+            });
+        };
+        
+        window.testFirebaseConversion = function() {
+            log('🔥 Testing Firebase data conversion edge cases', 'warning');
+            
+            const edgeCases = [
+                { name: 'Empty object', data: {} },
+                { name: 'Null values', data: { '0': null, '1': { name: 'Player1' } } },
+                { name: 'Undefined values', data: { '0': { name: 'undefined', userId: 'undefined' } } },
+                { name: 'Mixed valid/invalid', data: { '0': { name: 'Player1', userId: 'user123' }, '1': null, '2': { name: 'Player2' } } }
+            ];
+            
+            edgeCases.forEach(testCase => {
+                log(`  Testing: ${testCase.name}`, 'info');
+                const result = window.MultiplayerRenderingFix.fixedConvertObjectToArray(testCase.data);
+                log(`    Result: ${result.length} valid players`, result.length > 0 ? 'success' : 'warning');
+            });
+        };
+        
+        window.testTokenAssignment = function() {
+            log('🎨 Testing token assignment system', 'warning');
+            
+            const playersWithMissingData = [
+                { name: 'Player1' }, // Missing everything
+                { name: 'Player2', tokenIndex: 1 }, // Missing color
+                { name: 'Player3', color: '#00ff00' }, // Missing token
+                { name: 'Player4', tokenImage: 'assets/images/t4.png', color: '#ffff00' } // Complete
+            ];
+            
+            const fixed = window.MultiplayerRenderingFix.ensurePlayerTokenImages(playersWithMissingData);
+            
+            log(`✅ Token assignment test completed`, 'success');
+            fixed.forEach((player, index) => {
+                log(`  ${player.name}: Token ${player.tokenIndex} (${player.tokenImage}) - ${player.colorName}`, 'info');
+            });
+        };
+        
+        window.checkGameState = function() {
+            log('🔍 Checking current game state', 'info');
+            
+            if (typeof window.players !== 'undefined' && window.players) {
+                log(`✅ Players array found: ${window.players.length} players`, 'success');
+                window.players.forEach((player, index) => {
+                    log(`  Player ${index}: ${player.name} - Square: ${player.currentSquare} - Money: £${player.money}`, 'info');
+                });
+            } else {
+                log('❌ No players array found in global scope', 'error');
+            }
+            
+            if (typeof window.isMultiplayerGame !== 'undefined') {
+                log(`🎮 Multiplayer mode: ${window.isMultiplayerGame}`, 'info');
+            }
+            
+            if (typeof window.currentPlayerIndex !== 'undefined') {
+                log(`👤 Current player index: ${window.currentPlayerIndex}`, 'info');
+            }
+        };
+        
+        window.checkPlayerTokens = function() {
+            log('🎨 Checking player token status', 'info');
+            
+            if (typeof window.players !== 'undefined' && window.players) {
+                window.players.forEach((player, index) => {
+                    const hasImage = !!player.image;
+                    const hasTokenImage = !!player.tokenImage;
+                    const hasColor = !!player.color;
+                    
+                    log(`  ${player.name}: Image loaded: ${hasImage}, Token path: ${hasTokenImage}, Color: ${hasColor}`, 
+                        hasImage && hasTokenImage && hasColor ? 'success' : 'warning');
+                    
+                    if (hasTokenImage) {
+                        log(`    Token: ${player.tokenImage}`, 'info');
+                    }
+                    if (hasColor) {
+                        log(`    Color: ${player.color} (${player.colorName || 'Unknown'})`, 'info');
+                    }
+                });
+            } else {
+                log('❌ No players found to check', 'error');
+            }
+        };
+        
+        window.checkTurnState = function() {
+            log('🎯 Checking turn state', 'info');
+            
+            if (typeof window.players !== 'undefined' && window.players && typeof window.currentPlayerIndex !== 'undefined') {
+                const currentPlayer = window.players[window.currentPlayerIndex];
+                if (currentPlayer) {
+                    log(`✅ Current turn: ${currentPlayer.name} (index ${window.currentPlayerIndex})`, 'success');
+                    
+                    const localPlayerName = window.localPlayerName || document.getElementById('player1-name')?.value;
+                    if (localPlayerName) {
+                        const isMyTurn = currentPlayer.name.toLowerCase() === localPlayerName.toLowerCase();
+                        log(`👤 Local player: ${localPlayerName} - Is my turn: ${isMyTurn}`, isMyTurn ? 'success' : 'info');
+                    }
+                } else {
+                    log('❌ Current player not found', 'error');
+                }
+            } else {
+                log('❌ Turn state not available', 'error');
+            }
+        };
+        
+        // Override console.log to show in UI
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args.length > 0 && typeof args[0] === 'string') {
+                const message = args[0];
+                if (message.includes('🔧') || message.includes('✅') || message.includes('❌') || 
+                    message.includes('🎨') || message.includes('🔄') || message.includes('🎯')) {
+                    
+                    let type = 'info';
+                    if (message.includes('❌')) type = 'error';
+                    else if (message.includes('✅')) type = 'success';
+                    else if (message.includes('⚠️') || message.includes('🔧')) type = 'warning';
+                    
+                    const div = document.createElement('div');
+                    div.className = type;
+                    div.textContent = message;
+                    output.appendChild(div);
+                    output.scrollTop = output.scrollHeight;
+                }
+            }
+        };
+        
+        log('🔧 Multiplayer Rendering Fix Test Page Loaded', 'success');
+        log('💡 All fixes have been applied - test your multiplayer game now!', 'info');
+    </script>
+</body>
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Stale Player Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background-color: #2a2a2a;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .button.danger {
+            background-color: #f44336;
+        }
+        .button.danger:hover {
+            background-color: #da190b;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background-color: #333;
+            color: white;
+            margin-right: 10px;
+            width: 200px;
+        }
+        .output {
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .success {
+            color: #51cf66;
+        }
+        .warning {
+            color: #ffd43b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Stale Player Fix</h1>
+    
+    <div class="section">
+        <h3>🎯 Issue: Stale Player Matching</h3>
+        <p>The problem is that old players with names like "Ash" and "Sidney" are still in rooms from previous sessions. 
+        When new players with the same names try to join, they're being matched to the old stale players instead of being added as new players.</p>
+    </div>
+
+    <div class="section">
+        <h3>🧹 Clean Stale Players</h3>
+        <div class="input-group">
+            <input type="text" id="roomId" placeholder="Enter Room ID" value="CRYSTAL_LAKE">
+            <button class="button" onclick="cleanStalePlayersFromRoom()">Clean Stale Players</button>
+            <button class="button" onclick="checkRoomStatus()">Check Room Status</button>
+        </div>
+        <div class="input-group">
+            <button class="button danger" onclick="clearRoom()">Clear All Players</button>
+            <button class="button" onclick="clearOutput()">Clear Output</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🧪 Test Player Joining</h3>
+        <div class="input-group">
+            <input type="text" id="testPlayerName" placeholder="Enter Player Name" value="Ash">
+            <button class="button" onclick="testPlayerJoin()">Test Join Room</button>
+        </div>
+        <p><small>This will test the enhanced join logic that properly handles stale players.</small></p>
+    </div>
+
+    <div id="output" class="output">
+        <div class="success">🔧 Stale Player Fix Test Page Ready</div>
+        <div>📋 Use the buttons above to clean up rooms and test player joining</div>
+    </div>
+
+    <script type="module">
+        import './fix-stale-player-matching.js';
+        
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        window.log = log;
+        
+        window.clearOutput = function() {
+            output.innerHTML = '<div class="success">🔧 Output cleared</div>';
+        };
+        
+        window.cleanStalePlayersFromRoom = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            log(`🧹 Cleaning stale players from room: ${roomId}`);
+            try {
+                const result = await window.cleanStalePlayersFromRoom(roomId);
+                log(`✅ Cleanup completed. Valid players remaining: ${result ? result.length : 0}`, 'success');
+            } catch (error) {
+                log(`❌ Cleanup failed: ${error.message}`, 'error');
+            }
+        };
+        
+        window.checkRoomStatus = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            log(`📊 Checking room status: ${roomId}`);
+            try {
+                const { getDb } = await import('./firebase-init.js');
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js');
+                
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                const roomDoc = await getDoc(roomRef);
+                
+                if (!roomDoc.exists()) {
+                    log('❌ Room not found', 'error');
+                    return;
+                }
+                
+                const roomData = roomDoc.data();
+                const players = roomData.players || [];
+                
+                log(`📊 Room "${roomData.roomName || roomId}":`, 'info');
+                log(`   Players: ${players.length}/${roomData.maxPlayers || 2}`, 'info');
+                log(`   Game Started: ${roomData.gameStarted}`, 'info');
+                log(`   Last Activity: ${new Date(roomData.lastActivity).toLocaleString()}`, 'info');
+                
+                players.forEach((player, index) => {
+                    const age = player.lastActivity ? 
+                        ((Date.now() - player.lastActivity) / (1000 * 60)).toFixed(1) + ' min' : 
+                        'unknown';
+                    log(`   Player ${index + 1}: ${player.name} (${player.userId}) - Age: ${age}`, 'info');
+                });
+                
+            } catch (error) {
+                log(`❌ Error checking room: ${error.message}`, 'error');
+            }
+        };
+        
+        window.clearRoom = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            if (!roomId) {
+                log('❌ Please enter a room ID', 'error');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to clear ALL players from room ${roomId}?`)) {
+                return;
+            }
+            
+            log(`🗑️ Clearing all players from room: ${roomId}`, 'warning');
+            try {
+                const { getDb } = await import('./firebase-init.js');
+                const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js');
+                
+                const db = await getDb();
+                const roomRef = doc(db, 'gameRooms', roomId);
+                
+                await updateDoc(roomRef, {
+                    players: [],
+                    gameStarted: false,
+                    currentTurn: 0,
+                    lastActivity: Date.now(),
+                    lastCleared: new Date().toISOString()
+                });
+                
+                log('✅ Room cleared successfully', 'success');
+            } catch (error) {
+                log(`❌ Error clearing room: ${error.message}`, 'error');
+            }
+        };
+        
+        window.testPlayerJoin = async function() {
+            const roomId = document.getElementById('roomId').value.trim();
+            const playerName = document.getElementById('testPlayerName').value.trim();
+            
+            if (!roomId || !playerName) {
+                log('❌ Please enter both room ID and player name', 'error');
+                return;
+            }
+            
+            log(`🧪 Testing player join: "${playerName}" -> "${roomId}"`);
+            try {
+                const result = await window.StalePlayerFix.enhancedJoinGameRoom(roomId, playerName);
+                log(`✅ Join test completed:`, 'success');
+                log(`   Player: ${result.playerName}`, 'info');
+                log(`   User ID: ${result.userId}`, 'info');
+                log(`   Is Rejoin: ${result.isRejoin}`, 'info');
+            } catch (error) {
+                log(`❌ Join test failed: ${error.message}`, 'error');
+            }
+        };
+        
+        // Override console.log to show in UI
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            if (args.length > 0 && typeof args[0] === 'string') {
+                const message = args[0];
+                if (message.includes('🧹') || message.includes('📊') || message.includes('✅') || 
+                    message.includes('❌') || message.includes('🗑️') || message.includes('🔄') ||
+                    message.includes('🔍') || message.includes('🕒')) {
+                    
+                    let type = 'info';
+                    if (message.includes('❌')) type = 'error';
+                    else if (message.includes('✅')) type = 'success';
+                    else if (message.includes('⚠️') || message.includes('🗑️')) type = 'warning';
+                    
+                    const div = document.createElement('div');
+                    div.className = type;
+                    div.textContent = message;
+                    output.appendChild(div);
+                    output.scrollTop = output.scrollHeight;
+                }
+            }
+        };
+        
+        log('🔧 Stale Player Fix Test Page Loaded', 'success');
+        log('💡 Start by cleaning stale players from your room', 'info');
+    </script>
+</body>
+</html>

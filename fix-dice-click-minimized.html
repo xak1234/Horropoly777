@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Dice Click in Minimized Mode</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-section {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .status {
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .good { background: rgba(0, 255, 0, 0.2); }
+        .bad { background: rgba(255, 0, 0, 0.2); }
+        .info { background: rgba(0, 100, 255, 0.2); }
+        button {
+            background: #2a2a2a;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        #debug-output {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+        }
+        .code-block {
+            background: #2a2a2a;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 11px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Dice Click in Minimized Mode</h1>
+    
+    <div class="test-section">
+        <h2>🐛 Problem Identified</h2>
+        <div class="status bad">❌ <strong>Issue:</strong> Dice clicks are being detected by general minimized content listener but not triggering dice handler</div>
+        <div class="status info">📝 <strong>Root Cause:</strong> Event propagation and handler attachment issues in minimized mode</div>
+        <div class="status info">🔍 <strong>Symptoms:</strong> Console shows "Click detected on minimized content: DIV die1/die2" but dice don't roll</div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Solution Implementation</h2>
+        <div class="status good">✅ <strong>Fix 1:</strong> Ensure minimized dice handlers are properly attached</div>
+        <div class="status good">✅ <strong>Fix 2:</strong> Improve event delegation for dice clicks in minimized content</div>
+        <div class="status good">✅ <strong>Fix 3:</strong> Add fallback dice click detection in general minimized listener</div>
+        
+        <button onclick="applyFix()">Apply Fix to Game</button>
+        <button onclick="testDiceClick()">Test Dice Click</button>
+        <button onclick="debugDiceState()">Debug Dice State</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Fix Code</h2>
+        <div class="code-block">
+// Enhanced minimized content click handler with dice fallback
+function enhanceMinimizedContentClickHandler() {
+    const minimizedContent = document.getElementById('minimized-content');
+    if (!minimizedContent) return;
+    
+    console.log('🔧 Enhancing minimized content click handler with dice fallback');
+    
+    // Remove existing listeners to prevent conflicts
+    const newMinimizedContent = minimizedContent.cloneNode(true);
+    minimizedContent.parentNode.replaceChild(newMinimizedContent, minimizedContent);
+    
+    // Add enhanced click handler with dice detection
+    let lastClickLog = 0;
+    newMinimizedContent.addEventListener('click', async (e) => {
+        const now = Date.now();
+        
+        // Always log clicks (throttled)
+        if (now - lastClickLog > 1000) {
+            console.log('📱 Click detected on minimized content:', e.target.tagName, e.target.id || e.target.className);
+            lastClickLog = now;
+        }
+        
+        // Check if this is a dice-related click
+        const isDiceClick = e.target.id === 'die1' || e.target.id === 'die2' || 
+                           e.target.closest('#dice-section') || 
+                           e.target.classList.contains('die');
+        
+        if (isDiceClick) {
+            console.log('🎲 DICE CLICK DETECTED in minimized content - triggering handler');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Call the dice handler directly
+            await handleDiceClick('minimized-fallback');
+        }
+    }, { capture: true });
+    
+    console.log('✅ Enhanced minimized content click handler applied');
+}
+
+// Force reattach minimized dice handlers
+function forceReattachMinimizedDiceHandlers() {
+    const diceSection = document.getElementById('dice-section');
+    if (!diceSection) {
+        console.log('❌ No dice section found for reattaching handlers');
+        return;
+    }
+    
+    console.log('🔧 Force reattaching minimized dice handlers');
+    
+    // Check if dice is in minimized content
+    const minimizedContent = document.getElementById('minimized-content');
+    const isInMinimized = minimizedContent && diceSection.parentElement === minimizedContent;
+    
+    if (isInMinimized) {
+        console.log('📱 Dice is in minimized content - reattaching handlers');
+        
+        // Remove existing event listeners by cloning
+        const newDiceSection = diceSection.cloneNode(true);
+        diceSection.parentNode.replaceChild(newDiceSection, diceSection);
+        
+        // Reattach using the existing function
+        if (typeof reattachMinimizedDiceHandlers === 'function') {
+            reattachMinimizedDiceHandlers(newDiceSection);
+        } else {
+            // Fallback handler if function doesn't exist
+            newDiceSection.addEventListener('click', async (e) => {
+                console.log('🎲 FALLBACK DICE CLICK HANDLER');
+                e.preventDefault();
+                e.stopPropagation();
+                await handleDiceClick('fallback');
+            }, { capture: true });
+        }
+        
+        console.log('✅ Minimized dice handlers reattached');
+    } else {
+        console.log('📱 Dice is not in minimized content');
+    }
+}
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Debug Output</h2>
+        <div id="debug-output">Ready to debug dice click issues...</div>
+    </div>
+
+    <script>
+        const debugOutput = document.getElementById('debug-output');
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            debugOutput.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            debugOutput.scrollTop = debugOutput.scrollHeight;
+            console.log(`${prefix} ${message}`);
+        }
+
+        function applyFix() {
+            log('🔧 Applying dice click fix...', 'info');
+            
+            // Apply the enhanced minimized content click handler
+            const fixCode = `
+// Enhanced minimized content click handler with dice fallback
+function enhanceMinimizedContentClickHandler() {
+    const minimizedContent = document.getElementById('minimized-content');
+    if (!minimizedContent) return;
+    
+    console.log('🔧 Enhancing minimized content click handler with dice fallback');
+    
+    // Remove existing listeners to prevent conflicts
+    const newMinimizedContent = minimizedContent.cloneNode(true);
+    minimizedContent.parentNode.replaceChild(newMinimizedContent, minimizedContent);
+    
+    // Add enhanced click handler with dice detection
+    let lastClickLog = 0;
+    newMinimizedContent.addEventListener('click', async (e) => {
+        const now = Date.now();
+        
+        // Always log clicks (throttled)
+        if (now - lastClickLog > 1000) {
+            console.log('📱 Click detected on minimized content:', e.target.tagName, e.target.id || e.target.className);
+            lastClickLog = now;
+        }
+        
+        // Check if this is a dice-related click
+        const isDiceClick = e.target.id === 'die1' || e.target.id === 'die2' || 
+                           e.target.closest('#dice-section') || 
+                           e.target.classList.contains('die');
+        
+        if (isDiceClick) {
+            console.log('🎲 DICE CLICK DETECTED in minimized content - triggering handler');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Call the dice handler directly
+            if (typeof handleDiceClick === 'function') {
+                await handleDiceClick('minimized-fallback');
+            } else {
+                console.log('❌ handleDiceClick function not found');
+            }
+        }
+    }, { capture: true });
+    
+    console.log('✅ Enhanced minimized content click handler applied');
+}
+
+// Force reattach minimized dice handlers
+function forceReattachMinimizedDiceHandlers() {
+    const diceSection = document.getElementById('dice-section');
+    if (!diceSection) {
+        console.log('❌ No dice section found for reattaching handlers');
+        return;
+    }
+    
+    console.log('🔧 Force reattaching minimized dice handlers');
+    
+    // Check if dice is in minimized content
+    const minimizedContent = document.getElementById('minimized-content');
+    const isInMinimized = minimizedContent && diceSection.parentElement === minimizedContent;
+    
+    if (isInMinimized) {
+        console.log('📱 Dice is in minimized content - reattaching handlers');
+        
+        // Remove existing event listeners by cloning
+        const newDiceSection = diceSection.cloneNode(true);
+        diceSection.parentNode.replaceChild(newDiceSection, diceSection);
+        
+        // Reattach using the existing function
+        if (typeof reattachMinimizedDiceHandlers === 'function') {
+            reattachMinimizedDiceHandlers(newDiceSection);
+        } else {
+            // Fallback handler if function doesn't exist
+            newDiceSection.addEventListener('click', async (e) => {
+                console.log('🎲 FALLBACK DICE CLICK HANDLER');
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof handleDiceClick === 'function') {
+                    await handleDiceClick('fallback');
+                }
+            }, { capture: true });
+        }
+        
+        console.log('✅ Minimized dice handlers reattached');
+    } else {
+        console.log('📱 Dice is not in minimized content');
+    }
+}
+
+// Apply the fixes
+enhanceMinimizedContentClickHandler();
+forceReattachMinimizedDiceHandlers();
+
+// Make functions globally available
+window.enhanceMinimizedContentClickHandler = enhanceMinimizedContentClickHandler;
+window.forceReattachMinimizedDiceHandlers = forceReattachMinimizedDiceHandlers;
+
+console.log('🔧 Dice click fix applied successfully!');
+            `;
+            
+            try {
+                eval(fixCode);
+                log('✅ Fix applied successfully!', 'success');
+                log('🎯 Try clicking the dice now - it should work', 'info');
+            } catch (error) {
+                log(`❌ Error applying fix: ${error.message}`, 'error');
+            }
+        }
+
+        function testDiceClick() {
+            log('🧪 Testing dice click functionality...', 'info');
+            
+            const diceSection = document.getElementById('dice-section');
+            if (!diceSection) {
+                log('❌ No dice section found in DOM', 'error');
+                return;
+            }
+            
+            log(`📱 Dice section found: ${diceSection.id}`, 'success');
+            log(`📍 Parent element: ${diceSection.parentElement?.id || 'unknown'}`, 'info');
+            log(`🎨 CSS classes: ${Array.from(diceSection.classList).join(', ')}`, 'info');
+            log(`👆 Pointer events: ${diceSection.style.pointerEvents || 'default'}`, 'info');
+            
+            // Check if in minimized content
+            const minimizedContent = document.getElementById('minimized-content');
+            const isInMinimized = minimizedContent && diceSection.parentElement === minimizedContent;
+            log(`🔄 Is in minimized content: ${isInMinimized}`, 'info');
+            
+            // Simulate a click
+            try {
+                const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                diceSection.dispatchEvent(clickEvent);
+                log('✅ Simulated click event dispatched', 'success');
+            } catch (error) {
+                log(`❌ Error simulating click: ${error.message}`, 'error');
+            }
+        }
+
+        function debugDiceState() {
+            log('🔍 Debugging dice state...', 'info');
+            
+            // Check for dice section
+            const diceSection = document.getElementById('dice-section');
+            if (!diceSection) {
+                log('❌ No dice section found', 'error');
+                return;
+            }
+            
+            log('✅ Dice section found', 'success');
+            log(`ID: ${diceSection.id}`, 'info');
+            log(`Classes: ${Array.from(diceSection.classList).join(', ')}`, 'info');
+            log(`Pointer events: ${diceSection.style.pointerEvents || 'default'}`, 'info');
+            log(`Parent: ${diceSection.parentElement?.id || 'unknown'}`, 'info');
+            
+            // Check minimized content
+            const minimizedContent = document.getElementById('minimized-content');
+            if (minimizedContent) {
+                log('✅ Minimized content found', 'success');
+                const isInMinimized = diceSection.parentElement === minimizedContent;
+                log(`Dice in minimized content: ${isInMinimized}`, 'info');
+            } else {
+                log('❌ No minimized content found', 'error');
+            }
+            
+            // Check for event listeners (approximate)
+            log(`Event listeners attached: ${diceSection.onclick ? 'Yes (onclick)' : 'Unknown'}`, 'info');
+            
+            // Check game state variables
+            if (typeof isDiceRollInProgress !== 'undefined') {
+                log(`isDiceRollInProgress: ${isDiceRollInProgress}`, 'info');
+            }
+            if (typeof isDiceClickHandlerRunning !== 'undefined') {
+                log(`isDiceClickHandlerRunning: ${isDiceClickHandlerRunning}`, 'info');
+            }
+            if (typeof currentPlayerIndex !== 'undefined' && typeof players !== 'undefined') {
+                const currentPlayer = players[currentPlayerIndex];
+                log(`Current player: ${currentPlayer?.name || 'unknown'}`, 'info');
+                log(`Is AI: ${currentPlayer?.isAI || 'unknown'}`, 'info');
+            }
+        }
+
+        // Monitor console for dice-related messages
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            
+            const message = args.join(' ');
+            if (message.includes('dice') || message.includes('Dice') || message.includes('🎲') || message.includes('📱')) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugOutput.textContent += `[${timestamp}] ${message}\n`;
+                debugOutput.scrollTop = debugOutput.scrollHeight;
+            }
+        };
+        
+        log('🔍 Dice click fix test page loaded', 'info');
+        log('📝 Console monitoring active for dice-related messages', 'info');
+        log('🎯 Click "Apply Fix" to enhance dice click handling', 'info');
+    </script>
+</body>
+</html>

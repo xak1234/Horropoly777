@@ -1,0 +1,4237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Horropoly</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111 url('assets/images/backdrop.png') center center / cover no-repeat fixed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #eee;
+            overflow-x: hidden;
+            touch-action: pan-x pan-y;
+        }
+        #intro-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            text-align: center;
+            background-image: url('assets/images/front.jpg');
+            background-size: cover;
+            background-position: center;
+            padding-bottom: 50px;
+        } 
+        #intro-screen h1 {
+            display: none;
+        }
+        
+        /* Window box for player selection */
+        .player-selection-window {
+            background: rgba(0, 0, 0, 0.4);
+            border: 3px solid #666;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+            position: relative;
+            cursor: move;
+            user-select: none;
+            transition: border-color 0.2s;
+        }
+        
+        .player-selection-window:hover {
+            border-color: #888;
+        }
+        
+        .player-selection-window.dragging {
+            position: fixed;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+        
+        /* Horropoly title with pulsing effect */
+        .horropoly-title {
+            display: block !important; /* Override the display: none rule */
+            font-size: 36px;
+            font-weight: bold;
+            color: #ff6666;
+            text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+            margin-top: 0;
+            margin-bottom: 10px;
+            animation: titlePulse 2.5s ease-in-out infinite;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            letter-spacing: 2px;
+        }
+        
+        @keyframes titlePulse {
+            0% {
+                color: #ff6666;
+                text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+                transform: scale(1);
+            }
+            50% {
+                color: #ff9999;
+                text-shadow: 0 0 20px rgba(255, 102, 102, 1), 0 0 30px rgba(255, 102, 102, 0.6);
+                transform: scale(1.05);
+            }
+            100% {
+                color: #ff6666;
+                text-shadow: 0 0 10px rgba(255, 102, 102, 0.8);
+                transform: scale(1);
+            }
+        }
+        
+        #player-setup {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        #player-setup input {
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: none;
+            color: red;
+            font-weight: bold;
+        }
+        
+        /* Game mode buttons with glowing effects */
+        .game-mode-selection {
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .mode-button {
+            padding: 15px 25px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Play vs AI button - Red glow */
+        #vs-ai-btn {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+            animation: redGlow 2s ease-in-out infinite alternate;
+        }
+        
+        #vs-ai-btn:hover {
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        /* Play vs Human button - Green glow */
+        #vs-human-btn {
+            background: linear-gradient(45deg, #44ff44, #00cc00);
+            color: white;
+            box-shadow: 0 0 20px rgba(68, 255, 68, 0.6);
+            animation: greenGlow 2s ease-in-out infinite alternate;
+        }
+        
+        #vs-human-btn:hover {
+            box-shadow: 0 0 30px rgba(68, 255, 68, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes redGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(255, 68, 68, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(255, 68, 68, 0.9);
+            }
+        }
+        
+        @keyframes greenGlow {
+            0% {
+                box-shadow: 0 0 20px rgba(68, 255, 68, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 25px rgba(68, 255, 68, 0.9);
+            }
+        }
+        #game-container {
+            margin-top: 90px;  /* Moved up 25% more from 120px for desktop view */
+            border: 2px solid #444;
+            background: transparent;
+            display: none; /* Hidden by default */
+            position: relative;
+            overflow: hidden;
+            touch-action: pan-x pan-y;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            height: auto;
+            max-width: 1000px;
+            touch-action: none;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+            opacity: 0.85;
+        }
+        #info-panel {
+            position: fixed;
+            top: 20px;
+            right: 260px;
+            width: 173px; /* Reduced width by 20% from 216px */
+            padding: 8px; /* Reduced padding */
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #666;
+            border-radius: 8px;
+            color: #fff;
+            font-family: 'Courier New', 'Lucida Console', 'Monaco', 'Consolas', monospace;
+            cursor: move;
+            user-select: none;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.2s, height 0.3s ease;
+            text-align: center;
+            overflow: hidden;
+            word-wrap: break-word;
+            display: none; /* Hidden by default */
+        }
+        #info-panel:hover {
+            border-color: #888;
+        }
+        /* Minimized state styling */
+        #info-panel.minimized {
+            height: 40px;
+            min-height: 40px;
+            overflow: hidden;
+        }
+        /* Allow minimized panel to expand for property decisions */
+        #info-panel.minimized.property-decision {
+            height: auto;
+            min-height: auto;
+            overflow: visible;
+        }
+        #info-panel.minimized #info-panel-content {
+            display: none;
+        }
+        .player-info {
+            display: block; /* Changed to block since we only show steal cards and properties now */
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            font-size: 12px;
+            overflow: visible; /* Allow content to be fully visible */
+            word-wrap: break-word;
+            min-height: auto; /* Let content determine height */
+        }
+        
+        /* Player info content for steal cards */
+        .player-info .player-info-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+        
+        /* General span reset */
+        .player-info span {
+            display: inline;
+            overflow: visible;
+            white-space: normal;
+            text-align: left;
+        }
+        .dice-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin: 2.25px 0;
+            padding: 4.5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            /* Mobile touch improvements */
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .dice-section:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Override hover state when pulse animation is active */
+        .dice-section.dice-pulse-player-red:hover, .dice-pulse-player-red:hover {
+            background: rgba(255, 0, 0, 0.8) !important;
+        }
+        .dice-section.dice-pulse-player-blue:hover, .dice-pulse-player-blue:hover {
+            background: rgba(0, 0, 255, 0.8) !important;
+        }
+        .dice-section.dice-pulse-player-green:hover, .dice-pulse-player-green:hover {
+            background: rgba(0, 255, 0, 0.8) !important;
+        }
+        .dice-section.dice-pulse-player-yellow:hover, .dice-pulse-player-yellow:hover {
+            background: rgba(255, 255, 0, 0.8) !important;
+        }
+        .dice-section.dice-pulse-player-purple:hover, .dice-pulse-player-purple:hover {
+            background: rgba(128, 0, 128, 0.8) !important;
+        }
+        .dice-section.touch-feedback {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.95);
+        }
+        .die {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 4px;
+            min-width: 48px;
+            min-height: 48px;
+            /* Enhanced text rendering */
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            /* Enhanced border for definition */
+            border: 2px solid rgba(0, 0, 0, 0.15);
+            touch-action: manipulation;
+        }
+        
+        /* Enhanced player color dice styling - Better definition with gradients */
+        .dice-section.dice-pulse-player-red .die { 
+            background: linear-gradient(145deg, rgba(255, 80, 80, 0.95), rgba(200, 0, 0, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(255, 0, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 0, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        .dice-pulse-player-red .die { 
+            background: linear-gradient(145deg, rgba(255, 80, 80, 0.95), rgba(200, 0, 0, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(255, 0, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 0, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Extra specificity for red dice colors - enhanced definition */
+        #dice-section.dice-pulse-player-red .die { 
+            background: linear-gradient(145deg, rgba(255, 80, 80, 0.95), rgba(200, 0, 0, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(255, 0, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 0, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        #dice-section.dice-pulse-player-red #die1, #dice-section.dice-pulse-player-red #die2 { 
+            background: linear-gradient(145deg, rgba(255, 80, 80, 0.95), rgba(200, 0, 0, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(255, 0, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 0, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dice-section.dice-pulse-player-blue .die { 
+            background: linear-gradient(145deg, rgba(80, 80, 255, 0.95), rgba(0, 0, 200, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(0, 0, 255, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 0, 255, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        .dice-pulse-player-blue .die { 
+            background: linear-gradient(145deg, rgba(80, 80, 255, 0.95), rgba(0, 0, 200, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(0, 0, 255, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 0, 255, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Extra specificity for blue dice colors */
+        #dice-section.dice-pulse-player-blue .die { 
+            background: linear-gradient(145deg, rgba(80, 80, 255, 0.95), rgba(0, 0, 200, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(0, 0, 255, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 0, 255, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        #dice-section.dice-pulse-player-blue #die1, #dice-section.dice-pulse-player-blue #die2 { 
+            background: linear-gradient(145deg, rgba(80, 80, 255, 0.95), rgba(0, 0, 200, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(0, 0, 255, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 0, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 0, 255, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dice-section.dice-pulse-player-green .die { 
+            background: linear-gradient(145deg, rgba(80, 255, 80, 0.95), rgba(0, 200, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(0, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        .dice-pulse-player-green .die { 
+            background: linear-gradient(145deg, rgba(80, 255, 80, 0.95), rgba(0, 200, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(0, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Extra specificity for green dice colors */
+        #dice-section.dice-pulse-player-green .die { 
+            background: linear-gradient(145deg, rgba(80, 255, 80, 0.95), rgba(0, 200, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(0, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        #dice-section.dice-pulse-player-green #die1, #dice-section.dice-pulse-player-green #die2 { 
+            background: linear-gradient(145deg, rgba(80, 255, 80, 0.95), rgba(0, 200, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(0, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(0, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(0, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .dice-section.dice-pulse-player-yellow .die { 
+            background: linear-gradient(145deg, rgba(255, 255, 80, 0.95), rgba(220, 220, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(255, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        .dice-pulse-player-yellow .die { 
+            background: linear-gradient(145deg, rgba(255, 255, 80, 0.95), rgba(220, 220, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(255, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Extra specificity for yellow dice colors */
+        #dice-section.dice-pulse-player-yellow .die { 
+            background: linear-gradient(145deg, rgba(255, 255, 80, 0.95), rgba(220, 220, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(255, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        #dice-section.dice-pulse-player-yellow #die1, #dice-section.dice-pulse-player-yellow #die2 { 
+            background: linear-gradient(145deg, rgba(255, 255, 80, 0.95), rgba(220, 220, 0, 0.95)) !important; 
+            color: black !important; 
+            border: 2px solid rgba(255, 255, 0, 1) !important; 
+            box-shadow: 0 3px 8px rgba(255, 255, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 255, 0, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .dice-section.dice-pulse-player-purple .die { 
+            background: linear-gradient(145deg, rgba(180, 80, 180, 0.95), rgba(100, 0, 100, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(128, 0, 128, 1) !important; 
+            box-shadow: 0 3px 8px rgba(128, 0, 128, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(128, 0, 128, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        .dice-pulse-player-purple .die { 
+            background: linear-gradient(145deg, rgba(180, 80, 180, 0.95), rgba(100, 0, 100, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(128, 0, 128, 1) !important; 
+            box-shadow: 0 3px 8px rgba(128, 0, 128, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(128, 0, 128, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Extra specificity for purple dice colors */
+        #dice-section.dice-pulse-player-purple .die { 
+            background: linear-gradient(145deg, rgba(180, 80, 180, 0.95), rgba(100, 0, 100, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(128, 0, 128, 1) !important; 
+            box-shadow: 0 3px 8px rgba(128, 0, 128, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(128, 0, 128, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        #dice-section.dice-pulse-player-purple #die1, #dice-section.dice-pulse-player-purple #die2 { 
+            background: linear-gradient(145deg, rgba(180, 80, 180, 0.95), rgba(100, 0, 100, 0.95)) !important; 
+            color: white !important; 
+            border: 2px solid rgba(128, 0, 128, 1) !important; 
+            box-shadow: 0 3px 8px rgba(128, 0, 128, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 12px rgba(128, 0, 128, 0.6) !important; 
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+        }
+        .die.animate {
+            animation: roll 0.5s;
+        }
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .turn-info {
+            text-align: center;
+            margin: 6px 0;
+            font-size: 0.9em;
+            color: #ffd700;
+        }
+        button {
+            padding: 7.5px 15px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .go-square-glow {
+            box-shadow: 0 0 20px 10px #fff; /* White glow */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        #dice-roll-info {
+            font-size: 0.8em;
+            margin: 4px 0;
+            text-align: center;
+        }
+        
+
+
+        /* Circular Hand with Static effect styles */
+        .hand-container {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 3;
+            display: none;
+            overflow: hidden;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            background: 
+                radial-gradient(circle at 20% 80%, transparent 20%, rgba(120, 119, 240, 0.2) 21%, rgba(120, 119, 240, 0.2) 29%, transparent 30%, transparent),
+                radial-gradient(circle at 80% 20%, transparent 20%, rgba(255, 119, 120, 0.2) 21%, rgba(255, 119, 120, 0.2) 29%, transparent 30%, transparent),
+                radial-gradient(circle at 40% 40%, transparent 20%, rgba(120, 255, 119, 0.2) 21%, rgba(120, 255, 119, 0.2) 29%, transparent 30%, transparent);
+            background-size: 3px 3px, 4px 4px, 5px 5px;
+            animation: tvStatic 0.1s infinite linear;
+        }
+        .hand-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            animation: handImageAppear 20s ease-in-out;
+            opacity: 0;
+            border-radius: 50%;
+            filter: brightness(1.2) contrast(1.1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        @keyframes tvStatic {
+            0% {
+                background-position: 0px 0px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;
+            }
+            25% {
+                background-position: 1px 1px, -1px 0px, 1px -1px, 1px 0px, 0px 1px;
+            }
+            50% {
+                background-position: -1px 0px, 1px -1px, 0px 1px, -1px 1px, 1px 0px;
+            }
+            75% {
+                background-position: 1px -1px, 0px 1px, -1px 0px, 0px -1px, -1px -1px;
+            }
+            100% {
+                background-position: 0px 1px, -1px -1px, 1px 0px, 1px 1px, 0px 0px;
+            }
+        }
+
+        @keyframes handImageAppear {
+            0% { opacity: 0; }
+            5% { opacity: 0; }
+            10% { opacity: 1; filter: brightness(1.3) contrast(1.2); }
+            15% { opacity: 0; }
+            20% { opacity: 0; }
+            25% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            35% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            40% { opacity: 0; }
+            50% { opacity: 0; }
+            55% { opacity: 1; filter: brightness(1.4) contrast(1.3); }
+            70% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            75% { opacity: 0; }
+            85% { opacity: 0; }
+            88% { opacity: 1; filter: brightness(1.1) contrast(1.0); }
+            95% { opacity: 1; filter: brightness(1.2) contrast(1.1); }
+            100% { opacity: 0; }
+        }
+
+        /* Music toggle switch styles */
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        
+        .switch input:checked + .slider span {
+            transform: translateX(20px);
+        }
+        
+        .switch .slider {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .switch:hover .slider {
+            background-color: #777;
+        }
+        
+        .switch input:checked:hover + .slider {
+            background-color: #45a049;
+        }
+
+        /* Add pulsing animations */
+        @keyframes tokenPulse {
+            0% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% {
+                transform: scale(1.1);
+                filter: brightness(1.2);
+            }
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes dicePulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+
+        @keyframes dicePulseRed {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.9);
+                background-color: rgba(255, 0, 0, 0.3);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                background-color: rgba(255, 0, 0, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                background-color: rgba(255, 0, 0, 0.3);
+            }
+        }
+
+        .token-pulse {
+            animation: tokenPulse 2s ease-in-out infinite;
+        }
+
+        /* Rent flash animation */
+        @keyframes rentFlash {
+            0% {
+                color: red;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+                transform: scale(1);
+            }
+            25% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 1);
+                transform: scale(1.1);
+            }
+            50% {
+                color: #ffffff;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+                transform: scale(1.2);
+            }
+            75% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 1);
+                transform: scale(1.1);
+            }
+            100% {
+                color: red;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+                transform: scale(1);
+            }
+        }
+
+        .rent-flash {
+            animation: rentFlash 0.8s ease-in-out 3;
+            display: inline-block;
+        }
+
+        /* Money flash animations */
+        @keyframes moneyFlashGreen {
+            0% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+                transform: scale(1);
+            }
+            25% {
+                color: #66ff66;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                transform: scale(1.15);
+            }
+            50% {
+                color: #00ff00;
+                text-shadow: 0 0 20px rgba(0, 255, 0, 1);
+                transform: scale(1.3);
+            }
+            75% {
+                color: #66ff66;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                transform: scale(1.15);
+            }
+            100% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes moneyFlashRed {
+            0% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+                transform: scale(1);
+            }
+            25% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+                transform: scale(1.15);
+            }
+            50% {
+                color: #ff0000;
+                text-shadow: 0 0 20px rgba(255, 0, 0, 1);
+                transform: scale(1.3);
+            }
+            75% {
+                color: #ff6666;
+                text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+                transform: scale(1.15);
+            }
+            100% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        .money-flash-green {
+            animation: moneyFlashGreen 0.6s ease-in-out 2;
+            display: inline-block;
+        }
+
+        .money-flash-red {
+            animation: moneyFlashRed 0.6s ease-in-out 2;
+            display: inline-block;
+        }
+
+        /* Money pulse animations */
+        @keyframes moneyPulseGreen {
+            0% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(0, 255, 0, 0);
+            }
+            50% {
+                transform: scale(1.3);
+                color: #00ff00;
+                text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+                font-weight: bold;
+            }
+            100% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(0, 255, 0, 0);
+            }
+        }
+
+        @keyframes moneyPulseRed {
+            0% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(255, 0, 0, 0);
+            }
+            50% {
+                transform: scale(1.3);
+                color: #ff0000;
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+                font-weight: bold;
+            }
+            100% {
+                transform: scale(1);
+                color: #fff;
+                text-shadow: 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+
+        .money-pulse-green {
+            animation: moneyPulseGreen 1s ease-out;
+        }
+
+        .money-pulse-red {
+            animation: moneyPulseRed 1s ease-out;
+        }
+
+        .dice-pulse {
+            animation: dicePulse 1.2s ease-in-out infinite !important;
+            background-color: rgba(255, 0, 0, 0.1) !important;
+        }
+
+        @keyframes dicePulseBlue {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 128, 255, 0.9);
+                background-color: rgba(0, 128, 255, 0.3);
+            }
+            70% {
+                transform: scale(1.02);
+                box-shadow: 0 0 0 8px rgba(0, 128, 255, 0);
+                background-color: rgba(0, 128, 255, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(0, 128, 255, 0);
+                background-color: rgba(0, 128, 255, 0.3);
+            }
+        }
+
+        .dice-pulse-red {
+            animation: dicePulseRed 1.2s ease-in-out infinite !important;
+            text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+        }
+
+        .dice-pulse-blue {
+            animation: dicePulseBlue 1.2s ease-in-out infinite !important;
+            text-shadow: 0 0 3px rgba(0, 128, 255, 0.8) !important;
+        }
+
+        /* Dynamic player color dice pulse animations - Enhanced visibility */
+        .dice-pulse-player-red, .dice-section.dice-pulse-player-red {
+            animation: dicePulsePlayerRed 1.5s ease-in-out infinite !important;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 1) !important;
+            background: rgba(255, 0, 0, 0.6) !important;
+            border: 2px solid rgba(255, 0, 0, 0.8) !important;
+            transition: none !important;
+        }
+
+        .dice-pulse-player-blue, .dice-section.dice-pulse-player-blue {
+            animation: dicePulsePlayerBlue 1.5s ease-in-out infinite !important;
+            text-shadow: 0 0 8px rgba(0, 0, 255, 1) !important;
+            background: rgba(0, 0, 255, 0.6) !important;
+            border: 2px solid rgba(0, 0, 255, 0.8) !important;
+            transition: none !important;
+        }
+
+        .dice-pulse-player-green, .dice-section.dice-pulse-player-green {
+            animation: dicePulsePlayerGreen 1.5s ease-in-out infinite !important;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 1) !important;
+            background: rgba(0, 255, 0, 0.6) !important;
+            border: 2px solid rgba(0, 255, 0, 0.8) !important;
+            transition: none !important;
+        }
+
+        .dice-pulse-player-yellow, .dice-section.dice-pulse-player-yellow {
+            animation: dicePulsePlayerYellow 1.5s ease-in-out infinite !important;
+            text-shadow: 0 0 8px rgba(255, 255, 0, 1) !important;
+            background: rgba(255, 255, 0, 0.6) !important;
+            border: 2px solid rgba(255, 255, 0, 0.8) !important;
+            transition: none !important;
+        }
+
+        .dice-pulse-player-purple, .dice-section.dice-pulse-player-purple {
+            animation: dicePulsePlayerPurple 1.5s ease-in-out infinite !important;
+            text-shadow: 0 0 8px rgba(128, 0, 128, 1) !important;
+            background: rgba(128, 0, 128, 0.6) !important;
+            border: 2px solid rgba(128, 0, 128, 0.8) !important;
+            transition: none !important;
+        }
+
+        @keyframes dicePulsePlayerRed {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(255, 102, 102, 0.3), rgba(255, 0, 0, 0.3));
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 0, 0, 0.8), 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                background: linear-gradient(145deg, rgba(255, 102, 102, 0.6), rgba(255, 0, 0, 0.6));
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(255, 102, 102, 0.3), rgba(255, 0, 0, 0.3));
+            }
+        }
+
+        @keyframes dicePulsePlayerBlue {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(0, 128, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(102, 102, 255, 0.3), rgba(0, 128, 255, 0.3));
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(0, 128, 255, 0.8), 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                background: linear-gradient(145deg, rgba(102, 102, 255, 0.6), rgba(0, 128, 255, 0.6));
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(0, 128, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(102, 102, 255, 0.3), rgba(0, 128, 255, 0.3));
+            }
+        }
+
+        @keyframes dicePulsePlayerGreen {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(0, 255, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(102, 255, 102, 0.3), rgba(0, 255, 0, 0.3));
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(0, 255, 0, 0.8), 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                background: linear-gradient(145deg, rgba(102, 255, 102, 0.6), rgba(0, 255, 0, 0.6));
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(0, 255, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(102, 255, 102, 0.3), rgba(0, 255, 0, 0.3));
+            }
+        }
+
+        @keyframes dicePulsePlayerYellow {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 255, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(255, 255, 102, 0.3), rgba(255, 255, 0, 0.3));
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 255, 0, 0.8), 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                background: linear-gradient(145deg, rgba(255, 255, 102, 0.6), rgba(255, 255, 0, 0.6));
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 255, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(255, 255, 102, 0.3), rgba(255, 255, 0, 0.3));
+            }
+        }
+
+        @keyframes dicePulsePlayerPurple {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(128, 0, 128, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(180, 102, 180, 0.3), rgba(128, 0, 128, 0.3));
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(128, 0, 128, 0.8), 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.4);
+                background: linear-gradient(145deg, rgba(180, 102, 180, 0.6), rgba(128, 0, 128, 0.6));
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(128, 0, 128, 0.3), 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+                background: linear-gradient(145deg, rgba(180, 102, 180, 0.3), rgba(128, 0, 128, 0.3));
+            }
+        }
+
+        /* Add multiplayer UI styles */
+        .multiplayer-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .room-list {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .room-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .button-secondary {
+            background-color: #666;
+        }
+
+        .button-secondary:hover {
+            background-color: #777;
+        }
+
+        #room-code {
+            font-family: monospace;
+            font-size: 24px;
+            color: #4CAF50;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+            display: none;
+        }
+
+        .player-list {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 4px;
+        }
+
+        .player-list-item {
+            padding: 5px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .host-badge {
+            background: #4CAF50;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 8px;
+        }
+
+        /* Add game mode selection styles */
+        .game-mode-selection {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .mode-button {
+            padding: 15px 25px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .mode-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mode-button.selected {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .ai-options {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .multiplayer-controls {
+            display: none;
+        }
+
+        /* DEBUGGING - Temporarily highlight elements to verify targeting */
+        /*
+        .player-info .player-name[style*="font-size: 18px"] { border: 2px solid red !important; }
+        .player-info span[id^="player-money"] { border: 2px solid blue !important; }
+        .player-info span[style*="display: inline-block"][style*="font-size: 18px"] { border: 2px solid green !important; }
+        */
+
+        /* Desktop/Web view styles - compact to match image */
+        @media (min-width: 1025px) {
+            #property-info-content button {
+                font-size: 6.75px !important;
+                padding: 2.25px 4.5px !important;
+                min-height: 15px !important;
+                min-width: 37.5px !important;
+                margin: 0.75px !important;
+            }
+            
+            /* Ensure buttons are on the same line */
+            #property-info-content div[style*="display: flex"] {
+                gap: 3px !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
+            }
+            
+            /* Very compact property info content */
+            #property-info-content {
+                font-size: 7.5px !important;
+                padding: 3px !important;
+                margin-top: 3px !important;
+            }
+            
+            /* Player info for web view - larger panels with increased font size */
+            .player-info {
+                margin-bottom: 6px !important;
+                padding: 8px 12px !important;
+                font-size: 16px !important;
+                min-height: 36px !important;
+                border-radius: 8px !important;
+            }
+            
+            .player-info img {
+                width: 18px !important;
+                height: 18px !important;
+                margin-right: 6px !important;
+            }
+            
+            /* Enhanced dice section to match mobile design */
+            .dice-section {
+                gap: 8px !important;
+                margin: 3px 0 !important;
+                padding: 8px !important;
+                background: rgba(255, 255, 255, 0.1) !important;
+                border-radius: 8px !important;
+                min-height: 48px !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            
+                        /* Ensure dice pulse animations work in desktop view - Enhanced visibility */
+            .dice-section.dice-pulse-player-red {
+                animation: dicePulsePlayerRed 1.5s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(255, 0, 0, 1) !important;
+                background: rgba(255, 0, 0, 0.6) !important;
+                border: 2px solid rgba(255, 0, 0, 0.8) !important;
+                transition: none !important;
+            }
+
+            .dice-section.dice-pulse-player-blue {
+                animation: dicePulsePlayerBlue 1.5s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(0, 0, 255, 1) !important;
+                background: rgba(0, 0, 255, 0.6) !important;
+                border: 2px solid rgba(0, 0, 255, 0.8) !important;
+                transition: none !important;
+            }
+
+            .dice-section.dice-pulse-player-green {
+                animation: dicePulsePlayerGreen 1.5s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(0, 255, 0, 1) !important;
+                background: rgba(0, 255, 0, 0.6) !important;
+                border: 2px solid rgba(0, 255, 0, 0.8) !important;
+                transition: none !important;
+            }
+
+            .dice-section.dice-pulse-player-yellow {
+                animation: dicePulsePlayerYellow 1.5s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(255, 255, 0, 1) !important;
+                background: rgba(255, 255, 0, 0.6) !important;
+                border: 2px solid rgba(255, 255, 0, 0.8) !important;
+                transition: none !important;
+            }
+
+            .dice-section.dice-pulse-player-purple {
+                animation: dicePulsePlayerPurple 1.5s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(128, 0, 128, 1) !important;
+                background: rgba(128, 0, 128, 0.6) !important;
+                border: 2px solid rgba(128, 0, 128, 0.8) !important;
+                transition: none !important;
+            }
+            
+            /* Desktop hover state overrides for pulse animations */
+            .dice-section.dice-pulse-player-red:hover {
+                background: rgba(255, 0, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-blue:hover {
+                background: rgba(0, 0, 255, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-green:hover {
+                background: rgba(0, 255, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-yellow:hover {
+                background: rgba(255, 255, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-purple:hover {
+                background: rgba(128, 0, 128, 0.8) !important;
+            }
+            
+            .die {
+                width: 48px !important;
+                height: 48px !important;
+                font-size: 24px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+            }
+            
+            /* Desktop player color dice styling */
+            .dice-section.dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            .dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            .dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            .dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            .dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+            .dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+            
+            /* Much smaller analysis button */
+            #ai-analysis-btn {
+                font-size: 8px !important;
+                padding: 2px 4px !important;
+                min-height: 18px !important;
+            }
+            
+            /* Very compact switches container */
+            .switches-container {
+                gap: 0.125rem !important;
+                padding: 0.125rem !important;
+                margin-bottom: 0.25rem !important;
+            }
+            
+            #music-toggle, #restart-toggle, #analyze-toggle, #info-toggle {
+                font-size: 9px !important;
+                padding: 2px !important;
+                min-width: 18px !important;
+                height: 18px !important;
+                width: 18px !important;
+                border-radius: 6px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Mobile-specific minimized toggle buttons - 50% smaller */
+            @media (max-width: 768px), (max-device-width: 768px) {
+                .minimized #music-toggle, .minimized #restart-toggle, .minimized #analyze-toggle, .minimized #info-toggle {
+                    font-size: 0.1640625rem !important;
+                    padding: 0.046875rem 0.09375rem !important;
+                    min-width: 0.328125rem !important;
+                    height: 0.375rem !important;
+                }
+            }
+            
+            /* Compact text elements */
+            .turn-info {
+                font-size: 10px !important;
+                margin: 3px 0 !important;
+            }
+            
+            #dice-roll-info {
+                font-size: 9px !important;
+                margin: 2px 0 !important;
+            }
+            
+            /* Compact development buttons */
+            button[onclick*="handlePropertyDevelopment"] {
+                font-size: 6px !important;
+                padding: 3px 4.5px !important;
+                min-height: 16.5px !important;
+            }
+            
+            /* Compact header */
+            #info-panel-header {
+                margin-bottom: 3px !important;
+                padding: 2.25px !important;
+            }
+            
+            #info-panel-header span {
+                font-size: 9px !important;
+            }
+            
+            /* Smaller minimize button */
+            #minimize-info-panel {
+                font-size: 10.5px !important;
+                padding: 3px 1.5px !important;
+                min-width: 12px !important;
+                height: 18px !important;
+            }
+            
+            /* Compact Game Advisory section */
+            #advisory-panel {
+                font-size: 6.75px !important;
+                padding: 2.25px !important;
+                margin: 2.25px 0 !important;
+            }
+            
+            /* Compact property details */
+            .player-info + div[style*="padding"] {
+                padding: 2px 4px !important;
+                margin-bottom: 2px !important;
+                font-size: 8px !important;
+            }
+            
+            /* DESKTOP/WEB VIEW - Very specific selectors to override inline styles */
+            
+            /* Player names - multiple targeting approaches */
+            .player-info .player-name {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
+            }
+            
+            .player-info span.player-name {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
+            }
+            
+            span[class="player-name"] {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
+            }
+            
+            /* Money display - multiple targeting approaches */
+            .player-info span[id^="player-money"] {
+                font-size: 24px !important;
+            }
+            
+            span[id*="player-money"] {
+                font-size: 24px !important;
+            }
+            
+            /* Color star indicators - target by inline style attributes */
+            .player-info span[style*="color:"][style*="font-size: 18px"][style*="★"] {
+                font-size: 20px !important;
+            }
+            
+            /* Alternative selector for color stars */
+            .player-info span[style*="display: inline-block"][style*="font-size: 18px"] {
+                font-size: 20px !important;
+            }
+            
+            /* Steal card indicators - target by color and content */
+            .player-info span[style*="color: #00ff00"][style*="font-size: 16px"] {
+                font-size: 18px !important;
+            }
+            
+            /* HIGH SPECIFICITY OVERRIDES - These should definitely work */
+            #info-panel .player-info .player-name {
+                font-size: 28px !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7) !important;
+            }
+            
+            #info-panel .player-info span[id*="player-money"] {
+                font-size: 24px !important;
+            }
+            
+            /* Fallback - any span in player-info with inline font-size */
+            .player-info span[style*="font-size"] {
+                font-size: inherit !important;
+            }
+        }
+
+        /* Tablet and smaller desktop styles */
+        @media (max-width: 1024px) {
+            #info-panel {
+                right: 10px;
+                max-width: calc(100vw - 280px);
+            }
+            
+            /* Tablet-specific minimize button - reduced by 25% */
+            #minimize-info-panel {
+                font-size: 15px !important;
+                padding: 7.5px 3.75px !important;
+                min-width: 15px !important;
+                height: 18.75px !important;
+            }
+        }
+
+        /* Mobile-specific styles - expanded range for device simulation */
+        @media (max-width: 768px), (max-device-width: 768px), (max-width: 600px), (max-device-width: 600px) {
+            #game-container {
+                margin-top: 140px;  /* Reduced further to give more space */
+                width: 100vw;
+                height: calc(100vh - 40px);
+                border: none;
+                overflow: hidden;
+                background: transparent;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            
+            #info-panel {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                left: auto;
+                width: 280px;  /* Mobile-optimized width */
+                font-size: 10px;  /* Mobile-optimized font */
+                padding: 8px;    /* Mobile-optimized padding */
+                z-index: 1002;   /* Higher z-index for mobile */
+                max-width: 85vw;  /* Less screen width */
+                box-sizing: border-box;
+                border-radius: 8px;  /* Mobile-optimized border radius */
+                max-height: 85vh;    /* Limit height for mobile */
+                overflow-y: auto;    /* Allow scrolling on mobile */
+            }
+            
+            /* More compact player info on mobile - 95% size reduction */
+            .player-info {
+                margin-bottom: 1px !important;  /* Very small margin */
+                padding: 1px 2px !important;    /* Very small padding */
+                font-size: 4px !important;      /* Small but readable font */
+                border-radius: 1px !important;  /* Very small radius */
+                min-height: 8px !important;     /* Small but functional height */
+            }
+            
+            /* Force small fonts for all player info elements */
+            .player-money-amount,
+            .bankrupt-text,
+            .steal-card-display,
+            .player-color-star {
+                font-size: 8px !important;
+                line-height: 1.2 !important;
+            }
+            
+            .player-name {
+                font-size: 12px !important;
+                font-weight: bold !important;
+                line-height: 1.2 !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            .player-info-left {
+                margin-bottom: 0 !important;    /* No margin for single line */
+                flex-wrap: wrap;                 /* Allow wrapping on very small screens */
+            }
+            
+            .player-info-right {
+                font-size: 0.5rem !important;      /* Smaller for compact display */
+            }
+            
+            /* Smaller token images on mobile - 95% reduction */
+            .player-info img {
+                width: 6px !important;         /* Very small but visible */
+                height: 6px !important;
+                margin-right: 1px !important;   /* Very small margin */
+            }
+
+            /* ULTRA COMPACT MOBILE OVERRIDES - very small but readable fonts */
+            .player-info span[style*="font-size"] {
+                font-size: 4px !important;         /* Very small but readable */
+            }
+
+            /* Force override ALL font sizes in player-info on mobile */
+            .player-info *,
+            .player-info span,
+            .player-info .player-money,
+            .player-money-amount,
+            .bankrupt-text,
+            .steal-card-display,
+            .player-color-star {
+                font-size: 4px !important;         /* Very small but readable */
+            }
+            
+            /* Exception for player names - make them larger and more readable */
+            .player-info .player-name {
+                font-size: 12px !important;
+                font-weight: bold !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            /* Override ALL large font sizes for mobile */
+            .player-info span[style*="font-size: 22px"],
+            .player-info span[style*="font-size: 20px"],
+            .player-info span[style*="font-size: 18px"],
+            .player-info span[style*="font-size: 16px"],
+            .player-info span[style*="font-size: 14px"],
+            .player-info span[style*="font-size: 12px"] {
+                font-size: 4px !important;         /* Very small but readable */
+            }
+
+            .player-info span[style*="font-size: 16px"] {
+                font-size: 4px !important;         /* Very small but readable */
+            }
+
+            .player-info span[style*="font-size: 14px"] {
+                font-size: 4px !important;       /* Very small but readable */
+            }
+            
+            /* Mobile minimized content alignment */
+            #minimized-content {
+                text-align: center !important;
+                padding: 0.1875rem 0.3125rem !important;
+                font-size: 0.625rem !important;
+            }
+            
+            /* Minimized content player info styling */
+            #minimized-content span {
+                font-size: 0.625rem !important;
+            }
+            
+            #minimized-content div[style*="display: flex"] span {
+                font-size: 0.625rem !important;
+            }
+            
+            /* Ensure player info is centered in minimized view */
+            #minimized-content .player-info {
+                width: 100% !important;
+                justify-content: center !important;
+                text-align: center !important;
+                margin-bottom: 0.125rem !important;
+            }
+            
+            /* Mobile-specific overrides to keep compact layout */
+            #info-panel .player-info .player-name {
+                font-size: 12px !important;     /* Increased from 4px for readability */
+                font-weight: bold !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            .player-info .player-name {
+                font-size: 12px !important;     /* Increased from 4px for readability */
+                font-weight: bold !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            .player-info span.player-name {
+                font-size: 12px !important;     /* Increased from 4px for readability */
+                font-weight: bold !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            span[class="player-name"] {
+                font-size: 12px !important;     /* Increased from 4px for readability */
+                font-weight: bold !important;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8) !important;
+            }
+            
+            /* Mobile money display */
+            #info-panel .player-info span[id*="player-money"] {
+                font-size: 4px !important;     /* Very small but readable */
+            }
+            
+            .player-info span[id*="player-money"] {
+                font-size: 4px !important;     /* Very small but readable */
+            }
+            
+            span[id*="player-money"] {
+                font-size: 4px !important;     /* Very small but readable */
+            }
+
+            /* General fallback for inline font sizes */
+            .player-info span[style*="font-size"] {
+                font-size: 4px !important;     /* Very small but readable */
+            }
+
+            /* Reduce 14px inline fonts (player names, tokens) */
+            .player-info span[style*="font-size: 14px"] {
+                font-size: 4px !important;   /* Very small but readable */
+            }
+
+            /* Compact colored star indicators */
+            .player-info span[style*="color"][style*="font-size: 14px"] {
+                font-size: 4px !important;     /* Very small but readable */
+            }
+
+            .player-info span[style*="color"][style*="18px"] {
+                font-size: 4px !important;      /* Very small but readable */
+            }
+            
+            .player-info span[style*="color: #00ff00"] {
+                font-size: 4px !important;      /* Very small but readable */
+            }
+            
+            /* Compact property details */
+            .player-info + div[style*="padding: 6px"] {
+                padding: 1px 2px 1px 2px !important;  /* Very small padding */
+                margin-bottom: 1px !important;         /* Very small margin */
+                font-size: 4px !important;             /* Very small but readable font */
+            }
+            
+            /* Keep minimize button on mobile but very small */
+            #minimize-info-panel {
+                font-size: 4.5px !important;         /* Very small but clickable */
+                padding: 1.5px 0.75px !important;     /* Very small padding */
+                min-width: 6px !important;         /* Very small but clickable width */
+                height: 7.5px !important;         /* Very small but clickable height */
+            }
+            
+            /* Adjust header for mobile */
+            #info-panel-header {
+                margin-bottom: 4px !important;  /* Reduced margin */
+                padding: 2px !important;        /* Reduced padding */
+            }
+            
+            canvas {
+                max-width: 1000px;
+                width: 100%;
+                height: auto;
+                transform-origin: center center;
+                margin: 0 auto;
+            }
+            
+            .switches-container {
+                max-width: 2.5rem;
+                gap: 0.0625rem;
+                padding: 0.03125rem;
+            }
+            
+            #music-toggle, #restart-toggle, #analyze-toggle, #info-toggle {
+                font-size: 9px !important;
+                min-width: 18px !important;
+                height: 18px !important;
+                width: 18px !important;
+                line-height: 18px !important;
+                padding: 2px !important;
+                border-radius: 6px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            .switches-container span {
+                font-size: 0.234375rem;
+                margin-left: 0.046875rem;
+            }
+            
+            .dice-section {
+                padding: 0 !important;
+                margin: 0 !important;
+                gap: 1.5px !important;
+                max-width: 60px !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+            }
+            
+            .die {
+                width: 48px !important;
+                height: 48px !important;
+                font-size: 24px !important;
+                border-radius: 8px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+            }
+            
+            /* Mobile/Tablet player color dice styling */
+            .dice-section.dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            .dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            .dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            .dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            .dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+            .dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+            
+            button {
+                padding: 6px 9px !important;
+                font-size: 9px !important;
+                min-height: 27px !important;
+            }
+            
+            /* Override general button sizing for toggle buttons in this media query too */
+            #music-toggle, #restart-toggle, #analyze-toggle, #info-toggle {
+                min-height: 18px !important;
+                min-width: 18px !important;
+                height: 18px !important;
+                width: 18px !important;
+                font-size: 9px !important;
+                padding: 2px !important;
+                border-radius: 6px !important;
+                line-height: 18px !important;
+                flex: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Override general button sizing for switches container in this media query too */
+            .switches-container {
+                max-width: 1.65rem !important;
+                gap: 0.0375rem !important;
+                padding: 0.0140625rem !important;
+                border-radius: 0.1125rem !important;
+                margin-bottom: 0.16875rem !important;
+            }
+            
+            .switches-container span {
+                font-size: 0.140625rem !important;
+                margin-left: 0.028125rem !important;
+            }
+            
+            #property-info-content button {
+                padding: 4.5px 7.5px !important;
+                font-size: 8.25px !important;
+                min-height: 24px !important;
+            }
+            
+            .turn-info {
+                font-size: 8.25px !important;
+                margin: 3px 0 !important;
+            }
+            
+            #dice-roll-info {
+                font-size: 7.5px !important;
+                margin: 2.25px 0 !important;
+            }
+            
+            #ai-analysis-btn {
+                font-size: 11px !important;
+                padding: 6px 10px !important;
+                min-height: 32px !important;
+            }
+            
+            #userids-panel {
+                display: none !important;
+            }
+
+            /* Mobile-specific dice pulse animations */
+            @keyframes dicePulseRed {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.9);
+                    background-color: rgba(255, 0, 0, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                    background-color: rgba(255, 0, 0, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                    background-color: rgba(255, 0, 0, 0.3);
+                }
+            }
+
+            @keyframes dicePulseBlue {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 128, 255, 0.9);
+                    background-color: rgba(0, 128, 255, 0.3);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(0, 128, 255, 0);
+                    background-color: rgba(0, 128, 255, 0.5);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(0, 128, 255, 0);
+                    background-color: rgba(0, 128, 255, 0.3);
+                }
+            }
+
+            .dice-pulse {
+                animation: dicePulse 1.2s ease-in-out infinite !important;
+                background-color: rgba(255, 0, 0, 0.1) !important;
+            }
+
+            .dice-pulse-red {
+                animation: dicePulseRed 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+            }
+
+            .dice-pulse-blue {
+                animation: dicePulseBlue 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 128, 255, 0.8) !important;
+            }
+
+            @keyframes dicePulse {
+                0% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+                }
+                70% {
+                    transform: scale(1.02);
+                    box-shadow: 0 0 0 8px rgba(255, 0, 0, 0);
+                }
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+                }
+            }
+
+            /* Add mobile-specific property click detection */
+            .property-click-area {
+                position: absolute;
+                width: 60px;  /* Larger touch target */
+                height: 60px;
+                transform: translate(-50%, -50%);
+                background: transparent;
+                border-radius: 50%;
+                pointer-events: auto;
+                touch-action: manipulation;
+                z-index: 100;
+            }
+
+            .property-click-area:active {
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+
+        /* Touch feedback */
+        .touch-feedback {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(0.95);
+            transition: all 0.1s ease;
+        }
+        
+        /* Enhanced mobile/tablet touch support */
+        @media (max-width: 1024px) {
+            /* Larger touch targets for mobile/tablet */
+            .dice-section {
+                min-height: 60px;
+                min-width: 60px;
+                padding: 12px;
+            }
+            
+            /* Ensure dice pulse animations work in tablet/web view - Enhanced visibility */
+            .dice-section.dice-pulse-player-red {
+                animation: dicePulsePlayerRed 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(255, 0, 0, 1) !important;
+                background: rgba(255, 0, 0, 0.6) !important;
+                border: 2px solid rgba(255, 0, 0, 0.8) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-blue {
+                animation: dicePulsePlayerBlue 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(0, 0, 255, 1) !important;
+                background: rgba(0, 0, 255, 0.6) !important;
+                border: 2px solid rgba(0, 0, 255, 0.8) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-green {
+                animation: dicePulsePlayerGreen 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(0, 255, 0, 1) !important;
+                background: rgba(0, 255, 0, 0.6) !important;
+                border: 2px solid rgba(0, 255, 0, 0.8) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-yellow {
+                animation: dicePulsePlayerYellow 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(255, 255, 0, 1) !important;
+                background: rgba(255, 255, 0, 0.6) !important;
+                border: 2px solid rgba(255, 255, 0, 0.8) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-purple {
+                animation: dicePulsePlayerPurple 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 8px rgba(128, 0, 128, 1) !important;
+                background: rgba(128, 0, 128, 0.6) !important;
+                border: 2px solid rgba(128, 0, 128, 0.8) !important;
+                transition: none !important;
+            }
+            
+            /* Tablet/web view hover state overrides for pulse animations */
+            .dice-section.dice-pulse-player-red:hover {
+                background: rgba(255, 0, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-blue:hover {
+                background: rgba(0, 0, 255, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-green:hover {
+                background: rgba(0, 255, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-yellow:hover {
+                background: rgba(255, 255, 0, 0.8) !important;
+            }
+            .dice-section.dice-pulse-player-purple:hover {
+                background: rgba(128, 0, 128, 0.8) !important;
+            }
+            
+            /* Better visual feedback for double-tap */
+            canvas {
+                -webkit-tap-highlight-color: rgba(255, 255, 0, 0.3);
+            }
+        }
+        
+        /* High-DPI display optimizations */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            /* Ensure crisp rendering on high-DPI displays */
+            canvas {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Pan indicator */
+        .pan-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 1002;
+            display: none;
+        }
+
+        .switches-container {
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 0.375rem;
+            margin-bottom: 0.375rem;
+            padding: 0.125rem;
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 0.25rem;
+            max-width: 6.875rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        #music-toggle, #restart-toggle, #analyze-toggle, #info-toggle {
+            background: linear-gradient(135deg, #666 0%, #555 100%); 
+            color: white; 
+            border: 0.09375rem solid #999; 
+            border-radius: 0.1875rem;
+            padding: 0.0703125rem 0.140625rem;
+            cursor: pointer; 
+            font-size: 0.28125rem;
+            font-weight: bold; 
+            transition: all 0.3s ease;
+            min-width: 1.0546875rem;
+            text-align: center;
+            height: 0.6328125rem;
+            line-height: 0.3515625rem;
+            box-shadow: 0 0.09375rem 0.1875rem rgba(0, 0, 0, 0.3), inset 0 0.046875rem 0 rgba(255, 255, 255, 0.1);
+            text-shadow: 0 0.046875rem 0.046875rem rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #music-toggle:hover, #restart-toggle:hover, #analyze-toggle:hover, #info-toggle:hover {
+            transform: translateY(-0.046875rem);
+            box-shadow: 0 0.1875rem 0.375rem rgba(0, 0, 0, 0.4), inset 0 0.046875rem 0 rgba(255, 255, 255, 0.2);
+        }
+        
+        #restart-toggle {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            border-color: #b71c1c;
+        }
+        
+        #restart-toggle {
+            background: #f44336; 
+            border: 0.0625rem solid #d32f2f;
+        }
+        
+        .switches-container span {
+            font-size: 0.328125rem;
+            margin-left: 0.09375rem;
+        }
+
+        .player-info span[style*="color: black"] {
+            background-color: transparent;
+            color: black;
+        }
+
+        /* Special styling for demon card properties */
+        .demon-card-property {
+            background-color: #ff0000 !important;
+            color: #000000 !important;
+            padding: 1px 4px;
+            border-radius: 3px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 600px), (max-device-width: 600px) {
+            .demon-card-property {
+                padding: 1px 2px;
+                font-size: 9px !important;
+            }
+        }
+
+        .t8-glow {
+            box-shadow: 0 0 20px 10px #ff0000; /* Red glow */
+            animation: t8Flash 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        @keyframes t8Flash {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 0, 0, 0.8); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+        
+        /* Mobile dice pulsing effects */
+        .mobile-dice-pulse-red {
+            animation: mobileDicePulseRed 1.5s ease-in-out infinite;
+        }
+        
+        .mobile-dice-pulse-blue {
+            animation: mobileDicePulseBlue 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes mobileDicePulseRed {
+            0% {
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+            }
+            50% {
+                background: rgba(255, 102, 102, 0.3);
+                box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+            }
+            100% {
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+            }
+        }
+        
+        @keyframes mobileDicePulseBlue {
+            0% {
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0 5px rgba(0, 0, 255, 0.3);
+            }
+            50% {
+                background: rgba(102, 153, 255, 0.3);
+                box-shadow: 0 0 15px rgba(0, 0, 255, 0.8);
+            }
+            100% {
+                background: rgba(255, 255, 255, 0.1);
+                box-shadow: 0 0 5px rgba(0, 0, 255, 0.3);
+            }
+        }
+        
+        /* Mobile panel drag handle */
+        #mobile-info-header {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        /* Enhanced mobile touch feedback */
+        .mobile-touch-feedback {
+            transition: all 0.1s ease;
+        }
+        
+        .mobile-touch-active {
+            transform: scale(0.95) !important;
+            opacity: 0.8 !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        /* Mobile button improvements */
+        @media (max-width: 768px), (max-device-width: 768px) {
+            button {
+                min-height: 44px;  /* iOS recommended touch target size */
+                min-width: 44px;
+                padding: 8px 12px;
+                font-size: 14px;
+                border-radius: 8px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Enhanced dice digit size for mobile devices */
+            .die, .mobile-die {
+                font-size: 24px !important;
+                font-weight: bold !important;
+                width: 48px !important;
+                height: 48px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+            }
+            
+            /* Ensure dice digits are clearly visible on all mobile devices */
+            #die1, #die2 {
+                font-size: 24px !important;
+                font-weight: bold !important;
+                width: 48px !important;
+                height: 48px !important;
+            }
+            
+            /* Override general button sizing for toggle buttons specifically */
+            #music-toggle, #restart-toggle, #analyze-toggle, #info-toggle {
+                min-height: 18px !important;
+                min-width: 18px !important;
+                height: 18px !important;
+                width: 18px !important;
+                font-size: 9px !important;
+                padding: 2px !important;
+                border-radius: 6px !important;
+                line-height: 18px !important;
+                flex: 1 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            
+            /* Override general button sizing for switches container */
+            .switches-container {
+                max-width: 1.65rem !important;
+                gap: 0.0375rem !important;
+                padding: 0.0140625rem !important;
+                border-radius: 0.1125rem !important;
+                margin-bottom: 0.16875rem !important;
+            }
+            
+            .switches-container span {
+                font-size: 0.140625rem !important;
+                margin-left: 0.028125rem !important;
+            }
+            
+            /* Improved touch targets for dice - better definition */
+            .dice-section, #mobile-dice-section {
+                padding: 8px;
+                min-height: 48px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+            }
+            
+            .die, .mobile-die {
+                min-width: 32px;
+                min-height: 32px;
+                max-width: 32px;
+                max-height: 32px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+                /* Optimized font size for better readability */
+                font-size: 18px !important;
+                font-weight: bold !important;
+                border-radius: 6px !important;
+                margin: 3px !important;
+                /* Enhanced definition with better shadows */
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+                /* Subtle gradient for depth */
+                background: linear-gradient(145deg, #ffffff, #f0f0f0) !important;
+                /* Crisp text rendering */
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+            }
+            
+            /* Better canvas touch handling */
+            canvas {
+                touch-action: none;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                user-select: none;
+            }
+            
+            /* Mobile panel improvements */
+            #mobile-info-panel {
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: contain;
+            }
+            
+            /* Enhanced mobile info panel button styling - mobile only */
+            @media (max-width: 768px), (max-device-width: 768px) {
+                #mobile-music-toggle, #mobile-info-toggle, #mobile-analyze-toggle, #mobile-restart-toggle {
+                    transition: all 0.1s ease !important;
+                    min-height: 8px !important;
+                    min-width: 12px !important;
+                    font-size: 3px !important;
+                    padding: 0.5px 1px !important;
+                    border-radius: 1px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3) !important;
+                    user-select: none !important;
+                    -webkit-user-select: none !important;
+                    touch-action: manipulation !important;
+                }
+                
+                #mobile-music-toggle:active, #mobile-info-toggle:active, #mobile-analyze-toggle:active, #mobile-restart-toggle:active {
+                    transform: scale(0.9) !important;
+                    opacity: 0.7 !important;
+                }
+                
+                /* Ensure mobile control buttons container is properly sized */
+                #mobile-control-buttons {
+                    min-height: 12px !important;
+                    gap: 2px !important;
+                    padding: 2px !important;
+                    margin-bottom: 6px !important;
+                    border-radius: 2px !important;
+                }
+                
+                /* Mobile toggle switches - evenly spaced */
+                .switches-container {
+                    display: flex !important;
+                    justify-content: space-evenly !important;
+                    align-items: center !important;
+                    width: 100% !important;
+                    gap: 0 !important;
+                    padding: 4px 8px !important;
+                    margin-bottom: 8px !important;
+                    background: rgba(0, 0, 0, 0.4) !important;
+                    border-radius: 6px !important;
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                }
+                
+                /* Individual toggle button containers */
+                .music-toggle, .info-toggle, .analyze-toggle, .restart-toggle {
+                    flex: 1 !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                    align-items: center !important;
+                }
+                
+                /* Mobile toggle buttons styling (now 50% smaller from original) */
+                #music-toggle, #info-toggle, #analyze-toggle, #restart-toggle {
+                    min-width: 18px !important;
+                    min-height: 18px !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    font-size: 9px !important;
+                    padding: 2px !important;
+                    border-radius: 6px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    touch-action: manipulation !important;
+                    -webkit-tap-highlight-color: rgba(255, 255, 255, 0.2) !important;
+                }
+
+                /* Mobile toggle switches - decrease size by an additional 25% */
+                .switches-container {
+                    padding: 3px 6px !important;
+                    margin-bottom: 6px !important;
+                    border-radius: 4.5px !important;
+                }
+
+                #music-toggle, #info-toggle, #analyze-toggle, #restart-toggle {
+                    min-width: 18px !important;
+                    min-height: 18px !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    font-size: 9px !important;
+                    padding: 2px !important;
+                    border-radius: 6px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+            }
+            
+            /* Prevent zoom on input focus */
+            input, select, textarea {
+                font-size: 16px;
+            }
+            
+            /* Better touch feedback for interactive elements */
+            [onclick], button, .clickable {
+                cursor: pointer;
+                transition: all 0.1s ease;
+            }
+            
+            [onclick]:active, button:active, .clickable:active {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+        
+        /* Disable text selection on game elements */
+        .game-element, #mobile-info-panel, .dice-section, #info-panel {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+        
+        /* Improve scrolling on mobile */
+        @supports (-webkit-overflow-scrolling: touch) {
+            .scrollable {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Bottom Player Information Display Styles */
+        #bottom-player-display {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #666;
+            padding: 8px 16px;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+            /* Safe area support for modern mobile devices */
+            padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+            padding-left: calc(16px + env(safe-area-inset-left, 0px));
+            padding-right: calc(16px + env(safe-area-inset-right, 0px));
+            /* Ensure it's always visible above mobile browser UI */
+            min-height: 60px;
+            max-height: 30vh;
+            overflow-y: auto;
+        }
+
+        #bottom-player-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 4px;
+        }
+
+        .bottom-player-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 6px 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .bottom-player-item.current-player {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .bottom-player-name {
+            font-weight: bold;
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .bottom-player-money {
+            color: #90EE90;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .bottom-player-star {
+            color: #ffd700;
+            margin-right: 4px;
+            font-size: 12px;
+        }
+
+        /* Tablet styles for bottom player display */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            #bottom-player-display {
+                padding: 6px 12px;
+                padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+                padding-left: calc(12px + env(safe-area-inset-left, 0px));
+                padding-right: calc(12px + env(safe-area-inset-right, 0px));
+                min-height: 70px;
+                max-height: 25vh;
+            }
+            
+            /* Ensure dice pulse animations work in tablet range */
+            .dice-section.dice-pulse-player-red {
+                animation: dicePulsePlayerRed 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 0, 0, 0.8) !important;
+                background: rgba(255, 0, 0, 0.3) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-blue {
+                animation: dicePulsePlayerBlue 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 0, 255, 0.8) !important;
+                background: rgba(0, 0, 255, 0.3) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-green {
+                animation: dicePulsePlayerGreen 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.8) !important;
+                background: rgba(0, 255, 0, 0.3) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-yellow {
+                animation: dicePulsePlayerYellow 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(255, 255, 0, 0.8) !important;
+                background: rgba(255, 255, 0, 0.3) !important;
+                transition: none !important;
+            }
+            
+            .dice-section.dice-pulse-player-purple {
+                animation: dicePulsePlayerPurple 1.2s ease-in-out infinite !important;
+                text-shadow: 0 0 3px rgba(128, 0, 128, 0.8) !important;
+                background: rgba(128, 0, 128, 0.3) !important;
+                transition: none !important;
+            }
+            
+            /* Tablet player color dice styling */
+            .dice-section.dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            .dice-pulse-player-red .die { background: rgba(255, 0, 0, 0.9) !important; color: white !important; border: 2px solid rgba(255, 0, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 0, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            .dice-pulse-player-blue .die { background: rgba(0, 0, 255, 0.9) !important; color: white !important; border: 2px solid rgba(0, 0, 255, 1) !important; box-shadow: 0 0 8px rgba(0, 0, 255, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            .dice-pulse-player-green .die { background: rgba(0, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(0, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(0, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            .dice-pulse-player-yellow .die { background: rgba(255, 255, 0, 0.9) !important; color: black !important; border: 2px solid rgba(255, 255, 0, 1) !important; box-shadow: 0 0 8px rgba(255, 255, 0, 0.6) !important; }
+            
+            .dice-section.dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+            .dice-pulse-player-purple .die { background: rgba(128, 0, 128, 0.9) !important; color: white !important; border: 2px solid rgba(128, 0, 128, 1) !important; box-shadow: 0 0 8px rgba(128, 0, 128, 0.6) !important; }
+
+            .bottom-player-item {
+                width: 100%;
+                padding: 6px 12px;
+                gap: 8px;
+                min-height: 44px; /* Better touch targets for tablets */
+                align-items: center;
+            }
+
+            .bottom-player-name, .bottom-player-money {
+                font-size: 16px;
+            }
+            
+            .bottom-player-name {
+                font-weight: bold;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+            }
+
+            .bottom-player-star {
+                font-size: 12px;
+            }
+            
+            .bottom-player-properties {
+                font-size: 11px;
+            }
+        }
+
+        /* Mobile styles for bottom player display */
+        @media (max-width: 768px) {
+            #bottom-player-display {
+                padding: 4px 8px;
+                padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+                padding-left: calc(8px + env(safe-area-inset-left, 0px));
+                padding-right: calc(8px + env(safe-area-inset-right, 0px));
+                min-height: 80px;
+                max-height: 35vh;
+                /* Ensure visibility above mobile browser UI */
+                transform: translateZ(0); /* Force hardware acceleration */
+                will-change: transform;
+            }
+
+            #bottom-player-content {
+                gap: 4px;
+            }
+
+            .bottom-player-item {
+                width: 100%;
+                padding: 6px 10px;
+                gap: 6px;
+                min-height: 40px; /* Better touch targets for mobile */
+                align-items: center;
+                flex-wrap: nowrap;
+                overflow: hidden;
+            }
+
+            .bottom-player-name, .bottom-player-money {
+                font-size: 14px;
+                white-space: nowrap;
+            }
+            
+            .bottom-player-name {
+                font-weight: bold;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+            }
+
+            .bottom-player-star {
+                font-size: 10px;
+                flex-shrink: 0;
+            }
+            
+            .bottom-player-properties {
+                font-size: 9px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        /* Very small mobile screens */
+        @media (max-width: 480px) {
+            #bottom-player-display {
+                padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+                min-height: 90px;
+                max-height: 40vh;
+            }
+            
+            .bottom-player-item {
+                width: 100%;
+                gap: 4px;
+                padding: 5px 8px;
+                min-height: 36px;
+                font-size: 10px;
+            }
+
+            .bottom-player-name, .bottom-player-money {
+                font-size: 12px;
+            }
+            
+            .bottom-player-name {
+                font-weight: bold;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+            }
+            
+            .bottom-player-star {
+                font-size: 9px;
+            }
+            
+            .bottom-player-properties {
+                font-size: 8px;
+            }
+        }
+        
+        /* Landscape mobile devices */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #bottom-player-display {
+                max-height: 45vh;
+                min-height: 50px;
+                padding: 2px 8px;
+                padding-bottom: calc(2px + env(safe-area-inset-bottom, 0px));
+            }
+            
+            .bottom-player-item {
+                min-height: 32px;
+                padding: 3px 6px;
+                gap: 3px;
+            }
+            
+            .bottom-player-name, .bottom-player-money {
+                font-size: 11px;
+            }
+            
+            .bottom-player-name {
+                font-weight: bold;
+                text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* Lobby Player Display Styles */
+        #lobby-player-display {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #666;
+            padding: 8px 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #lobby-player-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .lobby-player-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            min-width: 80px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .lobby-player-item.current-player {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.2);
+        }
+
+        .lobby-player-name {
+            font-weight: bold;
+            font-size: 12px;
+            color: #fff;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .lobby-player-token {
+            width: 32px;
+            height: 32px;
+            margin: 4px 0;
+            border-radius: 4px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .lobby-player-money {
+            font-size: 11px;
+            color: #90EE90;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Responsive styles for lobby display */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            /* Tablet styles for lobby */
+            #lobby-player-display {
+                padding: 6px 12px;
+            }
+            
+            #lobby-player-content {
+                gap: 10px;
+            }
+            
+            .lobby-player-item {
+                padding: 6px 10px;
+                min-width: 70px;
+            }
+            
+            .lobby-player-token {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        /* iPhone 12 and similar high-resolution mobile devices */
+        @media (max-width: 428px) and (-webkit-device-pixel-ratio: 3), 
+               (max-width: 414px) and (-webkit-device-pixel-ratio: 3),
+               (max-width: 390px) and (-webkit-device-pixel-ratio: 3) {
+            /* Extra large dice digits for high-DPI mobile screens */
+            .die, .mobile-die, #die1, #die2 {
+                font-size: 26px !important;
+                font-weight: 900 !important;
+                width: 52px !important;
+                height: 52px !important;
+                min-width: 52px !important;
+                min-height: 52px !important;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile styles for lobby */
+            #lobby-player-display {
+                padding: 6px 8px;
+            }
+            
+            #lobby-player-content {
+                gap: 8px;
+            }
+            
+            .lobby-player-item {
+                padding: 4px 6px;
+                min-width: 60px;
+            }
+            
+            .lobby-player-name {
+                font-size: 10px;
+            }
+            
+            .lobby-player-token {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .lobby-player-money {
+                font-size: 9px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Very small mobile styles for lobby */
+            #lobby-player-display {
+                padding: 4px 6px;
+            }
+            
+            #lobby-player-content {
+                gap: 6px;
+            }
+            
+            .lobby-player-item {
+                padding: 3px 4px;
+                min-width: 50px;
+            }
+            
+            .lobby-player-name {
+                font-size: 9px;
+            }
+            
+            .lobby-player-token {
+                width: 20px;
+                height: 20px;
+            }
+            
+            .lobby-player-money {
+                font-size: 8px;
+            }
+        }
+    </style>
+    <style>
+        /* Auto-start multiplayer: skip intro screen entirely */
+        html.autostart #intro-screen { display: none !important; }
+        html.autostart #game-container { display: block !important; }
+    </style>
+    <script>
+        // Set autostart class as early as possible to avoid flicker
+        (function() {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('autostart') === '1' && (params.get('roomId') || params.get('room'))) {
+                    document.documentElement.classList.add('autostart');
+                    window.MULTIPLAYER_AUTOSTART = true;
+                }
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+    <!-- Audio element for rain sound -->
+    <audio id="rainSound" src="assets/sounds/rain.mp3" preload="auto" muted playsinline></audio>
+
+    <div id="intro-screen">
+        <div class="player-selection-window">
+            <h1 class="horropoly-title">Horropoly</h1>
+            
+            <div id="player-setup">
+                <input id="player1-name" type="text" value="Player1" />
+            </div>
+            
+            <div class="game-mode-selection">
+                <button id="vs-ai-btn" class="mode-button">Play vs AI</button>
+                <button id="vs-human-btn" class="mode-button">Play vs Human</button>
+            </div>
+
+            <div id="ai-options" class="ai-options">
+                <div style="margin-bottom:10px;">
+                    <label for="human-player-count" style="margin-right:6px;">Humans:</label>
+                    <select id="human-player-count" style="padding:6px; border-radius:4px;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label for="ai-player-count" style="margin-right:6px;">AI Bots:</label>
+                    <select id="ai-player-count" style="padding:6px; border-radius:4px;">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+                <button id="start-ai-game-btn">Start Game</button>
+            </div>
+
+            <div class="multiplayer-controls">
+                <div class="button-group">
+                    <button id="create-room-btn" class="button-secondary">Create Room</button>
+                    <button id="join-room-btn" class="button-secondary">Join Room</button>
+                </div>
+                <div style="margin-top:10px;">
+                    <label for="max-players" style="margin-right:6px;">Players:</label>
+                    <select id="max-players" style="padding:6px; border-radius:4px;">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
+                <input id="room-id-input" type="text" placeholder="Enter room code" style="display: none;" />
+                <div id="room-code"></div>
+                <div id="room-list" class="room-list" style="display: none;"></div>
+                <div id="player-list" class="player-list" style="display: none;"></div>
+                <button id="start-game-btn" style="display: none;">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="lobby-container" style="display:none; text-align:center; padding:20px; position: relative; min-height: 400px;">
+        <h2>Multiplayer Lobby</h2>
+        <input id="display-name" placeholder="Your name" maxlength="20" />
+        <div>
+            <input id="room-name" placeholder="Room name" maxlength="20" />
+            <select id="min-players">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+            <button id="create-room">Create</button>
+        </div>
+        <button id="refresh-rooms">Refresh Rooms</button>
+        <ul id="available-rooms"></ul>
+        <ul id="room-players"></ul>
+        
+        <!-- Bottom Player Info Display for Lobby -->
+        <div id="lobby-player-display" style="display: none;">
+            <div id="lobby-player-content">
+                <!-- Players will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container">
+
+        
+        <!-- Add hand effect container -->
+        <div id="hand-effect" class="hand-container">
+            <img src="assets/images/face1.jpg" alt="Face" class="hand-image" />
+        </div>
+    </div>
+
+    <!-- Bottom Player Information Display -->
+    <div id="bottom-player-display" style="display: none;">
+        <div id="bottom-player-content">
+            <!-- Players will be populated here -->
+        </div>
+    </div>
+
+    <!-- Mobile pan indicator -->
+    <div id="pan-indicator" class="pan-indicator">
+         Pinch or swipe to zoom and pan 👉
+    </div>
+
+    <!-- Player UserIDs Panel -->
+    <div id="userids-panel" style="display: none; position: fixed; top: 20px; right: 20px; width: 220px; padding: 10px; background: rgba(0, 0, 0, 0.95); border: 2px solid #4CAF50; border-radius: 8px; color: #fff; font-family: 'Courier New', Courier, monospace; z-index: 999; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);">
+        <div style="font-weight: bold; margin-bottom: 8px; color: #ffd700; text-align: center; font-size: 14px;">Player UserIDs</div>
+        <div id="userids-content" style="font-size: 11px;">
+            <div style="text-align: center; color: #999;">Loading...</div>
+        </div>
+    </div>
+
+    <div id="info-panel" style="display: none; z-index: 1001;">
+        <!-- Header with minimize button -->
+        <div id="info-panel-header" style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px; padding: 5px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; cursor: move; position: relative;">
+            <span style="flex: 1; text-align: center; font-weight: bold; color: #fff; font-size: 18px; letter-spacing: 1px; text-shadow: 0 0 8px #ffd700, 0 0 2px #fff;">Player Info</span>
+            <button id="minimize-info-panel" onclick="toggleInfoPanelMinimize()" style="
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 3.75px;
+                padding: 6.33px 2.535px;
+                cursor: pointer;
+                font-size: 10.125px;
+                transition: all 0.2s ease;
+                min-width: 12.66px;
+                height: 25.3125px;
+                text-align: center;
+            " onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">−</button>
+        </div>
+        
+        <!-- Content container that will be hidden when minimized -->
+        <div id="info-panel-content">
+        <div class="switches-container" style="display: flex; align-items: center; justify-content: center; gap: 0.28125rem; margin-bottom: 0.28125rem; padding: 0.1875rem; background: rgba(0, 0, 0, 0.3); border-radius: 0.1875rem; border: 0.046875rem solid rgba(255, 255, 255, 0.2);">
+            <div class="music-toggle" style="display: flex; align-items: center;">
+                <button id="music-toggle" style="
+                    background: linear-gradient(135deg, #666 0%, #555 100%); 
+                    color: white; 
+                    border: 0.09375rem solid #999; 
+                    border-radius: 0.375rem; 
+                    padding: 0.0703125rem 0.2109375rem; 
+                    cursor: pointer; 
+                    font-size: 0.38671875rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    min-width: 1.23046875rem;
+                    height: 0.5625rem;
+                    text-align: center;
+                    box-shadow: 0 0.09375rem 0.1875rem rgba(0, 0, 0, 0.3), inset 0 0.046875rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.046875rem 0.046875rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔇</button>
+            </div>
+            <div class="info-toggle" style="display: flex; align-items: center;">
+                <button id="info-toggle" onclick="showHorrorInstructions()" title="Game Instructions & Rules" style="
+                    background: linear-gradient(135deg, #4a0080 0%, #6a00a0 100%); 
+                    border-color: #8a2be2; 
+                " ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">ℹ️</button>
+            </div>
+            <div class="analyze-toggle" style="display: flex; align-items: center;">
+                <button id="analyze-toggle" onclick="showAIAnalysis()" title="AI Analysis" style="
+                    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); 
+                    color: white; 
+                    border: 0.125rem solid #4CAF50; 
+                    border-radius: 0.5rem; 
+                    padding: 0.09375rem 0.28125rem; 
+                    cursor: pointer; 
+                    font-size: 0.515625rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    min-width: 1.640625rem;
+                    height: 0.75rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔍</button>
+            </div>
+            <div class="restart-toggle" style="display: flex; align-items: center;">
+                <button id="restart-toggle" onclick="confirmRestart()" style="
+                    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%); 
+                    color: white; 
+                    border: 0.125rem solid #b71c1c; 
+                    border-radius: 0.5rem; 
+                    padding: 0.09375rem 0.28125rem; 
+                    cursor: pointer; 
+                    font-size: 0.515625rem; 
+                    font-weight: bold; 
+                    transition: all 0.3s ease;
+                    min-width: 1.640625rem;
+                    height: 0.75rem;
+                    text-align: center;
+                    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1);
+                    text-shadow: 0 0.0625rem 0.0625rem rgba(0, 0, 0, 0.5);
+                    position: relative;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-0.0625rem)'; this.style.boxShadow='0 0.25rem 0.5rem rgba(0, 0, 0, 0.4), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.2)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 0.125rem 0.25rem rgba(0, 0, 0, 0.3), inset 0 0.0625rem 0 rgba(255, 255, 255, 0.1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">🔄</button>
+            </div>
+        </div>
+        <div id="advisory-panel" style="margin-bottom: 15px; padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; font-size: 14px;">
+            <div id="advisory-title" style="font-weight: bold; margin-bottom: 5px; color: #ffd700;">Game Advisory</div>
+            <div id="advisory-content" style="color: #fff; min-height: 40px;">Welcome to Horropoly!</div>
+        </div>
+        <div id="dice-content"></div>
+        <div id="player-info-content"></div>
+        <div id="property-info-content"></div>
+
+        <div id="ai-analysis-modal" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 20px; border-radius: 10px; z-index: 1000; border: 2px solid #666; box-shadow: 0 0 20px rgba(0,0,0,0.5); max-width: 300px; text-align: center;">
+            <div id="ai-analysis-content" style="color: #fff; margin-bottom: 15px;"></div>
+            <button onclick="hideAIAnalysis()" style="background: #f44336; color: #fff; border: none; padding: 4.5px 9px; border-radius: 3px; cursor: pointer; font-size: 9px;">Close</button>
+        </div>
+        <div id="player-scores"></div>
+        <div class="dice-section" id="dice-section">
+            <div class="die" id="die1">?</div>
+            <div class="die" id="die2">?</div>
+        </div>
+        <h3 id="turn-info" class="turn-info"></h3>
+        <p id="dice-roll-info"></p>
+        </div>
+    </div>
+
+    <!-- Mobile Info Panel - Now uses the standard multiplayer info panel -->
+
+    <div id="record-export" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 30px; border-radius: 15px; z-index: 1000; border: 2px solid #666; box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center;">
+        <h3 style="color: white; margin-bottom: 15px;">Eye Positions Recorded!</h3>
+        <textarea id="eye-positions-json" rows="4" cols="40" readonly style="margin: 10px 0; padding: 10px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid #666; border-radius: 5px; font-family: monospace;"></textarea>
+        <br>
+        <div style="margin-top: 15px;">
+            <button id="save-eyes-btn" style="background-color: #4CAF50; min-width: 120px;">Save</button>
+            <button id="cancel-eyes-btn" style="margin-left: 10px; background-color: #f44336; min-width: 120px;">Cancel</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import and initialize game paywall integration
+        import gamePaywallIntegration from './game-paywall-integration.js';
+        
+        // Import and initialize board transparency fix
+        import boardTransparencyManager from './board-transparency-fix.js';
+        
+        // Make them globally available for the rest of the page
+        window.gamePaywallIntegration = gamePaywallIntegration;
+        window.boardTransparencyManager = boardTransparencyManager;
+    </script>
+
+    <script>
+        // Define toggleInfoPanelMinimize function to be available immediately
+        window.toggleInfoPanelMinimize = function toggleInfoPanelMinimize() {
+            console.log('toggleInfoPanelMinimize called!');
+            
+            const infoPanel = document.getElementById('info-panel');
+            const infoPanelContent = document.getElementById('info-panel-content');
+            const minimizeButton = document.getElementById('minimize-info-panel');
+            
+            console.log('Elements found:', { infoPanel, infoPanelContent, minimizeButton });
+            
+            if (!infoPanel || !infoPanelContent || !minimizeButton) {
+                console.error('Info panel elements not found', { infoPanel, infoPanelContent, minimizeButton });
+                return;
+            }
+            
+            const isMinimized = infoPanel.classList.contains('minimized');
+            
+            if (isMinimized) {
+                console.log('📱 Restoring info panel to full window');
+                
+                // Remove minimized class and property-decision class
+                infoPanel.classList.remove('minimized', 'property-decision');
+                infoPanelContent.style.display = 'block';
+                minimizeButton.textContent = '−';
+                minimizeButton.title = 'Minimize';
+                infoPanel.style.height = 'auto';
+                infoPanel.style.minHeight = 'auto';
+                
+                // Restore dice section to original location
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection && (diceSection.getAttribute('data-original-parent') || diceSection.getAttribute('data-original-parent-id'))) {
+                    const storedParentId = diceSection.getAttribute('data-original-parent-id') || 'dice-content';
+                    const originalParent = document.getElementById(storedParentId);
+                    if (originalParent) {
+                        console.log('📱 Restoring dice to original location:', storedParentId);
+                        diceSection.style.cssText = ''; // Reset styling
+                        diceSection.removeAttribute('data-original-parent');
+                        diceSection.removeAttribute('data-original-parent-id');
+                        originalParent.appendChild(diceSection);
+                        
+                        // Re-enable dice section for normal mode
+                        setTimeout(() => {
+                            if (typeof enableDiceSection === 'function') {
+                                enableDiceSection();
+                            }
+                        }, 50);
+                    } else {
+                        console.error('📱 Original parent not found for dice restoration:', storedParentId);
+                    }
+                }
+                
+                // Remove minimized content if it exists
+                const minimizedContent = document.getElementById('minimized-content');
+                if (minimizedContent) {
+                    minimizedContent.remove();
+                }
+                
+                // Update the info panel to show full content
+                setTimeout(() => {
+                    console.log('📱 Calling updateInfoPanel after restore');
+                    
+                    // Check game state before updating
+                    console.log('📱 Game state check:', {
+                        players: typeof players !== 'undefined' && Array.isArray(players) ? players.length : 'not array',
+                        currentPlayerIndex: typeof currentPlayerIndex !== 'undefined' ? currentPlayerIndex : 'undefined',
+                        currentPlayer: typeof players !== 'undefined' && players && players[currentPlayerIndex] ? players[currentPlayerIndex].name : 'none'
+                    });
+                    
+                    if (typeof updateInfoPanel === 'function') {
+                        updateInfoPanel();
+                    }
+                    
+                    // Force refresh all content sections
+                    const playerInfoContent = document.getElementById('player-info-content');
+                    const propertyInfoContent = document.getElementById('property-info-content');
+                    const diceContent = document.getElementById('dice-content');
+                    
+                    console.log('📱 Content elements found:', {
+                        playerInfoContent: !!playerInfoContent,
+                        propertyInfoContent: !!propertyInfoContent,
+                        diceContent: !!diceContent
+                    });
+                    
+                    // Ensure all sections are visible
+                    if (playerInfoContent) playerInfoContent.style.display = 'block';
+                    if (propertyInfoContent) propertyInfoContent.style.display = 'block';
+                    if (diceContent) diceContent.style.display = 'block';
+                    
+                    // If game state is not ready, try again later
+                    if (typeof players === 'undefined' || !Array.isArray(players) || players.length === 0) {
+                        console.log('📱 Game state not ready, retrying in 500ms');
+                        setTimeout(() => {
+                            console.log('📱 Retry updateInfoPanel call');
+                            if (typeof updateInfoPanel === 'function') {
+                                updateInfoPanel();
+                            }
+                        }, 500);
+                    } else {
+                        // Force a second update to ensure content is populated
+                        setTimeout(() => {
+                            console.log('📱 Second updateInfoPanel call');
+                            if (typeof updateInfoPanel === 'function') {
+                                updateInfoPanel();
+                            }
+                        }, 200);
+                    }
+                }, 100);
+            } else {
+                // Minimize the panel - show only essential info
+                infoPanel.classList.add('minimized');
+                infoPanelContent.style.display = 'none';
+                minimizeButton.textContent = '+';
+                minimizeButton.title = 'Restore';
+                
+                // Create minimized content with only player info, funds, token, properties, and dice
+                const minimizedContent = document.createElement('div');
+                minimizedContent.id = 'minimized-content';
+                minimizedContent.style.cssText = `
+                    padding: 5px 10px;
+                    color: #fff;
+                    font-size: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    height: auto;
+                    overflow: visible;
+                `;
+                
+                // Get current player info (if game is loaded)
+                let currentPlayer = null;
+                
+                // Try to get player data from global variables first
+                if (typeof players !== 'undefined' && typeof currentPlayerIndex !== 'undefined' && players[currentPlayerIndex]) {
+                    currentPlayer = players[currentPlayerIndex];
+                } else {
+                    // Fallback: try to extract player info from existing player-info-content
+                    const playerInfoContent = document.getElementById('player-info-content');
+                    if (playerInfoContent && playerInfoContent.innerHTML.trim()) {
+                        // Look for the first player info div
+                        const firstPlayerDiv = playerInfoContent.querySelector('.player-info');
+                        if (firstPlayerDiv) {
+                            // Extract player name and money from the existing content
+                            const nameSpan = firstPlayerDiv.querySelector('.player-name-row span');
+                            const moneySpan = firstPlayerDiv.querySelector('.player-money-row span:nth-child(2)');
+                            
+                            if (nameSpan && moneySpan) {
+                                currentPlayer = {
+                                    name: nameSpan.textContent.trim(),
+                                    money: moneySpan.textContent.replace('£', '').trim(),
+                                    color: nameSpan.style.color || '#fff'
+                                };
+                            }
+                        }
+                    }
+                }
+                
+                if (currentPlayer) {
+                    // Only show steal cards if player has them (name, token, money now in bottom-player-display)
+                    if (currentPlayer.stealCards && currentPlayer.stealCards > 0) {
+                        const stealCardsDiv = document.createElement('div');
+                        stealCardsDiv.style.cssText = 'display: flex; align-items: center; justify-content: center; gap: 8px;';
+                        stealCardsDiv.innerHTML = `
+                            <span style="color: #00ff00; font-weight: bold; font-size: 12px;">🃏 ${currentPlayer.stealCards} Steal Card${currentPlayer.stealCards > 1 ? 's' : ''}</span>
+                        `;
+                        minimizedContent.appendChild(stealCardsDiv);
+                    }
+                    
+                    // Skip token section since it's now in bottom-player-display
+                    
+                    // Properties owned (compact format)
+                    if (currentPlayer.properties && currentPlayer.properties.length > 0) {
+                        const propertiesDiv = document.createElement('div');
+                        propertiesDiv.style.cssText = 'font-size: 10px; line-height: 1.2;';
+                        propertiesDiv.innerHTML = `<span style="color: #ccc;">Properties: ${currentPlayer.properties.length} owned</span>`;
+                        minimizedContent.appendChild(propertiesDiv);
+                    }
+                } else {
+                    // Fallback if game data not available
+                    const fallbackDiv = document.createElement('div');
+                    fallbackDiv.style.cssText = 'text-align: center; color: #ccc;';
+                    fallbackDiv.textContent = 'Game data not available';
+                    minimizedContent.appendChild(fallbackDiv);
+                }
+                
+                // Add dice section (move original, don't clone to preserve events)
+                const diceSection = document.getElementById('dice-section');
+                if (diceSection) {
+                    // Store original parent to restore later
+                    diceSection.setAttribute('data-original-parent', 'dice-content');
+                    diceSection.style.cssText = 'margin-top: 5px; transform: scale(0.8); transform-origin: left center;';
+                    minimizedContent.appendChild(diceSection);
+                }
+                
+                // Add turn info at the bottom - always show whose turn it is
+                const turnInfoDiv = document.createElement('div');
+                turnInfoDiv.id = 'minimized-turn-info';
+                turnInfoDiv.style.cssText = `
+                    margin-top: 8px;
+                    padding: 4px 8px;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 4px;
+                    text-align: center;
+                    font-size: 11px;
+                    font-weight: bold;
+                    color: #ffd700;
+                    border: 1px solid rgba(255, 215, 0, 0.3);
+                `;
+                
+                // Get turn info from the main turn info element
+                const mainTurnInfo = document.getElementById('turn-info');
+                if (mainTurnInfo && mainTurnInfo.textContent.trim()) {
+                    turnInfoDiv.textContent = mainTurnInfo.textContent;
+                } else {
+                    // Fallback: construct turn info from game state
+                    if (typeof players !== 'undefined' && typeof currentPlayerIndex !== 'undefined' && players[currentPlayerIndex]) {
+                        const currentTurnPlayer = players[currentPlayerIndex];
+                        turnInfoDiv.textContent = `${currentTurnPlayer.name}'s Turn`;
+                    } else {
+                        turnInfoDiv.textContent = 'Waiting for turn...';
+                    }
+                }
+                
+                minimizedContent.appendChild(turnInfoDiv);
+                
+                // Insert after header
+                const header = document.getElementById('info-panel-header');
+                if (header) {
+                    header.insertAdjacentElement('afterend', minimizedContent);
+                }
+                
+                // Adjust panel height to fit content
+                infoPanel.style.height = 'auto';
+                infoPanel.style.minHeight = 'auto';
+            }
+        }
+        
+        // Make the function globally accessible (already done above)
+        // window.toggleInfoPanelMinimize = toggleInfoPanelMinimize; // Already assigned above
+        
+        // Debug: confirm function is defined
+        console.log('toggleInfoPanelMinimize function defined:', typeof window.toggleInfoPanelMinimize);
+
+        // Make player selection window draggable
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize rain sound loop
+            const rainSound = document.getElementById('rainSound');
+            rainSound.volume = 0.3; // Set volume to 30%
+            
+            function playRainSound() {
+                rainSound.currentTime = 0; // Reset to start
+                rainSound.play().catch(function(error) {
+                    console.log("Rain sound playback failed:", error);
+                });
+            }
+            
+            // Play rain sound every 15 seconds
+            playRainSound(); // Play immediately
+            setInterval(playRainSound, 15000); // Then every 15 seconds
+            const playerWindow = document.querySelector('.player-selection-window');
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            
+            playerWindow.addEventListener('mousedown', function(e) {
+                // Don't drag if clicking on input fields or buttons
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                
+                isDragging = true;
+                playerWindow.classList.add('dragging');
+                
+                const rect = playerWindow.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                // Convert to fixed positioning
+                playerWindow.style.position = 'fixed';
+                playerWindow.style.left = rect.left + 'px';
+                playerWindow.style.top = rect.top + 'px';
+                playerWindow.style.margin = '0';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const newX = e.clientX - dragOffset.x;
+                const newY = e.clientY - dragOffset.y;
+                
+                // Keep window within viewport bounds
+                const maxX = window.innerWidth - playerWindow.offsetWidth;
+                const maxY = window.innerHeight - playerWindow.offsetHeight;
+                
+                playerWindow.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                playerWindow.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    playerWindow.classList.remove('dragging');
+                }
+            });
+            
+            // Touch support for mobile
+            playerWindow.addEventListener('touchstart', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+                
+                const touch = e.touches[0];
+                isDragging = true;
+                playerWindow.classList.add('dragging');
+                
+                const rect = playerWindow.getBoundingClientRect();
+                dragOffset.x = touch.clientX - rect.left;
+                dragOffset.y = touch.clientY - rect.top;
+                
+                playerWindow.style.position = 'fixed';
+                playerWindow.style.left = rect.left + 'px';
+                playerWindow.style.top = rect.top + 'px';
+                playerWindow.style.margin = '0';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                
+                const touch = e.touches[0];
+                const newX = touch.clientX - dragOffset.x;
+                const newY = touch.clientY - dragOffset.y;
+                
+                const maxX = window.innerWidth - playerWindow.offsetWidth;
+                const maxY = window.innerHeight - playerWindow.offsetHeight;
+                
+                playerWindow.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
+                playerWindow.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('touchend', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    playerWindow.classList.remove('dragging');
+                }
+            });
+        });
+
+        // Add this at the beginning of your script section
+        function styleDemonProperties() {
+            const propertySpans = document.querySelectorAll('.player-info span[style*="color: black"]');
+            propertySpans.forEach(span => {
+                if (span.textContent.includes('Demon')) {
+                    span.classList.add('demon-card-property');
+                }
+            });
+        }
+
+        // Call this function whenever the player info is updated
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.target.id === 'player-info-content') {
+                    styleDemonProperties();
+                }
+            });
+        });
+
+        // Start observing the player-info-content for changes
+        observer.observe(document.getElementById('info-panel'), {
+            childList: true,
+            subtree: true
+        });
+    </script>
+
+    <script>
+    // Mobile Info Panel JavaScript - Now simplified for standard info panel
+    // Mobile panel now uses the standard multiplayer info panel
+    
+    // Initialize mobile panel functionality - Now simplified for standard info panel
+    function initializeMobilePanel() {
+        // Mobile panel now uses standard info panel, no special initialization needed
+        console.log('📱 Mobile panel now uses standard info panel - no special initialization needed');
+    }
+    
+    // Mobile panel dragging functionality - Now handled by standard info panel
+    function initializeMobilePanelDragging() {
+        // Dragging is now handled by the standard info panel's built-in functionality
+        console.log('📱 Panel dragging now handled by standard info panel');
+    }
+    
+    // Show mobile panel (for mobile devices) - Now uses standard info panel
+    function showMobilePanel() {
+        const infoPanel = document.getElementById('info-panel');
+        // Show standard info panel for mobile devices instead of separate mobile panel
+        if (infoPanel && (isMobile || window.innerWidth <= 768)) {
+            infoPanel.style.display = 'block';
+            // Apply mobile-specific styling to the standard panel
+            infoPanel.style.position = 'fixed';
+            infoPanel.style.top = '10px';
+            infoPanel.style.right = '10px';
+            infoPanel.style.width = '280px';
+            infoPanel.style.maxHeight = '85vh';
+            infoPanel.style.overflowY = 'auto';
+            infoPanel.style.zIndex = '1002';
+            console.log('📱 Standard info panel shown for mobile device with mobile styling');
+        }
+    }
+    
+    // Hide mobile panel - Now hides standard info panel
+    function hideMobilePanel() {
+        const infoPanel = document.getElementById('info-panel');
+        if (infoPanel) {
+            infoPanel.style.display = 'none';
+        }
+    }
+    
+    // Update mobile panel with current game state - Now updates standard info panel
+    function updateMobilePanel() {
+        const infoPanel = document.getElementById('info-panel');
+        if (!infoPanel || infoPanel.style.display === 'none') {
+            return;
+        }
+        
+        // Update the standard info panel instead of mobile-specific functions
+        if (typeof updateInfoPanel === 'function') {
+            updateInfoPanel();
+        }
+        
+        console.log('📱 Updated standard info panel for mobile device');
+    }
+    
+    // Update player scores in mobile panel - Now handled by standard info panel
+    function updateMobilePlayerScores() {
+        // This function is no longer needed as the standard info panel handles player scores
+        console.log('📱 Player scores now handled by standard info panel');
+    }
+    
+    // Update dice state in mobile panel - Now handled by standard info panel
+    function updateMobileDiceState() {
+        // This function is no longer needed as the standard info panel handles dice state
+        console.log('📱 Dice state now handled by standard info panel');
+    }
+    
+    // Update turn info in mobile panel - Now handled by standard info panel
+    function updateMobileTurnInfo() {
+        // This function is no longer needed as the standard info panel handles turn info
+        console.log('📱 Turn info now handled by standard info panel');
+    }
+    
+    // Update advisory content in mobile panel - Now handled by standard info panel
+    function updateMobileAdvisory() {
+        // This function is no longer needed as the standard info panel handles advisory content
+        console.log('📱 Advisory content now handled by standard info panel');
+    }
+    
+    // Check if purchase button should be shown - Now handled by standard info panel
+    function checkMobilePropertyPurchase() {
+        // This function is no longer needed as the standard info panel handles property purchases
+        console.log('📱 Property purchase now handled by standard info panel');
+    }
+    
+    // Show purchase button with timer - Now handled by standard info panel
+    function showMobilePurchaseButton(propertyInfo) {
+        // This function is no longer needed as the standard info panel handles property purchases
+        console.log('📱 Property purchase button now handled by standard info panel');
+    }
+    
+    // Hide purchase button - Now handled by standard info panel
+    function hideMobilePurchaseButton() {
+        // This function is no longer needed as the standard info panel handles property purchases
+        console.log('📱 Property purchase button hiding now handled by standard info panel');
+    }
+    
+    // Update purchase timer display - Now handled by standard info panel
+    function updatePurchaseTimer() {
+        // This function is no longer needed as the standard info panel handles property purchases
+        console.log('📱 Purchase timer now handled by standard info panel');
+    }
+    
+    // Handle purchase button click - Now handled by standard info panel
+    function handleMobilePurchase() {
+        // This function is no longer needed as the standard info panel handles property purchases
+        console.log('📱 Property purchase handling now handled by standard info panel');
+    }
+    
+    // Initialize mobile panel when DOM is ready - Now initializes standard info panel
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mobile panel now uses standard info panel, no special initialization needed
+        console.log('📱 Mobile panel now uses standard info panel');
+    });
+    
+    // Auto-show mobile panel for mobile devices - Now shows standard info panel
+    if (typeof window !== 'undefined') {
+        window.addEventListener('load', function() {
+            // Check if mobile and show standard info panel with mobile styling
+            if (window.isMobile || (window.innerWidth <= 768)) {
+                setTimeout(showMobilePanel, 1000);
+            }
+        });
+    }
+    
+    // Hook into main game functions to update mobile panel
+    // Override existing functions to include mobile panel updates
+    if (typeof window !== 'undefined') {
+        // Store original functions
+        let originalUpdateInfoPanel = null;
+        let originalShowAdvisory = null;
+        let originalNextTurn = null;
+        let originalEnableDiceSection = null;
+        
+        // Wait for game.js to load and then hook into functions
+        function hookIntoGameFunctions() {
+            if (window.updateInfoPanel && !originalUpdateInfoPanel) {
+                originalUpdateInfoPanel = window.updateInfoPanel;
+                window.updateInfoPanel = function(...args) {
+                    const result = originalUpdateInfoPanel.apply(this, args);
+                    updateMobilePanel();
+                    return result;
+                };
+                console.log('Hooked into updateInfoPanel for mobile panel');
+            }
+            
+            if (window.showAdvisory && !originalShowAdvisory) {
+                originalShowAdvisory = window.showAdvisory;
+                window.showAdvisory = function(...args) {
+                    const result = originalShowAdvisory.apply(this, args);
+                    updateMobilePanel();
+                    return result;
+                };
+                console.log('Hooked into showAdvisory for mobile panel');
+            }
+            
+            if (window.nextTurn && !originalNextTurn) {
+                originalNextTurn = window.nextTurn;
+                window.nextTurn = function(...args) {
+                    const result = originalNextTurn.apply(this, args);
+                    setTimeout(updateMobilePanel, 100);
+                    return result;
+                };
+                console.log('Hooked into nextTurn for mobile panel');
+            }
+            
+            if (window.enableDiceSection && !originalEnableDiceSection) {
+                originalEnableDiceSection = window.enableDiceSection;
+                window.enableDiceSection = function(...args) {
+                    const result = originalEnableDiceSection.apply(this, args);
+                    updateMobileDiceState();
+                    updateMinimizedTurnInfo();
+                    return result;
+                };
+                console.log('Hooked into enableDiceSection for mobile panel');
+            }
+            
+            // Hook into updateTurnInfo if it exists
+            if (window.updateTurnInfo && !window.originalUpdateTurnInfo) {
+                window.originalUpdateTurnInfo = window.updateTurnInfo;
+                window.updateTurnInfo = function(...args) {
+                    const result = window.originalUpdateTurnInfo.apply(this, args);
+                    updateMinimizedTurnInfo();
+                    return result;
+                };
+                console.log('Hooked into updateTurnInfo for minimized panel');
+            }
+        }
+        
+        // Try to hook immediately and also set up interval to catch late-loaded functions
+        setTimeout(hookIntoGameFunctions, 500);
+        const hookInterval = setInterval(() => {
+            hookIntoGameFunctions();
+            // Stop trying after 10 seconds
+            if (originalUpdateInfoPanel && originalShowAdvisory && originalNextTurn && originalEnableDiceSection) {
+                clearInterval(hookInterval);
+            }
+        }, 1000);
+        
+        setTimeout(() => clearInterval(hookInterval), 10000);
+    }
+    
+    // Enhanced steal card functionality for mobile panel
+    function addMobileStealCardClick(playerElement, playerName) {
+        if (!playerElement) return;
+        
+        playerElement.addEventListener('click', function(e) {
+            if (!window.players || !window.currentPlayerIndex === undefined) return;
+            
+            const currentPlayer = window.players[window.currentPlayerIndex];
+            if (!currentPlayer || currentPlayer.stealCards <= 0) return;
+            
+            // Find target player
+            const targetPlayer = window.players.find(p => p.name === playerName);
+            if (!targetPlayer || targetPlayer.properties.length === 0) return;
+            
+            // Show steal card confirmation
+            if (confirm(`Use steal card on ${playerName}? This will steal a random property.`)) {
+                if (window.handlePropertySteal) {
+                    // Use existing steal logic
+                    window.handlePropertySteal(0, 0, false);
+                } else {
+                    console.log('Steal card functionality not available');
+                }
+            }
+        });
+    }
+    
+    // Handle steal card click on mobile panel
+    function handleMobileStealCard(targetPlayerName) {
+        if (!window.players || window.currentPlayerIndex === undefined) return;
+        
+        const currentPlayer = window.players[window.currentPlayerIndex];
+        if (!currentPlayer || currentPlayer.stealCards <= 0) return;
+        
+        const targetPlayer = window.players.find(p => p.name === targetPlayerName);
+        if (!targetPlayer || targetPlayer.properties.length === 0) return;
+        
+        // Show confirmation with mobile-friendly styling
+        const confirmed = confirm(`🃏 Use STEAL CARD on ${targetPlayerName}?\n\nThis will steal a random property from them.\n\nYou have ${currentPlayer.stealCards} steal card${currentPlayer.stealCards > 1 ? 's' : ''} remaining.`);
+        
+        if (confirmed) {
+            // Use the existing steal card logic by simulating a canvas click
+            // The game uses canvas coordinates, so we need to simulate that
+            if (window.handlePropertySteal) {
+                console.log(`Mobile panel: Using steal card on ${targetPlayerName}`);
+                
+                // Find a property owned by the target player and get its coordinates
+                const targetProperty = targetPlayer.properties[0];
+                if (targetProperty && window.boardPositions && window.boardPositions[targetProperty]) {
+                    const pos = window.boardPositions[targetProperty];
+                    window.handlePropertySteal(pos.x, pos.y, false);
+                } else {
+                    // Fallback: use coordinates 0,0 and let the steal logic handle it
+                    window.handlePropertySteal(0, 0, false);
+                }
+                
+                // Update mobile panel after steal
+                setTimeout(updateMobilePanel, 500);
+            } else {
+                console.log('Steal card functionality not available');
+                alert('Steal card functionality is not available at this time.');
+            }
+        }
+    }
+    
+    // Update minimized turn info function
+    function updateMinimizedTurnInfo() {
+        const minimizedTurnInfo = document.getElementById('minimized-turn-info');
+        if (!minimizedTurnInfo) return;
+        
+        const mainTurnInfo = document.getElementById('turn-info');
+        if (mainTurnInfo && mainTurnInfo.textContent.trim()) {
+            minimizedTurnInfo.textContent = mainTurnInfo.textContent;
+        } else {
+            // Fallback: construct turn info from game state
+            if (typeof players !== 'undefined' && typeof currentPlayerIndex !== 'undefined' && players[currentPlayerIndex]) {
+                const currentTurnPlayer = players[currentPlayerIndex];
+                minimizedTurnInfo.textContent = `${currentTurnPlayer.name}'s Turn`;
+            } else {
+                minimizedTurnInfo.textContent = 'Waiting for turn...';
+            }
+        }
+    }
+
+    // Enhanced Mobile Touch System
+    function initializeMobileTouchSystem() {
+        console.log('🎯 Initializing Enhanced Mobile Touch System...');
+        
+        // Mobile device detection
+        const isMobileDevice = /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent) || 
+                              window.innerWidth <= 768 || 
+                              ('ontouchstart' in window);
+        
+        if (!isMobileDevice) {
+            console.log('🎯 Not a mobile device, skipping mobile touch initialization');
+            return;
+        }
+        
+        console.log('🎯 Mobile device detected, setting up enhanced touch handlers');
+        
+        // Enhanced dice touch handling
+        function setupDiceTouch() {
+            const diceSection = document.getElementById('dice-section');
+            const mobileDiceSection = document.getElementById('mobile-dice-section');
+            
+            const setupTouchForDice = (element, label) => {
+                if (!element) return;
+                
+                let touchStartTime = 0;
+                let touchStartPos = { x: 0, y: 0 };
+                let hasMoved = false;
+                
+                // Remove existing listeners to avoid duplicates
+                element.removeEventListener('touchstart', element._touchStartHandler);
+                element.removeEventListener('touchend', element._touchEndHandler);
+                element.removeEventListener('touchmove', element._touchMoveHandler);
+                
+                element._touchStartHandler = function(e) {
+                    console.log(`🎯 ${label} dice touch start`);
+                    touchStartTime = Date.now();
+                    const touch = e.touches[0];
+                    touchStartPos = { x: touch.clientX, y: touch.clientY };
+                    hasMoved = false;
+                    
+                    // Visual feedback
+                    this.style.transform = 'scale(0.95)';
+                    this.style.opacity = '0.8';
+                    
+                    e.preventDefault();
+                };
+                
+                element._touchMoveHandler = function(e) {
+                    const touch = e.touches[0];
+                    const deltaX = Math.abs(touch.clientX - touchStartPos.x);
+                    const deltaY = Math.abs(touch.clientY - touchStartPos.y);
+                    
+                    if (deltaX > 10 || deltaY > 10) {
+                        hasMoved = true;
+                    }
+                    
+                    e.preventDefault();
+                };
+                
+                element._touchEndHandler = function(e) {
+                    console.log(`🎯 ${label} dice touch end`);
+                    const touchDuration = Date.now() - touchStartTime;
+                    
+                    // Reset visual feedback
+                    this.style.transform = '';
+                    this.style.opacity = '';
+                    
+                    // Only trigger if it was a tap (not a drag) and reasonable duration
+                    if (!hasMoved && touchDuration < 1000 && touchDuration > 50) {
+                        console.log(`🎯 ${label} dice tap detected - triggering dice roll`);
+                        
+                        // Check if dice is clickable
+                        const mainDiceSection = document.getElementById('dice-section');
+                        if (mainDiceSection && mainDiceSection.style.pointerEvents !== 'none') {
+                            // Trigger dice click
+                            setTimeout(() => {
+                                if (window.takeTurn && !window.isAITurn && !window.isDiceRollInProgress) {
+                                    console.log('🎯 Executing dice roll from mobile touch');
+                                    window.takeTurn();
+                                } else {
+                                    console.log('🎯 Dice not available for rolling');
+                                }
+                            }, 100);
+                        }
+                    }
+                    
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+                
+                element.addEventListener('touchstart', element._touchStartHandler, { passive: false });
+                element.addEventListener('touchmove', element._touchMoveHandler, { passive: false });
+                element.addEventListener('touchend', element._touchEndHandler, { passive: false });
+                
+                console.log(`🎯 Enhanced touch handlers applied to ${label} dice`);
+            };
+            
+            setupTouchForDice(diceSection, 'main');
+            setupTouchForDice(mobileDiceSection, 'mobile');
+        }
+        
+        // Enhanced button touch handling
+        function setupButtonTouch() {
+            const buttons = document.querySelectorAll('button');
+            
+            buttons.forEach(button => {
+                if (button._mobileTouchSetup) return; // Already setup
+                button._mobileTouchSetup = true;
+                
+                let touchStartTime = 0;
+                let hasMoved = false;
+                
+                button.addEventListener('touchstart', function(e) {
+                    touchStartTime = Date.now();
+                    hasMoved = false;
+                    
+                    // Visual feedback
+                    this.style.transform = 'scale(0.95)';
+                    this.style.opacity = '0.8';
+                }, { passive: true });
+                
+                button.addEventListener('touchmove', function(e) {
+                    hasMoved = true;
+                }, { passive: true });
+                
+                button.addEventListener('touchend', function(e) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    
+                    // Reset visual feedback
+                    this.style.transform = '';
+                    this.style.opacity = '';
+                    
+                    // Prevent double-tap zoom
+                    e.preventDefault();
+                    
+                    // Only trigger click if it was a tap (not a drag)
+                    if (!hasMoved && touchDuration < 1000) {
+                        // Let the button's normal click handler run
+                        setTimeout(() => {
+                            this.click();
+                        }, 50);
+                    }
+                }, { passive: false });
+            });
+            
+            console.log(`🎯 Enhanced touch handlers applied to ${buttons.length} buttons`);
+        }
+        
+        // Enhanced canvas touch handling for property interactions
+        function setupCanvasTouch() {
+            const canvas = document.querySelector('canvas');
+            if (!canvas) return;
+            
+            let touchStartTime = 0;
+            let touchStartPos = { x: 0, y: 0 };
+            let hasMoved = false;
+            let lastTapTime = 0;
+            let lastTapPos = { x: 0, y: 0 };
+            
+            canvas.addEventListener('touchstart', function(e) {
+                touchStartTime = Date.now();
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                touchStartPos = {
+                    x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+                };
+                hasMoved = false;
+                
+                console.log(`🎯 Canvas touch start at (${Math.round(touchStartPos.x)}, ${Math.round(touchStartPos.y)})`);
+                e.preventDefault();
+            }, { passive: false });
+            
+            canvas.addEventListener('touchmove', function(e) {
+                const touch = e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const currentPos = {
+                    x: (touch.clientX - rect.left) * (canvas.width / rect.width),
+                    y: (touch.clientY - rect.top) * (canvas.height / rect.height)
+                };
+                
+                const deltaX = Math.abs(currentPos.x - touchStartPos.x);
+                const deltaY = Math.abs(currentPos.y - touchStartPos.y);
+                
+                if (deltaX > 15 || deltaY > 15) {
+                    hasMoved = true;
+                }
+                
+                e.preventDefault();
+            }, { passive: false });
+            
+            canvas.addEventListener('touchend', function(e) {
+                const touchDuration = Date.now() - touchStartTime;
+                const currentTime = Date.now();
+                
+                console.log(`🎯 Canvas touch end - duration: ${touchDuration}ms, moved: ${hasMoved}`);
+                
+                // Only process tap if it wasn't a drag and reasonable duration
+                if (!hasMoved && touchDuration < 1000 && touchDuration > 50) {
+                    const rect = canvas.getBoundingClientRect();
+                    const touch = e.changedTouches[0];
+                    const tapX = (touch.clientX - rect.left) * (canvas.width / rect.width);
+                    const tapY = (touch.clientY - rect.top) * (canvas.height / rect.height);
+                    
+                    console.log(`🎯 Canvas tap detected at (${Math.round(tapX)}, ${Math.round(tapY)})`);
+                    
+                    // Check for double tap
+                    const timeSinceLastTap = currentTime - lastTapTime;
+                    const distanceFromLastTap = Math.sqrt(
+                        Math.pow(tapX - lastTapPos.x, 2) + Math.pow(tapY - lastTapPos.y, 2)
+                    );
+                    
+                    if (timeSinceLastTap < 600 && distanceFromLastTap < 80) {
+                        console.log('🎯 Double tap detected - triggering steal card logic');
+                        // Handle double tap for steal cards
+                        if (window.handlePropertySteal) {
+                            window.handlePropertySteal(tapX, tapY, false);
+                        }
+                    } else {
+                        console.log('🎯 Single tap detected');
+                        // Handle single tap - could be for property selection or other interactions
+                        if (window.handleCanvasClick) {
+                            // Create a synthetic mouse event
+                            const syntheticEvent = {
+                                clientX: touch.clientX,
+                                clientY: touch.clientY,
+                                target: canvas,
+                                preventDefault: () => {},
+                                stopPropagation: () => {}
+                            };
+                            window.handleCanvasClick(syntheticEvent);
+                        }
+                    }
+                    
+                    lastTapTime = currentTime;
+                    lastTapPos = { x: tapX, y: tapY };
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            console.log('🎯 Enhanced canvas touch handlers applied');
+        }
+        
+        // Enhanced mobile panel touch handling
+        function setupMobilePanelTouch() {
+            const mobilePanel = document.getElementById('mobile-info-panel');
+            if (!mobilePanel) return;
+            
+            // Make sure all interactive elements in mobile panel have proper touch handling
+            const interactiveElements = mobilePanel.querySelectorAll('button, [onclick], [style*="cursor: pointer"]');
+            
+            interactiveElements.forEach(element => {
+                if (element._mobileTouchSetup) return;
+                element._mobileTouchSetup = true;
+                
+                let touchStartTime = 0;
+                let hasMoved = false;
+                
+                element.addEventListener('touchstart', function(e) {
+                    touchStartTime = Date.now();
+                    hasMoved = false;
+                    this.style.transform = 'scale(0.95)';
+                    this.style.opacity = '0.8';
+                }, { passive: true });
+                
+                element.addEventListener('touchmove', function(e) {
+                    hasMoved = true;
+                }, { passive: true });
+                
+                element.addEventListener('touchend', function(e) {
+                    const touchDuration = Date.now() - touchStartTime;
+                    
+                    this.style.transform = '';
+                    this.style.opacity = '';
+                    
+                    if (!hasMoved && touchDuration < 1000) {
+                        e.preventDefault();
+                        // Trigger click after a short delay
+                        setTimeout(() => {
+                            this.click();
+                        }, 50);
+                    }
+                }, { passive: false });
+            });
+            
+            console.log(`🎯 Enhanced touch handlers applied to ${interactiveElements.length} mobile panel elements`);
+        }
+        
+        // Initialize all touch systems
+        setupDiceTouch();
+        setupButtonTouch();
+        setupCanvasTouch();
+        setupMobilePanelTouch();
+        
+        // Set up periodic refresh for dynamically created elements
+        setInterval(() => {
+            setupButtonTouch();
+            setupMobilePanelTouch();
+        }, 2000);
+        
+        console.log('🎯 Enhanced Mobile Touch System initialized successfully');
+    }
+    
+    // Make mobile panel functions globally available
+    window.showMobilePanel = showMobilePanel;
+    window.hideMobilePanel = hideMobilePanel;
+    window.updateMobilePanel = updateMobilePanel;
+    window.handleMobileStealCard = handleMobileStealCard;
+    window.updateMinimizedTurnInfo = updateMinimizedTurnInfo;
+    window.initializeMobileTouchSystem = initializeMobileTouchSystem;
+    
+    // Initialize mobile touch system when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeMobileTouchSystem();
+    });
+    
+    // Also initialize on window load as a fallback
+    window.addEventListener('load', function() {
+        setTimeout(initializeMobileTouchSystem, 500);
+    });
+    </script>
+
+    <script>
+    // Enhanced Mobile Instructions System Integration
+    function showHorrorInstructions() {
+        console.log('🩸 showHorrorInstructions called');
+        
+        // Check if the mobile instructions system is already loaded
+        if (window.enhancedInstructionsLoaded && window.showHorrorInstructionsOriginal) {
+            console.log('🩸 Mobile instructions already loaded, calling function');
+            window.showHorrorInstructionsOriginal();
+            return;
+        }
+        
+        // Load the enhanced mobile instructions system
+        if (!window.enhancedInstructionsLoaded) {
+            console.log('🩸 Loading mobile instructions system...');
+            const script = document.createElement('script');
+            script.src = 'mobile-instructions.js';
+            script.onload = function() {
+                window.enhancedInstructionsLoaded = true;
+                // Store the original function with a different name to avoid conflicts
+                window.showHorrorInstructionsOriginal = window.showHorrorInstructions;
+                console.log('🩸 Mobile instructions loaded successfully');
+                // Call the function from the loaded script
+                if (window.showHorrorInstructionsOriginal && typeof window.showHorrorInstructionsOriginal === 'function') {
+                    window.showHorrorInstructionsOriginal();
+                } else {
+                    console.error('showHorrorInstructions function not available after loading');
+                }
+            };
+            script.onerror = function() {
+                console.error('Failed to load mobile-instructions.js');
+                alert('Failed to load instructions. Please refresh the page and try again.');
+            };
+            document.head.appendChild(script);
+            return;
+        }
+        
+        console.error('Mobile instructions system not properly loaded');
+    }
+
+    
+    function showHorrorInstructionsOld() {
+        createOptimizedInstructionsModal();
+    }
+    
+    function createOptimizedInstructionsModal() {
+        // Remove any existing modal
+        const existingModal = document.getElementById('game-instructions-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.id = 'game-instructions-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        
+        // Create modal content
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: linear-gradient(135deg, #1a0033 0%, #330066 50%, #1a0033 100%);
+            border: 3px solid #8b0000;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.8);
+            color: #fff;
+            position: relative;
+        `;
+        
+        modalContent.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #8b0000; padding-bottom: 10px;">
+                <h2 style="margin: 0; color: #ff0000; text-shadow: 0 0 10px #ff0000; font-size: 20px;">🎭 HORROPOLY RULES</h2>
+                <button onclick="closeGameInstructions()" style="
+                    background: #8b0000;
+                    color: white;
+                    border: none;
+                    border-radius: 50%;
+                    width: 22.5px;
+                    height: 22.5px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: bold;
+                " title="Close">✕</button>
+            </div>
+            
+            <div style="columns: 2; column-gap: 20px; font-size: 14px; line-height: 1.4;">
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">💰 RENT SYSTEM</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>Unimproved:</strong> Base rent</li>
+                        <li><strong>1 House:</strong> 5x base rent</li>
+                        <li><strong>2 Houses:</strong> 15x base rent</li>
+                        <li><strong>3 Houses:</strong> 45x base rent</li>
+                        <li><strong>4 Houses:</strong> 80x base rent</li>
+                        <li><strong>Hotel:</strong> 100x base rent</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🃏 STEAL CARDS</h3>
+                    <p style="margin: 0 0 8px 0;">Draw from the deck when landing on card spaces:</p>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>Property Steal:</strong> Take any property from another player</li>
+                        <li><strong>Money Steal:</strong> Take £200 from another player</li>
+                        <li><strong>Teleport:</strong> Move to any square instantly</li>
+                        <li><strong>Immunity:</strong> Skip next rent payment</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🎯 BASIC RULES</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li><strong>GO Bonus:</strong> Collect £250 when passing GO</li>
+                        <li><strong>Yin-Yang:</strong> Teleport to any square</li>
+                        <li><strong>Bankruptcy:</strong> Properties become available to all players</li>
+                        <li><strong>Win Condition:</strong> Last player standing wins</li>
+                    </ul>
+                </div>
+                
+                <div style="break-inside: avoid; margin-bottom: 15px;">
+                    <h3 style="color: #ff6666; margin: 0 0 8px 0; font-size: 16px;">🏠 BUILDING RULES</h3>
+                    <ul style="margin: 0; padding-left: 15px;">
+                        <li>Must own all properties in a color group</li>
+                        <li>Build evenly (max 1 house difference)</li>
+                        <li>Hotels replace 4 houses</li>
+                        <li>Sell buildings at half price</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #8b0000;">
+                <button onclick="closeGameInstructions()" style="
+                    background: linear-gradient(45deg, #8b0000, #ff0000);
+                    color: white;
+                    border: none;
+                    padding: 6px 15px;
+                    border-radius: 3.75px;
+                    cursor: pointer;
+                    font-weight: bold;
+                    font-size: 10.5px;
+                ">Got it! 🎮</button>
+            </div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        // Add mobile-specific styles
+        if (window.innerWidth <= 768) {
+            modalContent.style.cssText += `
+                max-width: 95vw;
+                padding: 15px;
+                font-size: 13px;
+            `;
+            modalContent.innerHTML = modalContent.innerHTML.replace('columns: 2;', 'columns: 1;');
+        }
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeGameInstructions();
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeGameInstructions();
+            }
+        });
+    }
+    
+    function closeGameInstructions() {
+        const modal = document.getElementById('game-instructions-modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+    </script>
+    
+
+    
+    <!-- 🚨 CRITICAL TURN SKIPPING FIX - Fixes dice clicks being ignored -->
+    <script src="fix-turn-skipping-critical.js"></script>
+    <!-- 🔧 PRELOAD WARNINGS FIX - Fixes browser warnings about unused preload resources -->
+    <script src="fix-preload-warnings.js"></script>
+    <!-- 🔊 AUTOPLAY AUDIO ERRORS FIX - Fixes browser autoplay policy violations -->
+    <script src="fix-autoplay-audio-errors.js"></script>
+    <!-- 🚨 FIREBASE DATA CORRUPTION FIX - Fixes undefined player names and userIds -->
+    <script src="fix-firebase-data-corruption-critical.js"></script>
+    <!-- ⚡ CRITICAL LIGHTNING MULTIPLAYER SYNC FIX - Fixes lightning desynchronization across players -->
+    <script src="fix-lightning-multiplayer-critical.js"></script>
+    <!-- ⚡ LIGHTNING STRIKE MULTIPLAYER SYNC FIX - Ensures lightning strikes hit same properties across all players -->
+    <script src="fix-lightning-strike-multiplayer-sync.js"></script>
+    <!-- 🎯 TARGETED ERROR FIXES - Preserves existing lightning sync -->
+    <script src="targeted-error-fixes.js"></script>
+    <!-- 🔓 TURN DEADLOCK FIX - Fixes stuck turns -->
+    <script src="fix-turn-deadlock.js"></script>
+    <!-- 🔧 EXCESSIVE REFRESH FIX - Reduces screen refreshes and player jumping -->
+    <script src="fix-excessive-refreshes.js"></script>
+    <!-- ⚡ COMPREHENSIVE LIGHTNING & ERROR FIX - Fixes lightning ownership removal and console errors -->
+    <script src="fix-lightning-and-errors.js"></script>
+    
+    <script src="panzoom.min.js"></script>
+    <script type="module">
+    import { enableMultipleAudioAfterGesture } from './audio-helper.js';
+    window.addEventListener('DOMContentLoaded', () => {
+        const rain = document.getElementById('rainSound');
+        if (rain) {
+            enableMultipleAudioAfterGesture([rain]);
+        }
+    });
+    </script>
+    <script src="restart.js"></script>
+    <script src="tablet-touch-manager.js"></script>
+    <!-- Lightning Strike Synchronization Fixes - REPLACED BY COMPREHENSIVE FIX ABOVE -->
+    <script type="module" src="lobby.js"></script>
+    <script src="game.js" type="module"></script>
+
+    <script>
+    console.log('Error handling utilities loaded');
+    </script>
+
+</body>
+</html>
